@@ -1,0 +1,13 @@
+native/target
+native/index.node
+native/artifacts.json
+**/*~
+**/node_modules
+**/.DS_Store
+
+# JS
+lib
+
+# C
+c/libffi_jose.h
+c/test.out
