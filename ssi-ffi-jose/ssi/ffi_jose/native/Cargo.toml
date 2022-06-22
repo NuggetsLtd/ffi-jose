@@ -1,0 +1,22 @@
+[package]
+name = "ffi-jose"
+version = "0.1.0"
+description = "A Foreign Function Interface (FFI) for the Rust JOSE package"
+authors = ["Andrew Lord <andrew.lord@nuggets.life>"]
+license = "MIT"
+build = "build.rs"
+edition = "2018"
+exclude = ["artifacts.json", "index.node"]
+
+[lib]
+name = "ffi_jose"
+crate-type = ["staticlib", "cdylib"]
+
+[build-dependencies]
+neon-build = "0.10.1"
+cbindgen = "0.24.3"
+
+[dependencies]
+neon = "0.10.1"
+josekit = "0.8.0"
+serde_json = "1.0.78"
