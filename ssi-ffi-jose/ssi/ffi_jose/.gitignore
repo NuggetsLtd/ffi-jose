@@ -15,3 +15,5 @@ wrappers/c/test.out
 
 # java
 wrappers/java/src/main/java/jose/jose.h
+wrappers/java/src/main/java/jose/*.class
+wrappers/java/src/main/jniLibs

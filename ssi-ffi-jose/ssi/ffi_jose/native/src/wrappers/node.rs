@@ -3,7 +3,6 @@ use crate::jose::{ NamedCurve, rust_generate_key_pair_jwk };
 
 fn node_generate_key_pair_jwk(mut cx: FunctionContext) -> JsResult<JsString> {
   let options = cx.argument::<JsObject>(0)?;
-  // let mut error = ExternError::success();
 
   let named_curve_num: Handle<JsNumber> = options.get::<JsNumber, _, _>(&mut cx, "namedCurve")?;
 
