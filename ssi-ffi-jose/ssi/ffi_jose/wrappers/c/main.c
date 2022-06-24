@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "libffi_jose.h"
+#include "libjose.h"
 
 int generate_key_pair(NamedCurve named_curve)
 {
