@@ -30,6 +30,7 @@
     "build:ts": "tsc --pretty",
     "docs:rust": "cd native && cargo doc --no-deps --open",
     "test:c": "./scripts/c_test.sh",
+    "test:java": "./scripts/java_test.sh",
     "test:neon": "./scripts/neon_test.sh",
     "test:ts": "jest --config jest.config.typescript.js",
     "lint:node": "eslint . --ignore-path .gitignore",
