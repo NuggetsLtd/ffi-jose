@@ -14,6 +14,31 @@ Functionality provided by this package is as follows:
 - JWT Signing & Verification
 - JWT Encryption & Decryption
 
+## Pre-Requisites
+For building this package, you will need to have OpenSSL installed. This is due to the Rust `josekit` package requiring this dependency.
+
+### Mac
+Check if OpenSSL is installed:
+```sh
+brew info openssl
+```
+
+Upgrade crates to the latest (if already installed):
+```sh
+brew upgrade
+```
+
+Install OpenSSL (if not installed):
+```sh
+brew install openssl@1.1
+```
+
+#### ZSH Users
+Export `OPENSSL_DIR` env var for `openssl` location:
+```sh
+echo 'export OPENSSL_DIR="/usr/local/opt/openssl@1.1"' >> ~/.zshrc
+```
+
 ## Javascript
 Javascript interface for JOSE functionality in Rust.
 
@@ -46,17 +71,26 @@ Test typescript code:
 yarn test:ts
 ```
 
-## C
-C interface for JOSE functionality in Rust.
+## C / iOS
+C / iOS interface for JOSE functionality in Rust.
 
-### Build C Bindings
-Build the interface between Rust & C:
+### Build iOS packages
+Build iOS-specific packages:
 ```sh
-yarn build:c
+yarn build:ios
 ```
 
 ### Test C Bindings
 Test the interface between Rust & C:
 ```sh
 yarn test:c
+```
+
+## Java / Android
+Java / Android interface for JOSE functionality in Rust.
+
+### Build Android packages
+Build Android-specific packages:
+```sh
+yarn build:android
 ```
