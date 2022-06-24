@@ -51,6 +51,7 @@ impl fmt::Debug for NamedCurve {
   }
 }
 
+#[allow(dead_code)]
 pub fn rust_generate_key_pair_jwk(named_curve: NamedCurve) -> String {
   let mut ec_named_curve: Option<EcCurve> = None;
   let mut ed_named_curve: Option<EdCurve> = None;

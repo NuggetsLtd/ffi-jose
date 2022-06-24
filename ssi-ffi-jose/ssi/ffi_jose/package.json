@@ -22,8 +22,11 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build:neon": "./scripts/neon_build.sh",
-    "build:c": "./scripts/c_build.sh",
+    "install": "./scripts/install-dependencies.sh",
+    "build": "./scripts/build.sh",
+    "build:neon": "yarn build NODE",
+    "build:ios": "yarn build IOS",
+    "build:android": "yarn build ANDROID",
     "build:ts": "tsc --pretty",
     "docs:rust": "cd native && cargo doc --no-deps --open",
     "test:c": "./scripts/c_test.sh",
