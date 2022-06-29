@@ -1,3 +1,5 @@
+package life.nuggets.rs;
+
 class Jose {
   enum NamedCurve {
     P256,
@@ -12,7 +14,7 @@ class Jose {
 
   // This declares that the static `hello` method will be provided
   // a native library.
-  private static native Long generate_key_pair_jwk(int named_curve);
+  private static native String generate_key_pair_jwk(int named_curve);
 
   static {
       // This actually loads the shared object that we'll be creating.
