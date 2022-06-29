@@ -52,11 +52,10 @@ case $PLATFORM in
         echo "❌  ERROR: ANDROID_NDK_HOME argument must be supplied and be a valid directory pointing to the installation of android ndk"
         exit 1
       fi
-        mkdir -p .NDK
         mkdir -p $OUTPUT_LOCATION/android
 
         # ARM build
-        echo "🤖  Building for Android ARM"
+        echo "🤖  Building for Android"
         rustup target add \
             armv7-linux-androideabi \
             arm-linux-androideabi \
@@ -64,7 +63,6 @@ case $PLATFORM in
             i686-linux-android \
             x86_64-linux-android
 
-        mkdir -p $OUTPUT_LOCATION/android
         cd native # `--manifest-path` currently not working for `cargo-ndk`
         CARGO_CFG_TARGET_OS='android' CARGO_CFG_FEATURE='java' cargo ndk \
             -t armeabi-v7a \
