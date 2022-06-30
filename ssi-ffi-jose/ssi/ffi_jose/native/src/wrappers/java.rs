@@ -5,7 +5,7 @@ use crate::jose::{ NamedCurve, rust_generate_key_pair_jwk };
 use std::panic;
 
 #[no_mangle]
-pub extern "system" fn Java_Jose_generate_1key_1pair_1jwk(
+pub extern "system" fn Java_life_nuggets_rs_Jose_generate_1key_1pair_1jwk(
   env: JNIEnv,
   _class: JClass,
   named_curve: jint

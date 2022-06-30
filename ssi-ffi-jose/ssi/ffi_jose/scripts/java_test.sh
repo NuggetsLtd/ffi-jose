@@ -4,7 +4,7 @@ BLUE='\033[1;36m'
 GREEN='\033[1;32m'
 NC='\033[0m' # No Color
 
-JAVA_JOSE_DIR=wrappers/java/src/main/java/jose
+JAVA_JOSE_DIR=wrappers/java/src/main/java/life/nuggets/rs
 
 echo ""
 echo "${BLUE}----- ⏳ BUILD: Java -> RUST FOREIGN FUNCTION INTERFACE ----------------------------------${NC}"
@@ -37,10 +37,8 @@ echo ""
 echo ""
 echo "${BLUE}----- ⏳ RUN: JAVA TEST CODE -------------------------------------------------------------${NC}"
 echo ""
-cd $JAVA_JOSE_DIR
-date +%s%3N
-java -cp . -Djava.library.path=../../jniLibs/darwin-x86_64/ Jose
-date +%s%3N
+cd $JAVA_JOSE_DIR/../../../
+java -cp . -Djava.library.path=../jniLibs/darwin-x86_64/ life.nuggets.rs.Jose
 echo ""
 echo "${GREEN}----- ✅ DONE: JAVA TEST CODE -----------------------------------------------------------${NC}"
 echo ""
