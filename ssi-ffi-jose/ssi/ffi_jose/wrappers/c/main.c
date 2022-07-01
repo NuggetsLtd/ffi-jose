@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "libjose.h"
 
-int generate_key_pair(NamedCurve named_curve)
+void generate_key_pair(NamedCurve named_curve)
 {
   JwkJsonString json_string;
 
