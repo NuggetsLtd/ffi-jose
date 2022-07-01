@@ -16,7 +16,6 @@ pub struct JwkJsonString {
 pub unsafe extern "C" fn generate_key_pair_jwk(
   named_curve: NamedCurve,
   json_string: &mut JwkJsonString,
-  // err: &mut ExternError,
 ) -> i32 {
   let jwk = panic::catch_unwind(|| {
     // generate JWK string for specified curve
