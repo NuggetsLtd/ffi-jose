@@ -1,4 +1,4 @@
-import {
+import type {
   JoseGenerateJwkRequest,
   JWK,
 } from "./types";
