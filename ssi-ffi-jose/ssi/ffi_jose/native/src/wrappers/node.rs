@@ -1,5 +1,14 @@
+#[macro_use]
+mod macros;
+
 use neon::prelude::*;
-use crate::jose::{ NamedCurve, rust_generate_key_pair_jwk };
+use base64;
+use crate::jose::{
+  NamedCurve,
+  rust_generate_key_pair_jwk,
+  ContentEncryptionAlgorithm,
+  rust_encrypt
+};
 
 fn node_generate_key_pair_jwk(mut cx: FunctionContext) -> JsResult<JsString> {
   let options = cx.argument::<JsObject>(0)?;
@@ -23,7 +32,52 @@ fn node_generate_key_pair_jwk(mut cx: FunctionContext) -> JsResult<JsString> {
   Ok(JsString::new(&mut cx, jwk_string))
 }
 
+fn node_encrypt(mut cx: FunctionContext) -> JsResult<JsObject> {
+  let enc = cx.argument::<JsNumber>(0)?;
+  let message = arg_to_slice!(cx, 1);
+  let key = arg_to_slice!(cx, 2);
+  let iv = arg_to_slice!(cx, 3);
+  let aad = arg_to_slice!(cx, 4);
+
+  // determine content encryption type
+  let content_encryption = match enc.value() as u8 {
+    0 => ContentEncryptionAlgorithm::A128gcm,
+    1 => ContentEncryptionAlgorithm::A192gcm,
+    2 => ContentEncryptionAlgorithm::A256gcm,
+    3 => ContentEncryptionAlgorithm::A128cbcHs256,
+    4 => ContentEncryptionAlgorithm::A192cbcHs384,
+    5 => ContentEncryptionAlgorithm::A256cbcHs512,
+    _ => panic!("Unsupported content encryption method")
+  };
+
+  // encrypt message
+  let (ciphertext, tag) = match rust_encrypt(content_encryption, &key, &iv, &message, &aad) {
+    Ok(encrypted) => encrypted,
+    Err(_) => panic!("Failed to encrypt data")
+  };
+
+  let result = JsObject::new(&mut cx);
+  
+  // add base64 encoded ciphertext to return object
+  let ciphertext_b64: String = base64::encode(ciphertext);
+  let ciphertext_b64 = JsString::new(&mut cx, ciphertext_b64);
+  result.set(&mut cx, "ciphertext", ciphertext_b64)?;
+
+  match tag {
+    Some(tag) => {
+      // add optional tag to return object
+      let tag_b64: String = base64::encode(tag);
+      let tag_b64 = JsString::new(&mut cx, tag_b64);
+      result.set(&mut cx, "tag", tag_b64)?;
+    },
+    None => ()
+  }
+  
+  Ok(result)
+}
+
 register_module!(mut cx, {
   cx.export_function("generate_key_pair_jwk", node_generate_key_pair_jwk)?;
+  cx.export_function("encrypt", node_encrypt)?;
   Ok(())
 });
