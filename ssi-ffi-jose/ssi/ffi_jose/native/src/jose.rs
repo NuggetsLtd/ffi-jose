@@ -1,7 +1,18 @@
-use josekit::jwk::{
-  alg::{ec::EcCurve, ecx::EcxCurve, ed::EdCurve},
-  Jwk,
+use josekit::{
+  jwk::{
+    alg::{ec::EcCurve, ecx::EcxCurve, ed::EdCurve},
+    Jwk,
+  },
+  jwe::{
+    enc::{
+      aesgcm::AesgcmJweEncryption,
+      aescbc_hmac::AescbcHmacJweEncryption
+    }
+  },
+  JoseError,
+  // util::random_bytes
 };
+
 use serde_json;
 use std::fmt;
 
@@ -52,7 +63,9 @@ impl fmt::Debug for NamedCurve {
 }
 
 #[allow(dead_code)]
-pub fn rust_generate_key_pair_jwk(named_curve: NamedCurve) -> String {
+pub fn rust_generate_key_pair_jwk(
+  named_curve: NamedCurve
+) -> String {
   let mut ec_named_curve: Option<EcCurve> = None;
   let mut ed_named_curve: Option<EdCurve> = None;
   let mut ecx_named_curve: Option<EcxCurve> = None;
@@ -109,4 +122,81 @@ pub fn rust_generate_key_pair_jwk(named_curve: NamedCurve) -> String {
   };
 
   jwk_cstring
+}
+
+#[allow(dead_code)]
+#[repr(C)]
+pub enum ContentEncryptionAlgorithm {
+  A128gcm,
+  A192gcm,
+  A256gcm,
+  A128cbcHs256,
+  A192cbcHs384,
+  A256cbcHs512,
+}
+
+#[allow(dead_code)]
+pub fn rust_encrypt(
+  enc: ContentEncryptionAlgorithm,
+  key: &[u8],
+  iv: &[u8],
+  message: &[u8],
+  aad: &[u8]
+) -> Result<(Vec<u8>, Option<Vec<u8>>), JoseError> {
+  let mut enc_aesgcm: Option<AesgcmJweEncryption> = None;
+  let mut enc_aescbc_hmac: Option<AescbcHmacJweEncryption> = None;
+  let mut encrypted: Option<Result<(Vec<u8>, Option<Vec<u8>>), JoseError>> = None;
+
+  match enc {
+    // GCM encryption
+    ContentEncryptionAlgorithm::A128gcm => enc_aesgcm = Some(AesgcmJweEncryption::A128gcm),
+    ContentEncryptionAlgorithm::A192gcm => enc_aesgcm = Some(AesgcmJweEncryption::A192gcm),
+    ContentEncryptionAlgorithm::A256gcm => enc_aesgcm = Some(AesgcmJweEncryption::A256gcm),
+    // CBC encryption
+    ContentEncryptionAlgorithm::A128cbcHs256 => enc_aescbc_hmac = Some(AescbcHmacJweEncryption::A128cbcHs256),
+    ContentEncryptionAlgorithm::A192cbcHs384 => enc_aescbc_hmac = Some(AescbcHmacJweEncryption::A192cbcHs384),
+    ContentEncryptionAlgorithm::A256cbcHs512 => enc_aescbc_hmac = Some(AescbcHmacJweEncryption::A256cbcHs512),
+  };
+
+  match enc_aesgcm {
+    Some(encryptor) => {
+      if key.len() != encryptor.key_len() {
+        panic!("Expected Key length of {}, received {}", encryptor.key_len(), key.len());
+      }
+    
+      if iv.len() != encryptor.iv_len() {
+        panic!("Expected IV length of {}, received {}", encryptor.iv_len(), iv.len());
+      }
+    
+      encrypted = Some(encryptor.encrypt(
+        key,
+        Some(iv),
+        message,
+        aad
+      ));
+    },
+    None => ()
+  };
+
+  match enc_aescbc_hmac {
+    Some(encryptor) => {
+      if key.len() != encryptor.key_len() {
+        panic!("Expected Key length of {}, received {}", encryptor.key_len(), key.len());
+      }
+    
+      if iv.len() != encryptor.iv_len() {
+        panic!("Expected IV length of {}, received {}", encryptor.iv_len(), iv.len());
+      }
+    
+      encrypted = Some(encryptor.encrypt(
+        key,
+        Some(iv),
+        message,
+        aad
+      ));
+    },
+    None => ()
+  };
+
+  encrypted.unwrap()
 }
