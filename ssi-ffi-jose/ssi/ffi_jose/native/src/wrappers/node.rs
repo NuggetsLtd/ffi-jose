@@ -7,7 +7,8 @@ use crate::jose::{
   NamedCurve,
   rust_generate_key_pair_jwk,
   ContentEncryptionAlgorithm,
-  rust_encrypt
+  rust_encrypt,
+  rust_decrypt
 };
 
 fn node_generate_key_pair_jwk(mut cx: FunctionContext) -> JsResult<JsString> {
@@ -76,8 +77,39 @@ fn node_encrypt(mut cx: FunctionContext) -> JsResult<JsObject> {
   Ok(result)
 }
 
+fn node_decrypt(mut cx: FunctionContext) -> JsResult<JsString> {
+  let enc = cx.argument::<JsNumber>(0)?;
+  let key = arg_to_slice!(cx, 1);
+  let ciphertext = arg_to_slice!(cx, 2);
+  let iv = arg_to_slice!(cx, 3);
+  let tag = arg_to_slice!(cx, 4);
+  let aad = arg_to_slice!(cx, 5);
+
+  // determine content encryption type
+  let content_encryption = match enc.value() as u8 {
+    0 => ContentEncryptionAlgorithm::A128gcm,
+    1 => ContentEncryptionAlgorithm::A192gcm,
+    2 => ContentEncryptionAlgorithm::A256gcm,
+    3 => ContentEncryptionAlgorithm::A128cbcHs256,
+    4 => ContentEncryptionAlgorithm::A192cbcHs384,
+    5 => ContentEncryptionAlgorithm::A256cbcHs512,
+    _ => panic!("Unsupported content encryption method")
+  };
+
+  // decrypt message
+  let plaintext = match rust_decrypt(content_encryption, &key, &ciphertext, &iv, &tag, &aad) {
+    Ok(decrypted) => decrypted,
+    Err(_) => panic!("Failed to decrypt data")
+  };
+
+  let plaintext_b64: String = base64::encode(plaintext);
+
+  Ok(JsString::new(&mut cx, plaintext_b64))
+}
+
 register_module!(mut cx, {
   cx.export_function("generate_key_pair_jwk", node_generate_key_pair_jwk)?;
   cx.export_function("encrypt", node_encrypt)?;
+  cx.export_function("decrypt", node_decrypt)?;
   Ok(())
 });
