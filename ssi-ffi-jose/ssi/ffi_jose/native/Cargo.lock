@@ -151,6 +151,7 @@ dependencies = [
 name = "ffi-jose"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "cbindgen",
  "jni",
  "josekit",
