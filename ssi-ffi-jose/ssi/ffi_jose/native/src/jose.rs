@@ -200,3 +200,72 @@ pub fn rust_encrypt(
 
   encrypted.unwrap()
 }
+
+#[allow(dead_code)]
+pub fn rust_decrypt(
+  enc: ContentEncryptionAlgorithm,
+  key: &[u8],
+  ciphertext: &[u8],
+  iv: &[u8],
+  tag: &[u8],
+  aad: &[u8]
+) -> Result<Vec<u8>, JoseError> {
+  let mut enc_aesgcm: Option<AesgcmJweEncryption> = None;
+  let mut enc_aescbc_hmac: Option<AescbcHmacJweEncryption> = None;
+  let mut decrypted: Option<Result<Vec<u8>, JoseError>> = None;
+
+  match enc {
+    // GCM encryption
+    ContentEncryptionAlgorithm::A128gcm => enc_aesgcm = Some(AesgcmJweEncryption::A128gcm),
+    ContentEncryptionAlgorithm::A192gcm => enc_aesgcm = Some(AesgcmJweEncryption::A192gcm),
+    ContentEncryptionAlgorithm::A256gcm => enc_aesgcm = Some(AesgcmJweEncryption::A256gcm),
+    // CBC encryption
+    ContentEncryptionAlgorithm::A128cbcHs256 => enc_aescbc_hmac = Some(AescbcHmacJweEncryption::A128cbcHs256),
+    ContentEncryptionAlgorithm::A192cbcHs384 => enc_aescbc_hmac = Some(AescbcHmacJweEncryption::A192cbcHs384),
+    ContentEncryptionAlgorithm::A256cbcHs512 => enc_aescbc_hmac = Some(AescbcHmacJweEncryption::A256cbcHs512),
+  };
+
+  match enc_aesgcm {
+    Some(decryptor) => {
+      if key.len() != decryptor.key_len() {
+        panic!("Expected Key length of {}, received {}", decryptor.key_len(), key.len());
+      }
+    
+      if iv.len() != decryptor.iv_len() {
+        panic!("Expected IV length of {}, received {}", decryptor.iv_len(), iv.len());
+      }
+    
+      decrypted = Some(decryptor.decrypt(
+        key,
+        Some(iv),
+        ciphertext,
+        aad,
+        Some(tag),
+      ));
+    },
+    None => ()
+  };
+
+  match enc_aescbc_hmac {
+    Some(decryptor) => {
+      if key.len() != decryptor.key_len() {
+        panic!("Expected Key length of {}, received {}", decryptor.key_len(), key.len());
+      }
+    
+      if iv.len() != decryptor.iv_len() {
+        panic!("Expected IV length of {}, received {}", decryptor.iv_len(), iv.len());
+      }
+    
+      decrypted = Some(decryptor.decrypt(
+        key,
+        Some(iv),
+        ciphertext,
+        aad,
+        Some(tag),
+      ));
+    },
+    None => ()
+  };
+
+  decrypted.unwrap()
+}
