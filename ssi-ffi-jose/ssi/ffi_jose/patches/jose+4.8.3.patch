@@ -1,0 +1,157 @@
+diff --git a/node_modules/jose/dist/node/cjs/runtime/decrypt.js b/node_modules/jose/dist/node/cjs/runtime/decrypt.js
+index 6e0de6d..dc3f9fe 100644
+--- a/node_modules/jose/dist/node/cjs/runtime/decrypt.js
++++ b/node_modules/jose/dist/node/cjs/runtime/decrypt.js
+@@ -3,70 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
+ const crypto_1 = require("crypto");
+ const check_iv_length_js_1 = require("../lib/check_iv_length.js");
+ const check_cek_length_js_1 = require("./check_cek_length.js");
+-const buffer_utils_js_1 = require("../lib/buffer_utils.js");
+ const errors_js_1 = require("../util/errors.js");
+-const timing_safe_equal_js_1 = require("./timing_safe_equal.js");
+-const cbc_tag_js_1 = require("./cbc_tag.js");
+ const webcrypto_js_1 = require("./webcrypto.js");
+ const crypto_key_js_1 = require("../lib/crypto_key.js");
+ const is_key_object_js_1 = require("./is_key_object.js");
+ const invalid_key_input_js_1 = require("../lib/invalid_key_input.js");
+-const ciphers_js_1 = require("./ciphers.js");
+ const is_key_like_js_1 = require("./is_key_like.js");
+-function cbcDecrypt(enc, cek, ciphertext, iv, tag, aad) {
+-    const keySize = parseInt(enc.slice(1, 4), 10);
+-    if ((0, is_key_object_js_1.default)(cek)) {
+-        cek = cek.export();
+-    }
+-    const encKey = cek.subarray(keySize >> 3);
+-    const macKey = cek.subarray(0, keySize >> 3);
+-    const macSize = parseInt(enc.slice(-3), 10);
+-    const algorithm = `aes-${keySize}-cbc`;
+-    if (!(0, ciphers_js_1.default)(algorithm)) {
+-        throw new errors_js_1.JOSENotSupported(`alg ${enc} is not supported by your javascript runtime`);
+-    }
+-    const expectedTag = (0, cbc_tag_js_1.default)(aad, iv, ciphertext, macSize, macKey, keySize);
+-    let macCheckPassed;
+-    try {
+-        macCheckPassed = (0, timing_safe_equal_js_1.default)(tag, expectedTag);
+-    }
+-    catch {
+-    }
+-    if (!macCheckPassed) {
+-        throw new errors_js_1.JWEDecryptionFailed();
+-    }
+-    let plaintext;
+-    try {
+-        const decipher = (0, crypto_1.createDecipheriv)(algorithm, encKey, iv);
+-        plaintext = (0, buffer_utils_js_1.concat)(decipher.update(ciphertext), decipher.final());
+-    }
+-    catch {
+-    }
+-    if (!plaintext) {
+-        throw new errors_js_1.JWEDecryptionFailed();
+-    }
+-    return plaintext;
+-}
+-function gcmDecrypt(enc, cek, ciphertext, iv, tag, aad) {
+-    const keySize = parseInt(enc.slice(1, 4), 10);
+-    const algorithm = `aes-${keySize}-gcm`;
+-    if (!(0, ciphers_js_1.default)(algorithm)) {
+-        throw new errors_js_1.JOSENotSupported(`alg ${enc} is not supported by your javascript runtime`);
+-    }
+-    try {
+-        const decipher = (0, crypto_1.createDecipheriv)(algorithm, cek, iv, { authTagLength: 16 });
+-        decipher.setAuthTag(tag);
+-        if (aad.byteLength) {
+-            decipher.setAAD(aad, { plaintextLength: ciphertext.length });
+-        }
+-        const plaintext = decipher.update(ciphertext);
+-        decipher.final();
+-        return plaintext;
+-    }
+-    catch {
+-        throw new errors_js_1.JWEDecryptionFailed();
+-    }
+-}
++const rust_encrypt = require("../../../../../..");
++
+ const decrypt = (enc, cek, ciphertext, iv, tag, aad) => {
+     let key;
+     if ((0, webcrypto_js_1.isCryptoKey)(cek)) {
+@@ -85,11 +29,10 @@ const decrypt = (enc, cek, ciphertext, iv, tag, aad) => {
+         case 'A128CBC-HS256':
+         case 'A192CBC-HS384':
+         case 'A256CBC-HS512':
+-            return cbcDecrypt(enc, key, ciphertext, iv, tag, aad);
+         case 'A128GCM':
+         case 'A192GCM':
+         case 'A256GCM':
+-            return gcmDecrypt(enc, key, ciphertext, iv, tag, aad);
++            return rust_encrypt.decrypt(enc, key, ciphertext, iv, tag, aad)
+         default:
+             throw new errors_js_1.JOSENotSupported('Unsupported JWE Content Encryption Algorithm');
+     }
+diff --git a/node_modules/jose/dist/node/cjs/runtime/encrypt.js b/node_modules/jose/dist/node/cjs/runtime/encrypt.js
+index 940a1ed..c73e995 100644
+--- a/node_modules/jose/dist/node/cjs/runtime/encrypt.js
++++ b/node_modules/jose/dist/node/cjs/runtime/encrypt.js
+@@ -3,47 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
+ const crypto_1 = require("crypto");
+ const check_iv_length_js_1 = require("../lib/check_iv_length.js");
+ const check_cek_length_js_1 = require("./check_cek_length.js");
+-const buffer_utils_js_1 = require("../lib/buffer_utils.js");
+-const cbc_tag_js_1 = require("./cbc_tag.js");
+ const webcrypto_js_1 = require("./webcrypto.js");
+ const crypto_key_js_1 = require("../lib/crypto_key.js");
+ const is_key_object_js_1 = require("./is_key_object.js");
+ const invalid_key_input_js_1 = require("../lib/invalid_key_input.js");
+ const errors_js_1 = require("../util/errors.js");
+-const ciphers_js_1 = require("./ciphers.js");
+ const is_key_like_js_1 = require("./is_key_like.js");
+-function cbcEncrypt(enc, plaintext, cek, iv, aad) {
+-    const keySize = parseInt(enc.slice(1, 4), 10);
+-    if ((0, is_key_object_js_1.default)(cek)) {
+-        cek = cek.export();
+-    }
+-    const encKey = cek.subarray(keySize >> 3);
+-    const macKey = cek.subarray(0, keySize >> 3);
+-    const algorithm = `aes-${keySize}-cbc`;
+-    if (!(0, ciphers_js_1.default)(algorithm)) {
+-        throw new errors_js_1.JOSENotSupported(`alg ${enc} is not supported by your javascript runtime`);
+-    }
+-    const cipher = (0, crypto_1.createCipheriv)(algorithm, encKey, iv);
+-    const ciphertext = (0, buffer_utils_js_1.concat)(cipher.update(plaintext), cipher.final());
+-    const macSize = parseInt(enc.slice(-3), 10);
+-    const tag = (0, cbc_tag_js_1.default)(aad, iv, ciphertext, macSize, macKey, keySize);
+-    return { ciphertext, tag };
+-}
+-function gcmEncrypt(enc, plaintext, cek, iv, aad) {
+-    const keySize = parseInt(enc.slice(1, 4), 10);
+-    const algorithm = `aes-${keySize}-gcm`;
+-    if (!(0, ciphers_js_1.default)(algorithm)) {
+-        throw new errors_js_1.JOSENotSupported(`alg ${enc} is not supported by your javascript runtime`);
+-    }
+-    const cipher = (0, crypto_1.createCipheriv)(algorithm, cek, iv, { authTagLength: 16 });
+-    if (aad.byteLength) {
+-        cipher.setAAD(aad, { plaintextLength: plaintext.length });
+-    }
+-    const ciphertext = cipher.update(plaintext);
+-    cipher.final();
+-    const tag = cipher.getAuthTag();
+-    return { ciphertext, tag };
+-}
++const rust_encrypt = require("../../../../../..");
++
+ const encrypt = (enc, plaintext, cek, iv, aad) => {
+     let key;
+     if ((0, webcrypto_js_1.isCryptoKey)(cek)) {
+@@ -62,11 +29,10 @@ const encrypt = (enc, plaintext, cek, iv, aad) => {
+         case 'A128CBC-HS256':
+         case 'A192CBC-HS384':
+         case 'A256CBC-HS512':
+-            return cbcEncrypt(enc, plaintext, key, iv, aad);
+         case 'A128GCM':
+         case 'A192GCM':
+         case 'A256GCM':
+-            return gcmEncrypt(enc, plaintext, key, iv, aad);
++            return rust_encrypt.encrypt(enc, plaintext, key, iv, aad)
+         default:
+             throw new errors_js_1.JOSENotSupported('Unsupported JWE Content Encryption Algorithm');
+     }
