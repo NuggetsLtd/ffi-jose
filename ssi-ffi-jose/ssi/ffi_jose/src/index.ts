@@ -1,4 +1,5 @@
 export {
-  generateJWK
+  generateJWK,
+  encrypt,
 } from "./jose";
 export * from "./types";
