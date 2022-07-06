@@ -29,15 +29,17 @@ const base64ToArrayBuffer = (value) =>
 describe('NEON NodeJS Interface:', () => {
 
   it('should export the expected items', () => {
-    expect(Object.keys(jose)).toEqual([
-      'generate_key_pair_jwk',
-      'encrypt'
+    expect(Object.keys(jose).sort()).toEqual([
+      'decrypt',
+      'encrypt',
+      'generate_key_pair_jwk'
     ])
   })
 
   it('should export foreign function interface functions', () => {
-    expect(typeof jose.generate_key_pair_jwk).toBe('function')
+    expect(typeof jose.decrypt).toBe('function')
     expect(typeof jose.encrypt).toBe('function')
+    expect(typeof jose.generate_key_pair_jwk).toBe('function')
   })
 
   describe('Functions', () => {
@@ -130,7 +132,7 @@ describe('NEON NodeJS Interface:', () => {
 
     })
 
-    describe.only('encrypt()', () => {
+    describe('encrypt()', () => {
       const plaintext = base64ToArrayBuffer('UExBSU5URVhU')
       const aad = base64ToArrayBuffer('')
 
@@ -210,7 +212,7 @@ describe('NEON NodeJS Interface:', () => {
 
     })
 
-    describe.only('decrypt()', () => {
+    describe('decrypt()', () => {
       const plaintextb64 = 'UExBSU5URVhU'
       const plaintext = base64ToArrayBuffer(plaintextb64)
       const aad = base64ToArrayBuffer('')
