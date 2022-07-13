@@ -199,9 +199,30 @@ fn node_general_encrypt_json(mut cx: FunctionContext) -> JsResult<JsString> {
 
   Ok(JsString::new(&mut cx, encrypted))
 }
+
+fn node_decrypt_json(mut cx: FunctionContext) -> JsResult<JsString> {
+  let jwe = cx.argument::<JsString>(0)?;
+  let jwk_string = cx.argument::<JsString>(1)?;
+
+  let jwk: Jwk = serde_json::from_str(&jwk_string.value()).unwrap();
+  
+  match rust_decrypt_json(&jwe.value(), &jwk) {
+    Ok(x) => {
+      let ( decrypted, header ) = x;
+      let decoded_string = String::from_utf8(decrypted).unwrap();
+      println!("\n\n{:?}\n\n{:?}\n\n", decoded_string, header);
+      Ok(JsString::new(&mut cx, decoded_string))
+    },
+    Err(_) => panic!("PANIC")
+  }
+}
+
 register_module!(mut cx, {
   cx.export_function("generate_key_pair_jwk", node_generate_key_pair_jwk)?;
+  cx.export_function("generate_key_pair", node_generate_key_pair)?;
   cx.export_function("encrypt", node_encrypt)?;
   cx.export_function("decrypt", node_decrypt)?;
+  cx.export_function("general_encrypt_json", node_general_encrypt_json)?;
+  cx.export_function("decrypt_json", node_decrypt_json)?;
   Ok(())
 });
