@@ -207,10 +207,9 @@ fn node_decrypt_json(mut cx: FunctionContext) -> JsResult<JsString> {
   let jwk: Jwk = serde_json::from_str(&jwk_string.value()).unwrap();
   
   match rust_decrypt_json(&jwe.value(), &jwk) {
-    Ok(x) => {
-      let ( decrypted, header ) = x;
+    Ok(deserialised) => {
+      let ( decrypted, _header ) = deserialised;
       let decoded_string = String::from_utf8(decrypted).unwrap();
-      println!("\n\n{:?}\n\n{:?}\n\n", decoded_string, header);
       Ok(JsString::new(&mut cx, decoded_string))
     },
     Err(_) => panic!("PANIC")
