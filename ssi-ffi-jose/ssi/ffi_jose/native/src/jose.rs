@@ -9,6 +9,7 @@ use josekit::{
   },
   jwe::{
     JweEncrypter,
+    JweDecrypter,
     enc::{
       aesgcm::AesgcmJweEncryption,
       aescbc_hmac::AescbcHmacJweEncryption
@@ -24,9 +25,9 @@ use josekit::{
     JweHeaderSet,
     JweHeader,
     serialize_general_json,
+    deserialize_json
   },
   JoseError,
-  // util::random_bytes
 };
 
 use serde::{Deserialize, Serialize};
@@ -581,4 +582,99 @@ pub fn rust_general_encrypt_json(
 
   // encrypt payload & return encrypted string
   serialize_general_json(payload, Some(&header), recipients_combined.as_slice(), aad)
+}
+
+#[allow(dead_code)]
+pub fn rust_decrypt_json(
+  jwe_string: &str,
+  jwk: &Jwk,
+) -> Result<(Vec<u8>, JweHeader), JoseError> {
+  let mut decrypter_dir: Option<DirectJweDecrypter> = None;
+  let mut decrypter_ecdhes: Option<EcdhEsJweDecrypter> = None;
+  let mut decrypter_rsaes: Option<RsaesJweDecrypter> = None;
+  let mut decrypter_pbes2: Option<Pbes2HmacAeskwJweDecrypter> = None;
+  let mut decrypter_aeskw: Option<AeskwJweDecrypter> = None;
+  let mut decrypter_aesgcmkw: Option<AesgcmkwJweDecrypter> = None;
+
+  // retrieve `alg` from `jwe_string`
+  let jwe_json: Value = serde_json::from_str(jwe_string).unwrap();
+  let protected = jwe_json["protected"].as_str().unwrap();
+  let protected_decoded_bytes = base64::decode(protected).unwrap();
+  let protected_json_string = String::from_utf8(protected_decoded_bytes).unwrap();
+  let protected_json: Value = serde_json::from_str(&protected_json_string).unwrap();
+  let alg = protected_json["alg"].as_str().unwrap();
+
+  // set required decrypter
+  match alg {
+    // Direct encryption
+    "dir" => decrypter_dir = Some(DirectJweAlgorithm::Dir.decrypter_from_jwk(jwk).unwrap()),
+    // Diffie-Hellman
+    "ECDH-ES" => decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEs.decrypter_from_jwk(jwk).unwrap()),
+    "ECDH-ES+A128KW" => decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEsA128kw.decrypter_from_jwk(jwk).unwrap()),
+    "ECDH-ES+A192KW" => decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEsA192kw.decrypter_from_jwk(jwk).unwrap()),
+    "ECDH-ES+A256KW"  => decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEsA256kw.decrypter_from_jwk(jwk).unwrap()),
+    // RSAES
+    "RSA1_5" => panic!("The `Rsa1_5` algorithm is no longer recommendeddur to a security vulnerability"),
+    "RSA-OAEP" => decrypter_rsaes = Some(RsaesJweAlgorithm::RsaOaep.decrypter_from_jwk(jwk).unwrap()),
+    "RSA-OAEP-256" => decrypter_rsaes = Some(RsaesJweAlgorithm::RsaOaep256.decrypter_from_jwk(jwk).unwrap()),
+    "RSA-OAEP-384" => decrypter_rsaes = Some(RsaesJweAlgorithm::RsaOaep384.decrypter_from_jwk(jwk).unwrap()),
+    "RSA-OAEP-512" => decrypter_rsaes = Some(RsaesJweAlgorithm::RsaOaep512.decrypter_from_jwk(jwk).unwrap()),
+    // PBES2
+    "PBES2-HS256+A128KW" => decrypter_pbes2 = Some(Pbes2HmacAeskwJweAlgorithm::Pbes2Hs256A128kw.decrypter_from_jwk(jwk).unwrap()),
+    "PBES2-HS384+A192KW" => decrypter_pbes2 = Some(Pbes2HmacAeskwJweAlgorithm::Pbes2Hs384A192kw.decrypter_from_jwk(jwk).unwrap()),
+    "PBES2-HS512+A256KW" => decrypter_pbes2 = Some(Pbes2HmacAeskwJweAlgorithm::Pbes2Hs512A256kw.decrypter_from_jwk(jwk).unwrap()),
+    // AES Key Wrap
+    "A128KW" => decrypter_aeskw = Some(AeskwJweAlgorithm::A128kw.decrypter_from_jwk(jwk).unwrap()),
+    "A192KW" => decrypter_aeskw = Some(AeskwJweAlgorithm::A192kw.decrypter_from_jwk(jwk).unwrap()),
+    "A256KW" => decrypter_aeskw = Some(AeskwJweAlgorithm::A256kw.decrypter_from_jwk(jwk).unwrap()),
+    // AES GCM Key wrap
+    "A128GCMKW" => decrypter_aesgcmkw = Some(AesgcmkwJweAlgorithm::A128gcmkw.decrypter_from_jwk(jwk).unwrap()),
+    "A192GCMKW" => decrypter_aesgcmkw = Some(AesgcmkwJweAlgorithm::A192gcmkw.decrypter_from_jwk(jwk).unwrap()),
+    "A256GCMKW" => decrypter_aesgcmkw = Some(AesgcmkwJweAlgorithm::A256gcmkw.decrypter_from_jwk(jwk).unwrap()),
+    // unknown
+    _ => panic!("Unknown key encryption algorithm"),
+  }
+
+  // use decrypter to decrypt `jwe_string`
+  match alg {
+    "dir" => {
+      let decrypter: &dyn JweDecrypter = &decrypter_dir.unwrap();
+      deserialize_json(jwe_string, decrypter)
+    },
+    "ECDH-ES" |
+    "ECDH-ES+A128KW" |
+    "ECDH-ES+A192KW" |
+    "ECDH-ES+A256KW"  => {
+      let decrypter: &dyn JweDecrypter = &decrypter_ecdhes.unwrap();
+      deserialize_json(jwe_string, decrypter)
+    },
+    "RSA1_5" |
+    "RSA-OAEP" |
+    "RSA-OAEP-256" |
+    "RSA-OAEP-384" |
+    "RSA-OAEP-512" => {
+      let decrypter: &dyn JweDecrypter = &decrypter_rsaes.unwrap();
+      deserialize_json(jwe_string, decrypter)
+    },
+    "PBES2-HS256+A128KW" |
+    "PBES2-HS384+A192KW" |
+    "PBES2-HS512+A256KW" => {
+      let decrypter: &dyn JweDecrypter = &decrypter_pbes2.unwrap();
+      deserialize_json(jwe_string, decrypter)
+    },
+    "A128KW" |
+    "A192KW" |
+    "A256KW" => {
+      let decrypter: &dyn JweDecrypter = &decrypter_aeskw.unwrap();
+      deserialize_json(jwe_string, decrypter)
+    },
+    "A128GCMKW" |
+    "A192GCMKW" |
+    "A256GCMKW" => {
+      let decrypter: &dyn JweDecrypter = &decrypter_aesgcmkw.unwrap();
+      deserialize_json(jwe_string, decrypter)
+    },
+    // unknown
+    _ => panic!("Unknown key encryption algorithm"),
+  }
 }
