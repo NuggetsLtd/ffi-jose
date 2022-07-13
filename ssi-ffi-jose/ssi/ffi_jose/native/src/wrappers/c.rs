@@ -42,3 +42,44 @@ pub unsafe extern "C" fn ffi_jose_generate_key_pair_jwk(
 pub unsafe extern "C" fn ffi_jose_free_jwk_string(jwk_string: JwkJsonString) {
   let _ = Box::from_raw(jwk_string.ptr as *mut c_char);
 }
+
+#[repr(C)]
+pub struct KeyPairJsonString {
+  ptr: *const c_char,
+}
+
+/// Generate KeyPair as JSON String
+///
+/// # SAFETY
+/// The `json_string.ptr` pointer needs to follow the same safety requirements
+/// as Rust's `std::ffi::CStr::from_ptr`
+#[no_mangle]
+pub unsafe extern "C" fn ffi_jose_generate_key_pair(
+  named_curve: NamedCurve,
+  json_string: &mut KeyPairJsonString,
+) -> i32 {
+  let key_pair = panic::catch_unwind(|| {
+    // generate key pair string for specified curve
+    let mut key_pair_string: String = rust_generate_key_pair(named_curve);
+    key_pair_string.push('\0'); // add null terminator (for C-string)
+    key_pair_string
+  });
+
+  match key_pair {
+    Ok(key_pair_string) => {
+      // box the string, so string isn't de-allocated on leaving the scope of this fn
+      let boxed: Box<str> = key_pair_string.into_boxed_str();
+    
+      // set json_string pointer to boxed key_pair_string
+      json_string.ptr = Box::into_raw(boxed).cast();
+
+      0
+    },
+    Err(_) => 1
+  }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ffi_jose_free_key_pair_string(key_pair_string: KeyPairJsonString) {
+  let _ = Box::from_raw(key_pair_string.ptr as *mut c_char);
+}
