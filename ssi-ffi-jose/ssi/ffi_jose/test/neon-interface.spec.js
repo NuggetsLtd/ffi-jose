@@ -1,5 +1,7 @@
 const jose = require('../native')
 
+const base64RegExp = /^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}==|[A-Za-z0-9+\\/]{3}=)?$/i
+
 const NamedCurve = {
   // EC curves
   P256: 0,
@@ -23,6 +25,34 @@ const ContentEncryption = {
   'A256CBC-HS512': 5
 }
 
+const KeyEncryption = {
+  // Direct encryption
+  'dir': 0,
+  // Diffie-Hellman
+  'ECDH-ES': 1,
+  'ECDH-ES+A128KW': 2,
+  'ECDH-ES+A192KW': 3,
+  'ECDH-ES+A256KW': 4,
+  // RSAES
+  'RSA1_5': 5,
+  'RSA-OAEP': 6,
+  'RSA-OAEP-256': 7,
+  'RSA-OAEP-384': 8,
+  'RSA-OAEP-512': 9,
+  // PBES2
+  'PBES2-HS256+A128KW': 10,
+  'PBES2-HS384+A192KW': 11,
+  'PBES2-HS512+A256KW': 12,
+  // AES Key Wrap
+  'A128KW': 13,
+  'A192KW': 14,
+  'A256KW': 15,
+  // AES GCM Key wrap
+  'A128GCMKW': 16,
+  'A192GCMKW': 17,
+  'A256GCMKW': 18
+}
+
 const base64ToArrayBuffer = (value) =>
   Uint8Array.from(Buffer.from(value, 'base64')).buffer
 
@@ -31,14 +61,20 @@ describe('NEON NodeJS Interface:', () => {
   it('should export the expected items', () => {
     expect(Object.keys(jose).sort()).toEqual([
       'decrypt',
+      'decrypt_json',
       'encrypt',
+      'general_encrypt_json',
+      'generate_key_pair',
       'generate_key_pair_jwk'
     ])
   })
 
   it('should export foreign function interface functions', () => {
     expect(typeof jose.decrypt).toBe('function')
+    expect(typeof jose.decrypt_json).toBe('function')
     expect(typeof jose.encrypt).toBe('function')
+    expect(typeof jose.general_encrypt_json).toBe('function')
+    expect(typeof jose.generate_key_pair).toBe('function')
     expect(typeof jose.generate_key_pair_jwk).toBe('function')
   })
 
@@ -128,6 +164,124 @@ describe('NEON NodeJS Interface:', () => {
         expect(jwk.crv).toBe('X448')
         expect(Buffer.from(jwk.d, 'base64').length).toBe(56)
         expect(Buffer.from(jwk.x, 'base64').length).toBe(56)
+      })
+
+    })
+
+    describe('generate_key_pair()', () => {
+
+      it('should return expected object structure', () => {
+        const namedCurve = NamedCurve.P256
+        const keyPair = JSON.parse(jose.generate_key_pair({ namedCurve }))
+
+        expect(keyPair).toEqual(expect.objectContaining({
+          der_private_key: expect.stringMatching(base64RegExp),
+          der_public_key: expect.stringMatching(base64RegExp),
+          jwk_key_pair: expect.objectContaining({
+            kty: expect.any(String),
+            crv: expect.any(String),
+            d: expect.any(String),
+            x: expect.any(String),
+            y: expect.any(String)
+          }),
+          jwk_private_key: expect.objectContaining({
+            kty: expect.any(String),
+            crv: expect.any(String),
+            d: expect.any(String)
+          }),
+          jwk_public_key: expect.objectContaining({
+            kty: expect.any(String),
+            crv: expect.any(String),
+            x: expect.any(String),
+            y: expect.any(String)
+          }),
+          pem_private_key: expect.stringMatching(base64RegExp),
+          pem_public_key: expect.stringMatching(base64RegExp)
+        }))
+      })
+
+      it('where "namedCurve" is "P-256"', () => {
+        const namedCurve = NamedCurve.P256
+        const { jwk_key_pair } = JSON.parse(jose.generate_key_pair({ namedCurve }))
+
+        expect(jwk_key_pair.kty).toBe('EC')
+        expect(jwk_key_pair.crv).toBe('P-256')
+        expect(Buffer.from(jwk_key_pair.d, 'base64').length).toBe(32)
+        expect(Buffer.from(jwk_key_pair.x, 'base64').length).toBe(32)
+        expect(Buffer.from(jwk_key_pair.y, 'base64').length).toBe(32)
+      })
+
+      it('where "namedCurve" is "P-384"', () => {
+        const namedCurve = NamedCurve.P384
+        const { jwk_key_pair } = JSON.parse(jose.generate_key_pair({ namedCurve }))
+
+        expect(jwk_key_pair.kty).toBe('EC')
+        expect(jwk_key_pair.crv).toBe('P-384')
+        expect(Buffer.from(jwk_key_pair.d, 'base64').length).toBe(48)
+        expect(Buffer.from(jwk_key_pair.x, 'base64').length).toBe(48)
+        expect(Buffer.from(jwk_key_pair.y, 'base64').length).toBe(48)
+      })
+
+      it('where "namedCurve" is "P-521"', () => {
+        const namedCurve = NamedCurve.P521
+        const { jwk_key_pair } = JSON.parse(jose.generate_key_pair({ namedCurve }))
+
+        expect(jwk_key_pair.kty).toBe('EC')
+        expect(jwk_key_pair.crv).toBe('P-521')
+        expect(Buffer.from(jwk_key_pair.d, 'base64').length).toBe(66)
+        expect(Buffer.from(jwk_key_pair.x, 'base64').length).toBe(66)
+        expect(Buffer.from(jwk_key_pair.y, 'base64').length).toBe(66)
+      })
+
+      it('where "namedCurve" is "secp256k1"', () => {
+        const namedCurve = NamedCurve.Secp256k1
+        const { jwk_key_pair } = JSON.parse(jose.generate_key_pair({ namedCurve }))
+
+        expect(jwk_key_pair.kty).toBe('EC')
+        expect(jwk_key_pair.crv).toBe('secp256k1')
+        expect(Buffer.from(jwk_key_pair.d, 'base64').length).toBe(32)
+        expect(Buffer.from(jwk_key_pair.x, 'base64').length).toBe(32)
+        expect(Buffer.from(jwk_key_pair.y, 'base64').length).toBe(32)
+      })
+
+      it('where "namedCurve" is "Ed25519"', () => {
+        const namedCurve = NamedCurve.Ed25519
+        const { jwk_key_pair } = JSON.parse(jose.generate_key_pair({ namedCurve }))
+
+        expect(jwk_key_pair.kty).toBe('OKP')
+        expect(jwk_key_pair.crv).toBe('Ed25519')
+        expect(Buffer.from(jwk_key_pair.d, 'base64').length).toBe(32)
+        expect(Buffer.from(jwk_key_pair.x, 'base64').length).toBe(32)
+      })
+
+      it('where "namedCurve" is "Ed448"', () => {
+        const namedCurve = NamedCurve.Ed448
+        const { jwk_key_pair } = JSON.parse(jose.generate_key_pair({ namedCurve }))
+
+        expect(jwk_key_pair.kty).toBe('OKP')
+        expect(jwk_key_pair.crv).toBe('Ed448')
+        expect(Buffer.from(jwk_key_pair.d, 'base64').length).toBe(57)
+        expect(Buffer.from(jwk_key_pair.x, 'base64').length).toBe(57)
+      })
+
+      it('where "namedCurve" is "X25519"', () => {
+        const namedCurve = NamedCurve.X25519
+        const { jwk_key_pair } = JSON.parse(jose.generate_key_pair({ namedCurve }))
+
+        expect(jwk_key_pair.kty).toBe('OKP')
+        expect(jwk_key_pair.crv).toBe('X25519')
+        expect(Buffer.from(jwk_key_pair.d, 'base64').length).toBe(32)
+        expect(Buffer.from(jwk_key_pair.x, 'base64').length).toBe(32)
+      })
+
+      it('where "namedCurve" is "X448"', () => {
+        const namedCurve = NamedCurve.X448
+        const { jwk_key_pair } = JSON.parse(jose.generate_key_pair({ namedCurve }))
+
+        expect(jwk_key_pair.kty).toBe('OKP')
+        expect(jwk_key_pair.crv).toBe('X448')
+        expect(Buffer.from(jwk_key_pair.d, 'base64').length).toBe(56)
+        expect(Buffer.from(jwk_key_pair.x, 'base64').length).toBe(56)
       })
 
     })
@@ -289,6 +443,42 @@ describe('NEON NodeJS Interface:', () => {
 
         })
 
+      })
+
+    })
+
+    describe('general_encrypt_jwt', () => {
+
+      it('should correctly encrypt payload', async () => {
+        const alg = KeyEncryption['ECDH-ES+A128KW']
+        const enc = ContentEncryption.A128GCM
+        const jwt = { hello: 'there' }
+        const payload = JSON.stringify(jwt)
+        const kid = 'did:nuggets:abcdef'
+        const jwkPublic = {
+          kid,
+          kty: 'EC',
+          crv: 'P-256',
+          // d: 'qjx4ib5Ea94YnyypBBPnvtGUuoRgGtF_0BtPuOSMJPc',
+          x: 'A4NKTvWeEv3b-sJnlmwrATDklidT_qo3jTYRV2shaAc',
+          y: '_06GxhBcbxJzOCTz4F0kq_mETgGti33WkFpMKZHc-SY'
+        }
+        const jwkPrivate = {
+          kid,
+          kty: 'EC',
+          crv: 'P-256',
+          d: 'qjx4ib5Ea94YnyypBBPnvtGUuoRgGtF_0BtPuOSMJPc'
+        }
+
+        const recipients = JSON.stringify([ jwkPublic ])
+
+        const jwe = jose.general_encrypt_json(alg, enc, payload, recipients)
+        console.log({ jwe: JSON.parse(jwe) })
+
+        const decryptedMsg = JSON.parse(jose.decrypt_json(jwe, JSON.stringify(jwkPrivate)))
+        console.log({ decryptedMsg })
+
+        expect(decryptedMsg).toEqual(jwt)
       })
 
     })
