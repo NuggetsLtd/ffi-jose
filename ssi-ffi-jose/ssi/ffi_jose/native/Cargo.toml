@@ -16,7 +16,7 @@ crate-type = ["staticlib", "cdylib"]
 default = ["node"]
 java = ["jni","openssl"]
 node = ["neon"]
-c = []
+c = ["ffi-support"]
 
 [build-dependencies]
 neon-build = "0.10.1"
@@ -25,8 +25,10 @@ cbindgen ="0.24.3"
 [dependencies]
 neon = { version = "0.10.1", optional = true }
 josekit = "0.8.0"
+serde = "1.0.138"
 serde_json = "1.0.78"
 base64 = "0.13.0"
 openssl = { version = "0.10", optional=true, features = ["vendored"] }
 jni = { version = "0.19", optional = true }
+ffi-support = { version = "0.4", optional = true }
 
