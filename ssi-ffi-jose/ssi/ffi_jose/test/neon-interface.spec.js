@@ -449,36 +449,70 @@ describe('NEON NodeJS Interface:', () => {
 
     describe('general_encrypt_jwt', () => {
 
-      it('should correctly encrypt payload', async () => {
+      describe('should correctly encrypt payload', () => {
         const alg = KeyEncryption['ECDH-ES+A128KW']
         const enc = ContentEncryption.A128GCM
         const jwt = { hello: 'there' }
         const payload = JSON.stringify(jwt)
-        const kid = 'did:nuggets:abcdef'
-        const jwkPublic = {
-          kid,
-          kty: 'EC',
-          crv: 'P-256',
-          // d: 'qjx4ib5Ea94YnyypBBPnvtGUuoRgGtF_0BtPuOSMJPc',
-          x: 'A4NKTvWeEv3b-sJnlmwrATDklidT_qo3jTYRV2shaAc',
-          y: '_06GxhBcbxJzOCTz4F0kq_mETgGti33WkFpMKZHc-SY'
-        }
-        const jwkPrivate = {
-          kid,
-          kty: 'EC',
-          crv: 'P-256',
-          d: 'qjx4ib5Ea94YnyypBBPnvtGUuoRgGtF_0BtPuOSMJPc'
-        }
+        const jwks = [
+          {
+            public: {
+              kid: 'did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1',
+              kty: 'EC',
+              crv: 'P-256',
+              x: 'A4NKTvWeEv3b-sJnlmwrATDklidT_qo3jTYRV2shaAc',
+              y: '_06GxhBcbxJzOCTz4F0kq_mETgGti33WkFpMKZHc-SY'
+            },
+            private: {
+              kid: 'did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1',
+              kty: 'EC',
+              crv: 'P-256',
+              d: 'qjx4ib5Ea94YnyypBBPnvtGUuoRgGtF_0BtPuOSMJPc'
+            }
+          },
+          {
+            public: {
+              kid: 'did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p256-1',
+              kty: 'EC',
+              crv: 'P-256',
+              x: 'YQbhZhp4ORKjwMqQIGFbIVSyYaaBuJbym_UWEWJPgbM',
+              y: 'hxHEiOwPXUt1Nv_3MO5oRkUoMtYFaWIzW0iiZMNTnFE'
+            },
+            private: {
+              kid: 'did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p256-1',
+              kty: 'EC',
+              crv: 'P-256',
+              d: 'pndx4RjZSMpYjkokcn5xcIfmhZV19-jr_0n4l1kcphI'
+            }
+          }
+        ]
 
-        const recipients = JSON.stringify([ jwkPublic ])
+        it('for single recipient', async () => {
+          const recipients = JSON.stringify([ jwks[0].public ])
 
-        const jwe = jose.general_encrypt_json(alg, enc, payload, recipients)
-        console.log({ jwe: JSON.parse(jwe) })
+          // encrypt message
+          const jwe = jose.general_encrypt_json(alg, enc, payload, recipients)
 
-        const decryptedMsg = JSON.parse(jose.decrypt_json(jwe, JSON.stringify(jwkPrivate)))
-        console.log({ decryptedMsg })
+          // decrypt message
+          const decryptedMsg = JSON.parse(jose.decrypt_json(jwe, JSON.stringify(jwks[0].private)))
+          expect(decryptedMsg).toEqual(jwt)
+        })
 
-        expect(decryptedMsg).toEqual(jwt)
+        it('for multiple recipients', async () => {
+          const recipients = JSON.stringify([ jwks[0].public, jwks[1].public ])
+
+          // encrypt message with multiple recipients
+          const jwe = jose.general_encrypt_json(alg, enc, payload, recipients)
+
+          // decrypt message for first recipient
+          const decryptedMsg1 = JSON.parse(jose.decrypt_json(jwe, JSON.stringify(jwks[0].private)))
+          expect(decryptedMsg1).toEqual(jwt)
+
+          // decrypt message for second recipient
+          const decryptedMsg2 = JSON.parse(jose.decrypt_json(jwe, JSON.stringify(jwks[1].private)))
+          expect(decryptedMsg2).toEqual(jwt)
+        })
+
       })
 
     })
