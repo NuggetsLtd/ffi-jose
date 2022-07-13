@@ -124,6 +124,109 @@ pub fn rust_generate_key_pair_jwk(
   jwk_cstring
 }
 
+#[derive(Serialize, Deserialize)]
+struct KeyPair {
+  jwk_key_pair: Jwk,
+  jwk_private_key: Jwk,
+  jwk_public_key: Jwk,
+  pem_private_key: String,
+  pem_public_key: String,
+  der_private_key: String,
+  der_public_key: String,
+}
+
+#[allow(dead_code)]
+pub fn rust_generate_key_pair(
+  named_curve: NamedCurve
+) -> String {
+  let mut ec_named_curve: Option<EcCurve> = None;
+  let mut ed_named_curve: Option<EdCurve> = None;
+  let mut ecx_named_curve: Option<EcxCurve> = None;
+  let mut key_pair: Option<KeyPair> = None;
+
+  match named_curve {
+    // EC curves
+    NamedCurve::P256 => ec_named_curve = Some(EcCurve::P256),
+    NamedCurve::P384 => ec_named_curve = Some(EcCurve::P384),
+    NamedCurve::P521 => ec_named_curve = Some(EcCurve::P521),
+    NamedCurve::Secp256k1 => ec_named_curve = Some(EcCurve::Secp256k1),
+    // ED curves
+    NamedCurve::Ed25519 => ed_named_curve =  Some(EdCurve::Ed25519),
+    NamedCurve::Ed448 => ed_named_curve =  Some(EdCurve::Ed448),
+    // ECX curves
+    NamedCurve::X25519 => ecx_named_curve =  Some(EcxCurve::X25519),
+    NamedCurve::X448 => ecx_named_curve =  Some(EcxCurve::X448),
+  }
+
+  match ec_named_curve {
+    Some(curve) => {
+      match EcKeyPair::generate(curve) {
+        Ok(ec_key_pair) =>{
+          key_pair = Some(KeyPair {
+            jwk_key_pair: ec_key_pair.to_jwk_key_pair(),
+            jwk_private_key: ec_key_pair.to_jwk_private_key(),
+            jwk_public_key: ec_key_pair.to_jwk_public_key(),
+            pem_private_key: base64::encode(ec_key_pair.to_pem_private_key()),
+            pem_public_key: base64::encode(ec_key_pair.to_pem_public_key()),
+            der_private_key: base64::encode(ec_key_pair.to_der_private_key()),
+            der_public_key: base64::encode(ec_key_pair.to_der_public_key()),
+          });
+        },
+        Err(_) => panic!("Unable to generate EC keypair for curve: {}", named_curve)
+      };
+    },
+    None => ()
+  }
+
+  match ed_named_curve {
+    Some(curve) => {
+      match EdKeyPair::generate(curve) {
+        Ok(ed_key_pair) => {
+          key_pair = Some(KeyPair {
+            jwk_key_pair: ed_key_pair.to_jwk_key_pair(),
+            jwk_private_key: ed_key_pair.to_jwk_private_key(),
+            jwk_public_key: ed_key_pair.to_jwk_public_key(),
+            pem_private_key: base64::encode(ed_key_pair.to_pem_private_key()),
+            pem_public_key: base64::encode(ed_key_pair.to_pem_public_key()),
+            der_private_key: base64::encode(ed_key_pair.to_der_private_key()),
+            der_public_key: base64::encode(ed_key_pair.to_der_public_key()),
+          });
+        },
+        Err(_) => panic!("Unable to generate ED keypair for curve: {}", named_curve)
+      };
+    },
+    None => ()
+  }
+
+  match ecx_named_curve {
+    Some(curve) => {
+      match EcxKeyPair::generate(curve) {
+        Ok(ecx_key_pair) => {
+          key_pair = Some(KeyPair {
+            jwk_key_pair: ecx_key_pair.to_jwk_key_pair(),
+            jwk_private_key: ecx_key_pair.to_jwk_private_key(),
+            jwk_public_key: ecx_key_pair.to_jwk_public_key(),
+            pem_private_key: base64::encode(ecx_key_pair.to_pem_private_key()),
+            pem_public_key: base64::encode(ecx_key_pair.to_pem_public_key()),
+            der_private_key: base64::encode(ecx_key_pair.to_der_private_key()),
+            der_public_key: base64::encode(ecx_key_pair.to_der_public_key()),
+          });
+        },
+        Err(_) => panic!("Unable to generate ECX keypair for curve: {:?}", named_curve)
+      };
+    },
+    None => ()
+  }
+
+  // Serialize JWK to a JSON string
+  let json_cstring: String = match serde_json::to_string(&key_pair) {
+    Ok(json) => String::from(json),
+    Err(_) => panic!("Unable to serialise Key Pair to JSON string")
+  };
+
+  json_cstring
+}
+
 #[allow(dead_code)]
 #[repr(C)]
 pub enum ContentEncryptionAlgorithm {
