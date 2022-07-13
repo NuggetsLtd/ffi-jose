@@ -209,8 +209,8 @@ fn node_decrypt_json(mut cx: FunctionContext) -> JsResult<JsString> {
   match rust_decrypt_json(&jwe.value(), &jwk) {
     Ok(deserialised) => {
       let ( decrypted, _header ) = deserialised;
-      let decoded_string = String::from_utf8(decrypted).unwrap();
-      Ok(JsString::new(&mut cx, decoded_string))
+      let decrypted_string = String::from_utf8(decrypted).unwrap();
+      Ok(JsString::new(&mut cx, decrypted_string))
     },
     Err(_) => panic!("Failed to decrypt data")
   }
