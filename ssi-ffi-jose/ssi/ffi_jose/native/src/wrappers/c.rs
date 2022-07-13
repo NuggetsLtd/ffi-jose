@@ -14,7 +14,7 @@ use serde::{Serialize};
 use base64;
 
 #[repr(C)]
-pub struct JwkJsonString {
+pub struct JsonString {
   ptr: *const c_char,
 }
 
@@ -26,7 +26,7 @@ pub struct JwkJsonString {
 #[no_mangle]
 pub unsafe extern "C" fn ffi_jose_generate_key_pair_jwk(
   named_curve: NamedCurve,
-  json_string: &mut JwkJsonString,
+  json_string: &mut JsonString,
 ) -> i32 {
   let jwk = panic::catch_unwind(|| {
     // generate JWK string for specified curve
@@ -49,16 +49,6 @@ pub unsafe extern "C" fn ffi_jose_generate_key_pair_jwk(
   }
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn ffi_jose_free_jwk_string(jwk_string: JwkJsonString) {
-  let _ = Box::from_raw(jwk_string.ptr as *mut c_char);
-}
-
-#[repr(C)]
-pub struct KeyPairJsonString {
-  ptr: *const c_char,
-}
-
 /// Generate KeyPair as JSON String
 ///
 /// # SAFETY
@@ -67,7 +57,7 @@ pub struct KeyPairJsonString {
 #[no_mangle]
 pub unsafe extern "C" fn ffi_jose_generate_key_pair(
   named_curve: NamedCurve,
-  json_string: &mut KeyPairJsonString,
+  json_string: &mut JsonString,
 ) -> i32 {
   let key_pair = panic::catch_unwind(|| {
     // generate key pair string for specified curve
@@ -90,16 +80,6 @@ pub unsafe extern "C" fn ffi_jose_generate_key_pair(
   }
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn ffi_jose_free_key_pair_string(key_pair_string: KeyPairJsonString) {
-  let _ = Box::from_raw(key_pair_string.ptr as *mut c_char);
-}
-
-#[repr(C)]
-pub struct EncryptedJsonString {
-  ptr: *const c_char,
-}
-
 #[derive(Serialize)]
 struct Encrypted {
   ciphertext: String,
@@ -118,7 +98,7 @@ pub unsafe extern "C" fn ffi_jose_encrypt(
   iv: ffi::ByteArray,
   message: ffi::ByteArray,
   aad: ffi::ByteArray,
-  json_string: &mut EncryptedJsonString,
+  json_string: &mut JsonString,
 ) -> i32 {
   // encrypt message
   let (ciphertext, tag) = match rust_encrypt(enc, &key.to_vec(), &iv.to_vec(), &message.to_vec(), &aad.to_vec()) {
@@ -161,13 +141,8 @@ pub unsafe extern "C" fn ffi_jose_encrypt(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ffi_jose_free_encrypted_string(encrypted_string: EncryptedJsonString) {
-  let _ = Box::from_raw(encrypted_string.ptr as *mut c_char);
-}
-
-#[repr(C)]
-pub struct DecryptedString {
-  ptr: *const c_char,
+pub unsafe extern "C" fn ffi_jose_free_json_string(json_string: JsonString) {
+  let _ = Box::from_raw(json_string.ptr as *mut c_char);
 }
 
 /// Decrypt message
@@ -183,7 +158,7 @@ pub unsafe extern "C" fn ffi_jose_decrypt(
   iv: ffi::ByteArray,
   tag: ffi::ByteArray,
   aad: ffi::ByteArray,
-  decrypted_string: &mut DecryptedString,
+  json_string: &mut JsonString,
 ) -> i32 {
   // decrypt message
   let plaintext = match rust_decrypt(enc, &key.to_vec(), &ciphertext.to_vec(), &iv.to_vec(), &tag.to_vec(), &aad.to_vec()) {
