@@ -212,7 +212,7 @@ fn node_decrypt_json(mut cx: FunctionContext) -> JsResult<JsString> {
       let decoded_string = String::from_utf8(decrypted).unwrap();
       Ok(JsString::new(&mut cx, decoded_string))
     },
-    Err(_) => panic!("PANIC")
+    Err(_) => panic!("Failed to decrypt data")
   }
 }
 
