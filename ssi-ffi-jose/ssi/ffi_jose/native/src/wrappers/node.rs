@@ -3,13 +3,20 @@ mod macros;
 
 use neon::prelude::*;
 use base64;
+use serde_json;
 use crate::jose::{
-  NamedCurve,
-  rust_generate_key_pair_jwk,
   ContentEncryptionAlgorithm,
+  KeyEncryptionAlgorithm,
+  NamedCurve,
+  TokenType,
+  rust_generate_key_pair_jwk,
+  rust_generate_key_pair,
   rust_encrypt,
-  rust_decrypt
+  rust_decrypt,
+  rust_general_encrypt_json,
+  rust_decrypt_json
 };
+use josekit::jwk::Jwk;
 
 fn node_generate_key_pair_jwk(mut cx: FunctionContext) -> JsResult<JsString> {
   let options = cx.argument::<JsObject>(0)?;
@@ -129,6 +136,69 @@ fn node_decrypt(mut cx: FunctionContext) -> JsResult<JsString> {
   Ok(JsString::new(&mut cx, plaintext_b64))
 }
 
+fn node_general_encrypt_json(mut cx: FunctionContext) -> JsResult<JsString> {
+  let alg = cx.argument::<JsNumber>(0)?;
+  let enc = cx.argument::<JsNumber>(1)?;
+  let payload = cx.argument::<JsString>(2)?;
+  let recipients = cx.argument::<JsString>(3)?;
+  let aad: Option<&[u8]> = None;
+
+  // determine key encryption type
+  let key_encryption = match alg.value() as u8 {
+    0 => KeyEncryptionAlgorithm::Dir,
+    1 => KeyEncryptionAlgorithm::EcdhEs,
+    2 => KeyEncryptionAlgorithm::EcdhEsA128kw,
+    3 => KeyEncryptionAlgorithm::EcdhEsA192kw,
+    4 => KeyEncryptionAlgorithm::EcdhEsA256kw,
+    5 => KeyEncryptionAlgorithm::Rsa1_5,
+    6 => KeyEncryptionAlgorithm::RsaOaep,
+    7 => KeyEncryptionAlgorithm::RsaOaep256,
+    8 => KeyEncryptionAlgorithm::RsaOaep384,
+    9 => KeyEncryptionAlgorithm::RsaOaep512,
+    10 => KeyEncryptionAlgorithm::Pbes2Hs256A128kw,
+    11 => KeyEncryptionAlgorithm::Pbes2Hs384A192kw,
+    12 => KeyEncryptionAlgorithm::Pbes2Hs512A256kw,
+    13 => KeyEncryptionAlgorithm::A128kw,
+    14 => KeyEncryptionAlgorithm::A192kw,
+    15 => KeyEncryptionAlgorithm::A256kw,
+    16 => KeyEncryptionAlgorithm::A128gcmkw,
+    17 => KeyEncryptionAlgorithm::A192gcmkw,
+    18 => KeyEncryptionAlgorithm::A256gcmkw,
+    _ => panic!("Unsupported key encryption method")
+  };
+
+  // determine content encryption type
+  let content_encryption = match enc.value() as u8 {
+    0 => ContentEncryptionAlgorithm::A128gcm,
+    1 => ContentEncryptionAlgorithm::A192gcm,
+    2 => ContentEncryptionAlgorithm::A256gcm,
+    3 => ContentEncryptionAlgorithm::A128cbcHs256,
+    4 => ContentEncryptionAlgorithm::A192cbcHs384,
+    5 => ContentEncryptionAlgorithm::A256cbcHs512,
+    _ => panic!("Unsupported content encryption method")
+  };
+
+  // convert serialised data to array of Jwks
+  let recipient_jwks: Vec<Jwk> = serde_json::from_str(&recipients.value()).unwrap();
+
+  // convert JsString to String
+  let payload_string: String = payload.value();
+
+  // decrypt message
+  let encrypted = match rust_general_encrypt_json(
+    key_encryption,
+    content_encryption,
+    TokenType::DidcommEncrypted,
+    payload_string.as_bytes(),
+    &recipient_jwks,
+    aad
+  ) {
+    Ok(encrypted) => encrypted,
+    Err(_) => panic!("Failed to encrypt data")
+  };
+
+  Ok(JsString::new(&mut cx, encrypted))
+}
 register_module!(mut cx, {
   cx.export_function("generate_key_pair_jwk", node_generate_key_pair_jwk)?;
   cx.export_function("encrypt", node_encrypt)?;
