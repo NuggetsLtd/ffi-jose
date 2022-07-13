@@ -33,6 +33,28 @@ fn node_generate_key_pair_jwk(mut cx: FunctionContext) -> JsResult<JsString> {
   Ok(JsString::new(&mut cx, jwk_string))
 }
 
+fn node_generate_key_pair(mut cx: FunctionContext) -> JsResult<JsString> {
+  let options = cx.argument::<JsObject>(0)?;
+
+  let named_curve_num: Handle<JsNumber> = options.get::<JsNumber, _, _>(&mut cx, "namedCurve")?;
+
+  let named_curve = match named_curve_num.value() as u8 {
+    0 => NamedCurve::P256,
+    1 => NamedCurve::P384,
+    2 => NamedCurve::P521,
+    3 => NamedCurve::Secp256k1,
+    4 => NamedCurve::Ed25519,
+    5 => NamedCurve::Ed448,
+    6 => NamedCurve::X25519,
+    7 => NamedCurve::X448,
+    _ => panic!("Unknown curve")
+  };
+
+  let json_string: String = rust_generate_key_pair(named_curve);
+
+  Ok(JsString::new(&mut cx, json_string))
+}
+
 fn node_encrypt(mut cx: FunctionContext) -> JsResult<JsObject> {
   let enc = cx.argument::<JsNumber>(0)?;
   let message = arg_to_slice!(cx, 1);
