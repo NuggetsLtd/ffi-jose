@@ -13,7 +13,7 @@ pub struct JwkJsonString {
 /// The `json_string.ptr` pointer needs to follow the same safety requirements
 /// as Rust's `std::ffi::CStr::from_ptr`
 #[no_mangle]
-pub unsafe extern "C" fn generate_key_pair_jwk(
+pub unsafe extern "C" fn ffi_jose_generate_key_pair_jwk(
   named_curve: NamedCurve,
   json_string: &mut JwkJsonString,
 ) -> i32 {
@@ -39,6 +39,6 @@ pub unsafe extern "C" fn generate_key_pair_jwk(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn free_jwk_string(jwk_string: JwkJsonString) {
+pub unsafe extern "C" fn ffi_jose_free_jwk_string(jwk_string: JwkJsonString) {
   let _ = Box::from_raw(jwk_string.ptr as *mut c_char);
 }
