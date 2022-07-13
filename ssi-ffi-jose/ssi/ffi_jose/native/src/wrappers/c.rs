@@ -229,7 +229,41 @@ pub unsafe extern "C" fn ffi_jose_general_encrypt_json(
   }
 }
 
+/// Decrypt JSON
+///
+/// # SAFETY
+/// The `json_string.ptr` pointer needs to follow the same safety requirements
+/// as Rust's `std::ffi::CStr::from_ptr`
 #[no_mangle]
-pub unsafe extern "C" fn ffi_jose_free_decrypted_string(decrypted_string: DecryptedString) {
-  let _ = Box::from_raw(decrypted_string.ptr as *mut c_char);
+pub unsafe extern "C" fn ffi_jose_decrypt_json(
+  jwe: ffi::ByteArray,
+  jwk: ffi::ByteArray,
+  json_string: &mut JsonString,
+) -> i32 {
+  let jwe_string = String::from_utf8(jwe.to_vec()).unwrap();
+
+  // convert byte array to Jwk
+  let jwk_string = String::from_utf8(jwk.to_vec()).unwrap();
+  let jwk: Jwk = serde_json::from_str(&jwk_string).unwrap();
+
+  match rust_decrypt_json(&jwe_string, &jwk) {
+    Ok(deserialised) => {
+      let ( decrypted, _header ) = deserialised;
+
+      let mut decrypted_string = String::from_utf8(decrypted).unwrap();
+      
+      // add null terminator (for C-string)
+      decrypted_string.push('\0');
+
+      // box the string, so string isn't de-allocated on leaving the scope of this fn
+      let boxed: Box<str> = decrypted_string.into_boxed_str();
+    
+      // set json_string pointer to boxed encrypted_string
+      json_string.ptr = Box::into_raw(boxed).cast();
+
+      0
+    },
+    Err(_) => panic!("Failed to decrypt data")
+  }
 }
+
