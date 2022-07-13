@@ -3,11 +3,16 @@ pub mod ffi;
 use crate::jose::{
   NamedCurve,
   ContentEncryptionAlgorithm,
+  KeyEncryptionAlgorithm,
+  TokenType,
   rust_generate_key_pair_jwk,
   rust_generate_key_pair,
   rust_encrypt,
-  rust_decrypt
+  rust_decrypt,
+  rust_general_encrypt_json,
+  rust_decrypt_json
 };
+use josekit::jwk::Jwk;
 use std::os::raw::c_char;
 use std::panic;
 use serde::{Serialize};
@@ -16,6 +21,11 @@ use base64;
 #[repr(C)]
 pub struct JsonString {
   ptr: *const c_char,
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ffi_jose_free_json_string(json_string: JsonString) {
+  let _ = Box::from_raw(json_string.ptr as *mut c_char);
 }
 
 /// Generate JWK as JSON String
@@ -140,11 +150,6 @@ pub unsafe extern "C" fn ffi_jose_encrypt(
   }
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn ffi_jose_free_json_string(json_string: JsonString) {
-  let _ = Box::from_raw(json_string.ptr as *mut c_char);
-}
-
 /// Decrypt message
 ///
 /// # SAFETY
@@ -175,9 +180,53 @@ pub unsafe extern "C" fn ffi_jose_decrypt(
   let boxed: Box<str> = plaintext_b64_string.into_boxed_str();
 
   // set json_string pointer to boxed plaintext_b64_string
-  decrypted_string.ptr = Box::into_raw(boxed).cast();
+  json_string.ptr = Box::into_raw(boxed).cast();
 
   0
+}
+
+/// General Encrypt JSON
+///
+/// # SAFETY
+/// The `json_string.ptr` pointer needs to follow the same safety requirements
+/// as Rust's `std::ffi::CStr::from_ptr`
+#[no_mangle]
+pub unsafe extern "C" fn ffi_jose_general_encrypt_json(
+  alg: KeyEncryptionAlgorithm,
+  enc: ContentEncryptionAlgorithm,
+  payload: ffi::ByteArray,
+  recipients: ffi::ByteArray,
+  json_string: &mut JsonString,
+) -> i32 {
+  let aad: Option<&[u8]> = None;
+
+  // convert recipients byte array to array of Jwks
+  let recipients_string = String::from_utf8(recipients.to_vec()).unwrap();
+  let recipient_jwks: Vec<Jwk> = serde_json::from_str(&recipients_string).unwrap();
+
+  // encrypt payload for recipients and return
+  match rust_general_encrypt_json(
+    alg,
+    enc,
+    TokenType::DidcommEncrypted,
+    &payload.to_vec(),
+    &recipient_jwks,
+    aad
+  ) {
+    Ok(mut encrypted_string) => {
+      // add null terminator (for C-string)
+      encrypted_string.push('\0');
+
+      // box the string, so string isn't de-allocated on leaving the scope of this fn
+      let boxed: Box<str> = encrypted_string.into_boxed_str();
+    
+      // set json_string pointer to boxed encrypted_string
+      json_string.ptr = Box::into_raw(boxed).cast();
+
+      0
+    },
+    Err(_) => 1
+  }
 }
 
 #[no_mangle]
