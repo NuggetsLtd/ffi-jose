@@ -1,20 +1,38 @@
 use josekit::{
   jwk::{
-    alg::{ec::EcCurve, ecx::EcxCurve, ed::EdCurve},
+    alg::{
+      ec::{EcCurve, EcKeyPair},
+      ecx::{EcxCurve, EcxKeyPair},
+      ed::{EdCurve, EdKeyPair}
+    },
     Jwk,
   },
   jwe::{
+    JweEncrypter,
     enc::{
       aesgcm::AesgcmJweEncryption,
       aescbc_hmac::AescbcHmacJweEncryption
-    }
+    },
+    alg::{
+      direct::{DirectJweAlgorithm, DirectJweDecrypter},
+      ecdh_es::{EcdhEsJweAlgorithm, EcdhEsJweDecrypter},
+      rsaes::{RsaesJweAlgorithm, RsaesJweDecrypter},
+      pbes2_hmac_aeskw::{Pbes2HmacAeskwJweAlgorithm, Pbes2HmacAeskwJweDecrypter},
+      aeskw::{AeskwJweAlgorithm, AeskwJweDecrypter},
+      aesgcmkw::{AesgcmkwJweAlgorithm, AesgcmkwJweDecrypter},
+    },
+    JweHeaderSet,
+    JweHeader,
+    serialize_general_json,
   },
   JoseError,
   // util::random_bytes
 };
 
-use serde_json;
+use serde::{Deserialize, Serialize};
+use serde_json::{Value};
 use std::fmt;
+use base64;
 
 #[allow(dead_code)]
 #[repr(C)]
@@ -371,4 +389,196 @@ pub fn rust_decrypt(
   };
 
   decrypted.unwrap()
+}
+
+#[allow(dead_code)]
+#[repr(C)]
+pub enum TokenType {
+  DidcommPlain,
+  DidcommSigned,
+  DidcommEncrypted,
+}
+
+#[allow(dead_code)]
+#[repr(C)]
+pub enum KeyEncryptionAlgorithm {
+  // Direct encryption
+  Dir,
+  // Diffie-Hellman
+  EcdhEs,
+  EcdhEsA128kw,
+  EcdhEsA192kw,
+  EcdhEsA256kw,
+  // RSAES
+  Rsa1_5,
+  RsaOaep,
+  RsaOaep256,
+  RsaOaep384,
+  RsaOaep512,
+  // PBES2
+  Pbes2Hs256A128kw,
+  Pbes2Hs384A192kw,
+  Pbes2Hs512A256kw,
+  // AES Key Wrap
+  A128kw,
+  A192kw,
+  A256kw,
+  // AES GCM Key wrap
+  A128gcmkw,
+  A192gcmkw,
+  A256gcmkw,
+}
+
+#[allow(dead_code)]
+pub fn rust_general_encrypt_json(
+  alg: KeyEncryptionAlgorithm,
+  enc: ContentEncryptionAlgorithm,
+  typ: TokenType,
+  payload: &[u8],
+  recipients: &[Jwk],
+  aad: Option<&[u8]>
+) -> Result<String, JoseError> {
+  let token_type = match typ {
+    TokenType::DidcommPlain => "application/didcomm-plain+json",
+    TokenType::DidcommSigned => "application/didcomm-signed+json",
+    TokenType::DidcommEncrypted => "application/didcomm-encrypted+json",
+  };
+
+  let key_encrypt_algorithm = match alg {
+    // Direct encryption
+    KeyEncryptionAlgorithm::Dir => "dir",
+    // Diffie-Hellman
+    KeyEncryptionAlgorithm::EcdhEs => "ECDH-ES",
+    KeyEncryptionAlgorithm::EcdhEsA128kw => "ECDH-ES+A128KW",
+    KeyEncryptionAlgorithm::EcdhEsA192kw => "ECDH-ES+A192KW",
+    KeyEncryptionAlgorithm::EcdhEsA256kw => "ECDH-ES+A256KW",
+    // RSAES
+    KeyEncryptionAlgorithm::Rsa1_5 => "RSA1_5",
+    KeyEncryptionAlgorithm::RsaOaep => "RSA-OAEP",
+    KeyEncryptionAlgorithm::RsaOaep256 => "RSA-OAEP-256",
+    KeyEncryptionAlgorithm::RsaOaep384 => "RSA-OAEP-384",
+    KeyEncryptionAlgorithm::RsaOaep512 => "RSA-OAEP-512",
+    // PBES2
+    KeyEncryptionAlgorithm::Pbes2Hs256A128kw => "PBES2-HS256+A128KW",
+    KeyEncryptionAlgorithm::Pbes2Hs384A192kw => "PBES2-HS384+A192KW",
+    KeyEncryptionAlgorithm::Pbes2Hs512A256kw => "PBES2-HS512+A256KW",
+    // AES Key Wrap
+    KeyEncryptionAlgorithm::A128kw => "A128KW",
+    KeyEncryptionAlgorithm::A192kw => "A192KW",
+    KeyEncryptionAlgorithm::A256kw => "A256KW",
+    // AES GCM Key wrap        
+    KeyEncryptionAlgorithm::A128gcmkw => "A128GCMKW",
+    KeyEncryptionAlgorithm::A192gcmkw => "A192GCMKW",
+    KeyEncryptionAlgorithm::A256gcmkw => "A256GCMKW"
+  };
+
+  let content_encrypt_algorithm = match enc {
+    // CBC encryption
+    ContentEncryptionAlgorithm::A128cbcHs256 => "A128CBC-HS256",
+    ContentEncryptionAlgorithm::A192cbcHs384 => "A192CBC-HS384",
+    ContentEncryptionAlgorithm::A256cbcHs512 => "A256CBC-HS512",
+    // GCM encryption
+    ContentEncryptionAlgorithm::A128gcm => "A128GCM",
+    ContentEncryptionAlgorithm::A192gcm => "A192GCM",
+    ContentEncryptionAlgorithm::A256gcm => "A256GCM"
+  };
+
+  let mut header = JweHeaderSet::new();
+  header.set_algorithm(key_encrypt_algorithm, true);
+  header.set_content_encryption(content_encrypt_algorithm, true);
+  header.set_token_type(token_type, true);
+
+  let mut recipients_dir = Vec::new();
+  let mut recipients_ecdhes = Vec::new();
+  let mut recipients_rsaes = Vec::new();
+  let mut recipients_pbes2 = Vec::new();
+  let mut recipients_aeskw = Vec::new();
+  let mut recipients_aesgcmkw = Vec::new();
+
+  for i in 0..recipients.len() {
+    let jwk = &recipients[i];
+    let mut recipient_header = JweHeader::new();
+
+    let kid = match jwk.key_id() {
+      Some(kid) => kid,
+      None => panic!("Key identifier (`kid`) required for jwk")
+    };
+
+    recipient_header.set_key_id(kid);
+
+    match alg {
+      // Direct encryption
+      KeyEncryptionAlgorithm::Dir => recipients_dir.push((recipient_header, DirectJweAlgorithm::Dir.encrypter_from_jwk(jwk).unwrap())),
+      // Diffie-Hellman
+      KeyEncryptionAlgorithm::EcdhEs => recipients_ecdhes.push((recipient_header, EcdhEsJweAlgorithm::EcdhEs.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::EcdhEsA128kw => recipients_ecdhes.push((recipient_header, EcdhEsJweAlgorithm::EcdhEsA128kw.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::EcdhEsA192kw => recipients_ecdhes.push((recipient_header, EcdhEsJweAlgorithm::EcdhEsA192kw.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::EcdhEsA256kw => recipients_ecdhes.push((recipient_header, EcdhEsJweAlgorithm::EcdhEsA256kw.encrypter_from_jwk(jwk).unwrap())),
+      // RSAES
+      KeyEncryptionAlgorithm::Rsa1_5 => panic!("The `Rsa1_5` algorithm is no longer recommendeddur to a security vulnerability"),
+      KeyEncryptionAlgorithm::RsaOaep => recipients_rsaes.push((recipient_header, RsaesJweAlgorithm::RsaOaep.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::RsaOaep256 => recipients_rsaes.push((recipient_header, RsaesJweAlgorithm::RsaOaep256.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::RsaOaep384 => recipients_rsaes.push((recipient_header, RsaesJweAlgorithm::RsaOaep384.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::RsaOaep512 => recipients_rsaes.push((recipient_header, RsaesJweAlgorithm::RsaOaep512.encrypter_from_jwk(jwk).unwrap())),
+      // PBES2
+      KeyEncryptionAlgorithm::Pbes2Hs256A128kw => recipients_pbes2.push((recipient_header, Pbes2HmacAeskwJweAlgorithm::Pbes2Hs256A128kw.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::Pbes2Hs384A192kw => recipients_pbes2.push((recipient_header, Pbes2HmacAeskwJweAlgorithm::Pbes2Hs384A192kw.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::Pbes2Hs512A256kw => recipients_pbes2.push((recipient_header, Pbes2HmacAeskwJweAlgorithm::Pbes2Hs512A256kw.encrypter_from_jwk(jwk).unwrap())),
+      // AES Key Wrap
+      KeyEncryptionAlgorithm::A128kw => recipients_aeskw.push((recipient_header, AeskwJweAlgorithm::A128kw.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::A192kw => recipients_aeskw.push((recipient_header, AeskwJweAlgorithm::A192kw.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::A256kw => recipients_aeskw.push((recipient_header, AeskwJweAlgorithm::A256kw.encrypter_from_jwk(jwk).unwrap())),
+      // AES GCM Key wrap
+      KeyEncryptionAlgorithm::A128gcmkw => recipients_aesgcmkw.push((recipient_header, AesgcmkwJweAlgorithm::A128gcmkw.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::A192gcmkw => recipients_aesgcmkw.push((recipient_header, AesgcmkwJweAlgorithm::A192gcmkw.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::A256gcmkw => recipients_aesgcmkw.push((recipient_header, AesgcmkwJweAlgorithm::A256gcmkw.encrypter_from_jwk(jwk).unwrap())),
+    }
+  }
+
+  let mut recipients_combined = Vec::new();
+
+  for i in 0..recipients_dir.len() {
+    let (header, encrypter) = &recipients_dir[i];
+    let encrypter_dir: &dyn JweEncrypter = encrypter;
+
+    recipients_combined.push((Some(header), encrypter_dir));
+  }
+
+  for i in 0..recipients_ecdhes.len() {
+    let (header, encrypter) = &recipients_ecdhes[i];
+    let encrypter_ecdhes: &dyn JweEncrypter = encrypter;
+
+    recipients_combined.push((Some(header), encrypter_ecdhes));
+  }
+
+  for i in 0..recipients_rsaes.len() {
+    let (header, encrypter) = &recipients_rsaes[i];
+    let encrypter_rsaes: &dyn JweEncrypter = encrypter;
+
+    recipients_combined.push((Some(header), encrypter_rsaes));
+  }
+
+  for i in 0..recipients_pbes2.len() {
+    let (header, encrypter) = &recipients_pbes2[i];
+    let encrypter_pbes2: &dyn JweEncrypter = encrypter;
+
+    recipients_combined.push((Some(header), encrypter_pbes2));
+  }
+
+  for i in 0..recipients_aeskw.len() {
+    let (header, encrypter) = &recipients_aeskw[i];
+    let encrypter_aeskw: &dyn JweEncrypter = encrypter;
+
+    recipients_combined.push((Some(header), encrypter_aeskw));
+  }
+
+  for i in 0..recipients_aesgcmkw.len() {
+    let (header, encrypter) = &recipients_aesgcmkw[i];
+    let encrypter_aesgcmkw: &dyn JweEncrypter = encrypter;
+
+    recipients_combined.push((Some(header), encrypter_aesgcmkw));
+  }
+
+  // encrypt payload & return encrypted string
+  serialize_general_json(payload, Some(&header), recipients_combined.as_slice(), aad)
 }
