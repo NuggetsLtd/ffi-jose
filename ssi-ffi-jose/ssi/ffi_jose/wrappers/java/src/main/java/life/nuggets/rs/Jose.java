@@ -23,6 +23,9 @@ class Jose {
       System.loadLibrary("jose");
   }
 
+  // Declare static methods provided by native library:
+  private static native String generate_key_pair_jwk(int named_curve);
+  private static native String generate_key_pair(int named_curve);
   // The rest is just regular ol' Java!
   public static void main(String[] args) {
       System.out.println("\nP-256:");
@@ -48,5 +51,8 @@ class Jose {
       
       System.out.println("\nX448:");
       System.out.println(Jose.generate_key_pair_jwk(NamedCurve.X448.ordinal()));
+      
+      System.out.println("\nX448 (full key pair):");
+      System.out.println(Jose.generate_key_pair(NamedCurve.X448.ordinal()));
   }
 }

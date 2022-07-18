@@ -15,6 +15,13 @@ extern "C" {
 JNIEXPORT jstring JNICALL Java_life_nuggets_rs_Jose_generate_1key_1pair_1jwk
   (JNIEnv *, jclass, jint);
 
+/*
+ * Class:     life_nuggets_rs_Jose
+ * Method:    generate_key_pair
+ * Signature: (I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_life_nuggets_rs_Jose_generate_1key_1pair
+  (JNIEnv *, jclass, jint);
 #ifdef __cplusplus
 }
 #endif
