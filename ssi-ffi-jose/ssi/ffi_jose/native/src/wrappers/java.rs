@@ -113,29 +113,29 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_encrypt(
     _ => panic!("Unknown `enc` value")
   };
 
-  let public_key;
-  let initialisation_vector;
-  let plaintext;
-  let additional_data;
+  let key_bytes;
+  let iv_bytes;
+  let plaintext_bytes;
+  let aad_bytes;
 
   match env.convert_byte_array(key) {
       Err(_) => panic!("Failed converting `key` to byte array"),
-      Ok(k) => public_key = k,
+      Ok(k) => key_bytes = k,
   };
   match env.convert_byte_array(iv) {
       Err(_) => panic!("Failed converting `iv` to byte array"),
-      Ok(i) => initialisation_vector = i,
+      Ok(i) => iv_bytes = i,
   };
   match env.convert_byte_array(message) {
       Err(_) => panic!("Failed converting `message` to byte array"),
-      Ok(m) => plaintext = m,
+      Ok(m) => plaintext_bytes = m,
   };
   match env.convert_byte_array(aad) {
       Err(_) => panic!("Failed converting `message` to byte array"),
-      Ok(a) => additional_data = a,
+      Ok(a) => aad_bytes = a,
   };
 
-  let (ciphertext, tag) = match rust_encrypt(enc, &public_key, &initialisation_vector, &plaintext, &additional_data) {
+  let (ciphertext, tag) = match rust_encrypt(enc, &key_bytes, &iv_bytes, &plaintext_bytes, &aad_bytes) {
     Ok(encrypted) => encrypted,
     _ => panic!("Failed to encrypt data")
   };
