@@ -58,6 +58,7 @@ class Jose {
   private static native String generate_key_pair_jwk(int named_curve);
   private static native String generate_key_pair(int named_curve);
   private static native String encrypt(int enc, byte[] key, byte[] iv, byte[] message, byte[] aad);
+  private static native String decrypt(int enc, byte[] key, byte[] ciphertext, byte[] iv, byte[] tag, byte[] aad);
   public static byte hexToByte(String hexString) {
       int firstDigit = toDigit(hexString.charAt(0));
       int secondDigit = toDigit(hexString.charAt(1));
@@ -121,7 +122,14 @@ class Jose {
       byte[] msgBytes = msgString.getBytes();
       String aadString = "";
       byte[] aadBytes = aadString.getBytes();
+      
       System.out.println("\nEncrypt:");
       System.out.println(Jose.encrypt(ContentEncryptionAlgorithm.A128gcm.ordinal(), key, iv, msgBytes, aadBytes));
+
+      byte[] ciphertext = decodeHexString("862dc0141058b5ca4768f7928a3c93fa35c6");
+      byte[] tag = decodeHexString("aba4fd9f3ab9dde676f7b1a91f562b35");
+
+      System.out.println("\nDecrypt:");
+      System.out.println(Jose.decrypt(ContentEncryptionAlgorithm.A128gcm.ordinal(), key, ciphertext, iv, tag, aadBytes));
   }
 }

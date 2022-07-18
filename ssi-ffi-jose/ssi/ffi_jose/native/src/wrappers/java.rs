@@ -6,7 +6,8 @@ use crate::jose::{
   ContentEncryptionAlgorithm,
   rust_generate_key_pair_jwk,
   rust_generate_key_pair,
-  rust_encrypt
+  rust_encrypt,
+  rust_decrypt
 };
 use std::panic;
 use serde::{Serialize};
@@ -168,4 +169,68 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_encrypt(
     },
     Err(_) => panic!("Unable to generate encryped data")
   }
+}
+
+#[no_mangle]
+pub extern "system" fn Java_life_nuggets_rs_Jose_decrypt(
+  env: JNIEnv,
+  _class: JClass,
+  enc: jint,
+  key: jbyteArray,
+  ciphertext: jbyteArray,
+  iv: jbyteArray,
+  tag: jbyteArray,
+  aad: jbyteArray,
+) -> jstring {
+  // map content encryption algorithm integers to enum options
+  let enc = match enc as u8 {
+    0 => ContentEncryptionAlgorithm::A128gcm,
+    1 => ContentEncryptionAlgorithm::A192gcm,
+    2 => ContentEncryptionAlgorithm::A256gcm,
+    3 => ContentEncryptionAlgorithm::A128cbcHs256,
+    4 => ContentEncryptionAlgorithm::A192cbcHs384,
+    5 => ContentEncryptionAlgorithm::A256cbcHs512,
+    _ => panic!("Unknown `enc` value")
+  };
+
+  let key_bytes;
+  let iv_bytes;
+  let ciphertext_bytes;
+  let tag_bytes;
+  let aad_bytes;
+
+  match env.convert_byte_array(key) {
+      Err(_) => panic!("Failed converting `key` to byte array"),
+      Ok(k) => key_bytes = k,
+  };
+  match env.convert_byte_array(ciphertext) {
+      Err(_) => panic!("Failed converting `ciphertext` to byte array"),
+      Ok(c) => ciphertext_bytes = c,
+  };
+  match env.convert_byte_array(iv) {
+      Err(_) => panic!("Failed converting `iv` to byte array"),
+      Ok(i) => iv_bytes = i,
+  };
+  match env.convert_byte_array(tag) {
+      Err(_) => panic!("Failed converting `tag` to byte array"),
+      Ok(t) => tag_bytes = t,
+  };
+  match env.convert_byte_array(aad) {
+      Err(_) => panic!("Failed converting `message` to byte array"),
+      Ok(a) => aad_bytes = a,
+  };
+
+  // decrypt ciphertext
+  let decrypted = match rust_decrypt(enc, &key_bytes, &ciphertext_bytes, &iv_bytes, &tag_bytes, &aad_bytes) {
+    Ok(decrypted) => decrypted,
+    _ => panic!("Failed to decrypt data")
+  };
+
+  let decrypted_string = String::from_utf8(decrypted).unwrap();
+
+  let output = env
+        .new_string(decrypted_string)
+        .expect("Unable to create string from decrypted data");
+
+  output.into_inner()
 }

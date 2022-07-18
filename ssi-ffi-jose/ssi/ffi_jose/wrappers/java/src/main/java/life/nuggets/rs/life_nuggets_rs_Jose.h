@@ -30,6 +30,14 @@ JNIEXPORT jstring JNICALL Java_life_nuggets_rs_Jose_generate_1key_1pair
  */
 JNIEXPORT jstring JNICALL Java_life_nuggets_rs_Jose_encrypt
   (JNIEnv *, jclass, jint, jbyteArray, jbyteArray, jbyteArray, jbyteArray);
+
+/*
+ * Class:     life_nuggets_rs_Jose
+ * Method:    decrypt
+ * Signature: (I[B[B[B[B[B)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_life_nuggets_rs_Jose_decrypt
+  (JNIEnv *, jclass, jint, jbyteArray, jbyteArray, jbyteArray, jbyteArray, jbyteArray);
 #ifdef __cplusplus
 }
 #endif
