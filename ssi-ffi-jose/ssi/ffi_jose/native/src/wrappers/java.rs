@@ -4,11 +4,15 @@ use jni::sys::{jstring, jint, jbyteArray};
 use crate::jose::{
   NamedCurve,
   ContentEncryptionAlgorithm,
+  KeyEncryptionAlgorithm,
+  TokenType,
   rust_generate_key_pair_jwk,
   rust_generate_key_pair,
   rust_encrypt,
-  rust_decrypt
+  rust_decrypt,
+  rust_general_encrypt_json
 };
+use josekit::jwk::Jwk;
 use std::panic;
 use serde::{Serialize};
 use base64;
@@ -231,6 +235,88 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_decrypt(
   let output = env
         .new_string(decrypted_string)
         .expect("Unable to create string from decrypted data");
+
+  output.into_inner()
+}
+
+#[no_mangle]
+pub extern "system" fn Java_life_nuggets_rs_Jose_general_1encrypt_1json(
+  env: JNIEnv,
+  _class: JClass,
+  alg: jint,
+  enc: jint,
+  plaintext: jbyteArray,
+  recipients: jbyteArray,
+) -> jstring {
+  let aad: Option<&[u8]> = None;
+
+  // map key encryption algorithm integers to enum options
+  let alg = match alg as u8 {
+    0 => KeyEncryptionAlgorithm::Dir,
+    1 => KeyEncryptionAlgorithm::EcdhEs,
+    2 => KeyEncryptionAlgorithm::EcdhEsA128kw,
+    3 => KeyEncryptionAlgorithm::EcdhEsA192kw,
+    4 => KeyEncryptionAlgorithm::EcdhEsA256kw,
+    5 => KeyEncryptionAlgorithm::Rsa1_5,
+    6 => KeyEncryptionAlgorithm::RsaOaep,
+    7 => KeyEncryptionAlgorithm::RsaOaep256,
+    8 => KeyEncryptionAlgorithm::RsaOaep384,
+    9 => KeyEncryptionAlgorithm::RsaOaep512,
+    10 => KeyEncryptionAlgorithm::Pbes2Hs256A128kw,
+    11 => KeyEncryptionAlgorithm::Pbes2Hs384A192kw,
+    12 => KeyEncryptionAlgorithm::Pbes2Hs512A256kw,
+    13 => KeyEncryptionAlgorithm::A128kw,
+    14 => KeyEncryptionAlgorithm::A192kw,
+    15 => KeyEncryptionAlgorithm::A256kw,
+    16 => KeyEncryptionAlgorithm::A128gcmkw,
+    17 => KeyEncryptionAlgorithm::A192gcmkw,
+    18 => KeyEncryptionAlgorithm::A256gcmkw,
+    _ => panic!("Unknown `alg` value")
+  };
+
+  // map content encryption algorithm integers to enum options
+  let enc = match enc as u8 {
+    0 => ContentEncryptionAlgorithm::A128gcm,
+    1 => ContentEncryptionAlgorithm::A192gcm,
+    2 => ContentEncryptionAlgorithm::A256gcm,
+    3 => ContentEncryptionAlgorithm::A128cbcHs256,
+    4 => ContentEncryptionAlgorithm::A192cbcHs384,
+    5 => ContentEncryptionAlgorithm::A256cbcHs512,
+    _ => panic!("Unknown `enc` value")
+  };
+
+  let plaintext_bytes;
+  match env.convert_byte_array(plaintext) {
+      Err(_) => panic!("Failed converting `plaintext` to byte array"),
+      Ok(p) => plaintext_bytes = p,
+  };
+
+  let recipients_bytes;
+  match env.convert_byte_array(recipients) {
+      Err(_) => panic!("Failed converting `recipients` to byte array"),
+      Ok(r) => recipients_bytes = r,
+  };
+
+  // convert recipients byte array to array of Jwks
+  let recipients_string = String::from_utf8(recipients_bytes.to_vec()).unwrap();
+  let recipient_jwks: Vec<Jwk> = serde_json::from_str(&recipients_string).unwrap();
+
+  // encrypt JSON to JWE
+  let encrypted = match rust_general_encrypt_json(
+    alg,
+    enc,
+    TokenType::DidcommEncrypted,
+    &plaintext_bytes.to_vec(),
+    &recipient_jwks,
+    aad
+  ) {
+    Ok(encrypted) => encrypted,
+    _ => panic!("Failed to decrypt data")
+  };
+
+  let output = env
+        .new_string(encrypted)
+        .expect("Unable to create string from encrypted data");
 
   output.into_inner()
 }

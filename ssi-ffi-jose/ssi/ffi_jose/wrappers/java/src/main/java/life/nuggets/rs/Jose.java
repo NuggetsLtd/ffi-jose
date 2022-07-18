@@ -59,6 +59,7 @@ class Jose {
   private static native String generate_key_pair(int named_curve);
   private static native String encrypt(int enc, byte[] key, byte[] iv, byte[] message, byte[] aad);
   private static native String decrypt(int enc, byte[] key, byte[] ciphertext, byte[] iv, byte[] tag, byte[] aad);
+  private static native String general_encrypt_json(int alg, int enc, byte[] payload, byte[] recipients);
   public static byte hexToByte(String hexString) {
       int firstDigit = toDigit(hexString.charAt(0));
       int secondDigit = toDigit(hexString.charAt(1));
@@ -89,6 +90,7 @@ class Jose {
 
   // The rest is just regular ol' Java!
   public static void main(String[] args) {
+      // ----- Generate JWK -----------------------------------------------------------------------
       System.out.println("\nP-256:");
       System.out.println(Jose.generate_key_pair_jwk(NamedCurve.P256.ordinal()));
       
@@ -113,9 +115,11 @@ class Jose {
       System.out.println("\nX448:");
       System.out.println(Jose.generate_key_pair_jwk(NamedCurve.X448.ordinal()));
       
+      // ----- Generate Keypair -------------------------------------------------------------------
       System.out.println("\nX448 (full key pair):");
       System.out.println(Jose.generate_key_pair(NamedCurve.X448.ordinal()));
       
+      // ----- Encrypt & Decrypt ------------------------------------------------------------------
       byte[] key = decodeHexString("b8aae648b9c7819e24f2b2c684efcef1");
       byte[] iv = decodeHexString("eae7e2df51f0dc34c39183e8");
       String msgString = "PLAINTEXT";
@@ -131,5 +135,12 @@ class Jose {
 
       System.out.println("\nDecrypt:");
       System.out.println(Jose.decrypt(ContentEncryptionAlgorithm.A128gcm.ordinal(), key, ciphertext, iv, tag, aadBytes));
+
+      // ----- JOSE Encrypt & Decrypt -------------------------------------------------------------
+      String recipientsSingle = "[{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"A4NKTvWeEv3b-sJnlmwrATDklidT_qo3jTYRV2shaAc\",\"y\":\"_06GxhBcbxJzOCTz4F0kq_mETgGti33WkFpMKZHc-SY\"}]";
+      byte[] recipientsSingleBytes = recipientsSingle.getBytes();
+
+      System.out.println("\nEncrypt JSON:");
+      System.out.println(Jose.general_encrypt_json(KeyEncryptionAlgorithm.EcdhEsA128kw.ordinal(), ContentEncryptionAlgorithm.A128gcm.ordinal(), msgBytes, recipientsSingleBytes));
   }
 }
