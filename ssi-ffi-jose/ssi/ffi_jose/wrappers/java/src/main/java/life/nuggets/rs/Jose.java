@@ -60,6 +60,8 @@ class Jose {
   private static native String encrypt(int enc, byte[] key, byte[] iv, byte[] message, byte[] aad);
   private static native String decrypt(int enc, byte[] key, byte[] ciphertext, byte[] iv, byte[] tag, byte[] aad);
   private static native String general_encrypt_json(int alg, int enc, byte[] payload, byte[] recipients);
+  private static native String decrypt_json(byte[] jwe, byte[] jwk);
+
   public static byte hexToByte(String hexString) {
       int firstDigit = toDigit(hexString.charAt(0));
       int secondDigit = toDigit(hexString.charAt(1));
@@ -142,5 +144,13 @@ class Jose {
 
       System.out.println("\nEncrypt JSON:");
       System.out.println(Jose.general_encrypt_json(KeyEncryptionAlgorithm.EcdhEsA128kw.ordinal(), ContentEncryptionAlgorithm.A128gcm.ordinal(), msgBytes, recipientsSingleBytes));
+
+      String jwe1 = "{\"protected\":\"eyJhbGciOiJFQ0RILUVTK0EyNTZLVyIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLWVuY3J5cHRlZCtqc29uIn0\",\"recipients\":[{\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"epk\":{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"gOck1VTJKClbIBckxyWDcvjgH7Hjh8l8JtZyMF_pcUg\",\"y\":\"erdiGdGNx_Bq3ZjIP0O6HqwnZ-hV4Qla1143vHg2CtA\"}},\"encrypted_key\":\"mYei_90yBUye5t54StnQWyZmpzgoaQ9N\"}],\"iv\":\"r7Tgd038slI_oE7v\",\"ciphertext\":\"0CPqmVTEOU3r\",\"tag\":\"WHzSP6R0tUK-w4UD1twngQ\"}";
+      byte[] jwe1Bytes = jwe1.getBytes();
+      String jwk1 = "{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"d\":\"qjx4ib5Ea94YnyypBBPnvtGUuoRgGtF_0BtPuOSMJPc\"}";
+      byte[] jwk1Bytes = jwk1.getBytes();
+
+      System.out.println("\nDecrypt JSON:");
+      System.out.println(Jose.decrypt_json(jwe1Bytes, jwk1Bytes));
   }
 }

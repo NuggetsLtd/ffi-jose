@@ -10,7 +10,8 @@ use crate::jose::{
   rust_generate_key_pair,
   rust_encrypt,
   rust_decrypt,
-  rust_general_encrypt_json
+  rust_general_encrypt_json,
+  rust_decrypt_json
 };
 use josekit::jwk::Jwk;
 use std::panic;
@@ -317,6 +318,49 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_general_1encrypt_1json(
   let output = env
         .new_string(encrypted)
         .expect("Unable to create string from encrypted data");
+
+  output.into_inner()
+}
+
+#[no_mangle]
+pub extern "system" fn Java_life_nuggets_rs_Jose_decrypt_1json(
+  env: JNIEnv,
+  _class: JClass,
+  jwe: jbyteArray,
+  jwk: jbyteArray,
+) -> jstring {
+  let jwe_bytes;
+  match env.convert_byte_array(jwe) {
+      Err(_) => panic!("Failed converting `jwe` to byte array"),
+      Ok(j) => jwe_bytes = j,
+  };
+
+  let jwk_bytes;
+  match env.convert_byte_array(jwk) {
+      Err(_) => panic!("Failed converting `jwk` to byte array"),
+      Ok(k) => jwk_bytes = k,
+  };
+
+  let jwe_string = String::from_utf8(jwe_bytes.to_vec()).unwrap();
+
+  // convert jwk byte array to Jwk
+  let jwk_string = String::from_utf8(jwk_bytes.to_vec()).unwrap();
+  let jwk: Jwk = serde_json::from_str(&jwk_string).unwrap();
+
+  // decrypt JWE to JSON
+  let (decrypted, _header) = match rust_decrypt_json(
+    &jwe_string,
+    &jwk,
+  ) {
+    Ok(decrypted) => decrypted,
+    _ => panic!("Failed to decrypt data")
+  };
+
+  let decrypted_string = String::from_utf8(decrypted).unwrap();
+
+  let output = env
+        .new_string(decrypted_string)
+        .expect("Unable to create string from decrypted data");
 
   output.into_inner()
 }
