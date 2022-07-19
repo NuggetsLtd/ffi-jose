@@ -64,9 +64,9 @@ fn node_generate_key_pair(mut cx: FunctionContext) -> JsResult<JsString> {
 
 fn node_encrypt(mut cx: FunctionContext) -> JsResult<JsObject> {
   let enc = cx.argument::<JsNumber>(0)?;
-  let message = arg_to_slice!(cx, 1);
-  let key = arg_to_slice!(cx, 2);
-  let iv = arg_to_slice!(cx, 3);
+  let key = arg_to_slice!(cx, 1);
+  let iv = arg_to_slice!(cx, 2);
+  let message = arg_to_slice!(cx, 3);
   let aad = arg_to_slice!(cx, 4);
 
   // determine content encryption type
