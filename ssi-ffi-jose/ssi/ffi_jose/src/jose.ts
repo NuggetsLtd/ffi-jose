@@ -21,14 +21,6 @@ const path = require("path");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const jose = require(path.resolve(path.join(__dirname, "../native/index.node")));
 
-const _castToUint8Array = (value: Iterable<number>) => {
-  if(value instanceof Uint8Array) {
-    return Uint8Array.from(value)
-  }
-  
-  throw new Error('Unable to convert value to Uint8Array')
-}
-
 export const generateJWK = async (request: JoseGenerateJwkRequest): Promise<JWK> => {
   const { namedCurve } = request
   let jwkString
