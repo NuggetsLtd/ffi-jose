@@ -30,11 +30,11 @@ const _castToUint8Array = (value: Iterable<number>) => {
 }
 
 export const generateJWK = async (request: JoseGenerateJwkRequest): Promise<JWK> => {
-  const { namedCurve } = request;
+  const { namedCurve } = request
   let jwkString
 
   try {
-    jwkString = jose.generate_key_pair_jwk({ namedCurve });
+    jwkString = await jose.generate_key_pair_jwk({ namedCurve })
   } catch (error: any) {
     if(error.message === 'internal error in Neon module: Unknown curve') {
       throw new TypeError('Unknown curve')
@@ -44,6 +44,7 @@ export const generateJWK = async (request: JoseGenerateJwkRequest): Promise<JWK>
   }
   
   return JSON.parse(jwkString)
+}
 
 export const generateKeyPair = async (type: string, options?: { namedCurve: string }): Promise<{ publicKey: PublicKeyObject, privateKey: PrivateKeyObject }> => {
   let crv
