@@ -184,3 +184,43 @@ export const decrypt = async (
 
   return Uint8Array.from(Buffer.from(decrypted, 'base64'))
 }
+
+const _isJsonString = (str: string) => {
+  try {
+      JSON.parse(str);
+  } catch (e) {
+      return false;
+  }
+  return true;
+}
+
+const _jsonConvertToString = (data: any) => {
+  // ensure data is serialised as JSON string
+  const dataSerialised = typeof data === 'string' && _isJsonString(data)
+    ? data
+    : JSON.stringify(data)
+
+  return dataSerialised
+}
+
+export const generalEncryptJson = async (
+  alg: KeyEncryption,
+  enc: ContentEncryption,
+  payload: any,
+  recipients: JWK[],
+): Promise<any> => {
+  recipients.forEach(recipient => {
+    if(!recipient?.kid) {
+      throw new Error("Recipient JWKs must contain key identifier (kid)");
+    }
+  });
+
+  let jwe_string = await jose.general_encrypt_json(
+    alg,
+    enc,
+    _jsonConvertToString(payload),
+    _jsonConvertToString(recipients),
+  );
+
+  return JSON.parse(jwe_string)
+}
