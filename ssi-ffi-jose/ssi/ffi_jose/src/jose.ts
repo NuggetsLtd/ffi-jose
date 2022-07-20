@@ -104,29 +104,28 @@ export const encrypt = async (
   iv: Uint8Array,
   aad: Uint8Array
 ): Promise<JoseEncryptResponse> => {
-  let encryptObj
-
+  let encryptedString
   const enc_mapped = {
-    'A128CBC-HS256': ContentEncryption.A128cbcHs256,
-    'A192CBC-HS384': ContentEncryption.A192cbcHs384,
-    'A256CBC-HS512': ContentEncryption.A256cbcHs512,
     'A128GCM': ContentEncryption.A128gcm,
     'A192GCM': ContentEncryption.A192gcm,
     'A256GCM': ContentEncryption.A256gcm,
+    'A128CBC-HS256': ContentEncryption.A128cbcHs256,
+    'A192CBC-HS384': ContentEncryption.A192cbcHs384,
+    'A256CBC-HS512': ContentEncryption.A256cbcHs512,
   }[enc]
 
-  if(enc_mapped === undefined){
-    throw new RangeError(`Unsupported enc type: "${enc}"`)
+  if(enc_mapped === undefined) {
+    throw new TypeError(`Invalid or unsupported "enc" value: "${enc}"`)
   }
 
   try {
-    encryptObj = jose.encrypt(
+    encryptedString = await jose.encrypt(
       enc_mapped,
-      _castToUint8Array(plaintext).buffer,
-      _castToUint8Array(cek).buffer,
-      _castToUint8Array(iv).buffer,
-      _castToUint8Array(aad).buffer
-    );
+      cek.buffer,
+      iv.buffer,
+      plaintext.buffer,
+      aad.buffer,
+    )
   } catch (error: any) {
     if(error.message === 'internal error in Neon module: Unknown curve') {
       throw new TypeError('Unknown curve')
@@ -134,12 +133,14 @@ export const encrypt = async (
 
     throw error
   }
+  
+  const { ciphertext, tag } = encryptedString
 
   return {
-    ciphertext: Uint8Array.from(Buffer.from(encryptObj.ciphertext, 'base64')),
-    tag: encryptObj.tag ? Uint8Array.from(Buffer.from(encryptObj.tag, 'base64')) : undefined
+    ciphertext: Uint8Array.from(Buffer.from(ciphertext, 'base64')),
+    tag: tag && Uint8Array.from(Buffer.from(tag, 'base64'))
   }
-};
+}
 
 export const decrypt = async (
   enc: string,
@@ -152,26 +153,26 @@ export const decrypt = async (
   let decrypted
 
   const enc_mapped = {
-    'A128CBC-HS256': ContentEncryption.A128cbcHs256,
-    'A192CBC-HS384': ContentEncryption.A192cbcHs384,
-    'A256CBC-HS512': ContentEncryption.A256cbcHs512,
     'A128GCM': ContentEncryption.A128gcm,
     'A192GCM': ContentEncryption.A192gcm,
     'A256GCM': ContentEncryption.A256gcm,
+    'A128CBC-HS256': ContentEncryption.A128cbcHs256,
+    'A192CBC-HS384': ContentEncryption.A192cbcHs384,
+    'A256CBC-HS512': ContentEncryption.A256cbcHs512,
   }[enc]
 
   if(enc_mapped === undefined){
-    throw new RangeError(`Unsupported enc type: "${enc}"`)
+    throw new TypeError(`Invalid or unsupported "enc" value: "${enc}"`)
   }
 
   try {
     decrypted = jose.decrypt(
       enc_mapped,
-      _castToUint8Array(cek).buffer,
-      _castToUint8Array(ciphertext).buffer,
-      _castToUint8Array(iv).buffer,
-      _castToUint8Array(tag).buffer,
-      _castToUint8Array(aad).buffer,
+      cek.buffer,
+      ciphertext.buffer,
+      iv.buffer,
+      tag.buffer,
+      aad.buffer,
     );
   } catch (error: any) {
     if(error.message === 'internal error in Neon module: Unknown curve') {
