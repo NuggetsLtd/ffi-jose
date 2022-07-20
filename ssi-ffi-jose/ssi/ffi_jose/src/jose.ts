@@ -1,9 +1,17 @@
-import {
+import type {
   JoseGenerateJwkRequest,
-  JWK,
+  JoseGenerateKeyPairResponse,
   JoseEncryptResponse,
+  JWK,
+} from "./types"
+import {
+  NamedCurve,
   ContentEncryption,
-} from "./types";
+} from "./types"
+import {
+  PrivateKeyObject,
+  PublicKeyObject
+} from "./KeyObject";
 
 /**
  * @ignore
@@ -36,6 +44,56 @@ export const generateJWK = async (request: JoseGenerateJwkRequest): Promise<JWK>
   }
   
   return JSON.parse(jwkString)
+
+export const generateKeyPair = async (type: string, options?: { namedCurve: string }): Promise<{ publicKey: PublicKeyObject, privateKey: PrivateKeyObject }> => {
+  let crv
+  let keyPairString
+
+  switch (type) {
+    case 'ec':
+      crv = options?.namedCurve || ""
+      break;
+    case 'ed25519':
+    case 'ed448':
+    case 'x25519':
+    case 'x448':
+      crv = type
+      break;
+    default:
+      throw new TypeError('Invalid or unsupported "type" Parameter value')
+  }
+
+  const crv_mapped = {
+    'P-256': NamedCurve.P256,
+    'P-384': NamedCurve.P384,
+    'P-521': NamedCurve.P521,
+    'secp256k1': NamedCurve.Secp256k1,
+    'ed25519': NamedCurve.Ed25519,
+    'ed448': NamedCurve.Ed448,
+    'x25519': NamedCurve.X25519,
+    'x448': NamedCurve.X448,
+  }[crv]
+
+  if(crv_mapped === undefined) {
+    throw new TypeError('Invalid or unsupported "crv" value')
+  }
+
+  try {
+    keyPairString = await jose.generate_key_pair_jwk({ namedCurve: crv_mapped });
+  } catch (error: any) {
+    if(error.message === 'internal error in Neon module: Unknown curve') {
+      throw new TypeError('Unknown curve')
+    }
+
+    throw error
+  }
+  
+  const keyPair: JoseGenerateKeyPairResponse = JSON.parse(keyPairString)
+
+  return {
+    privateKey: new PrivateKeyObject(keyPair, type, options?.namedCurve),
+    publicKey: new PublicKeyObject(keyPair, type, options?.namedCurve)
+  }
 };
 
 export const encrypt = async (
