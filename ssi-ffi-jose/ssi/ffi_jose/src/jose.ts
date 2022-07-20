@@ -7,6 +7,7 @@ import type {
 import {
   NamedCurve,
   ContentEncryption,
+  KeyEncryption
 } from "./types"
 import {
   PrivateKeyObject,
@@ -186,6 +187,15 @@ const _isJsonString = (str: string) => {
   return true;
 }
 
+const _jsonConvertToBase64 = (data: any) => {
+  // ensure data is serialised as JSON string
+  const dataSerialised = typeof data === 'string' && _isJsonString(data)
+    ? data
+    : JSON.stringify(data)
+
+  return Buffer.from(dataSerialised).toString('base64')
+}
+
 const _jsonConvertToString = (data: any) => {
   // ensure data is serialised as JSON string
   const dataSerialised = typeof data === 'string' && _isJsonString(data)
@@ -215,4 +225,16 @@ export const generalEncryptJson = async (
   );
 
   return JSON.parse(jwe_string)
+}
+
+export const decryptJson = async (
+  jwe: any,
+  jwk: JWK,
+): Promise<any> => {
+  let json_string = await jose.decrypt_json(
+    _jsonConvertToString(jwe),
+    _jsonConvertToString(jwk),
+  );
+
+  return JSON.parse(json_string)
 }
