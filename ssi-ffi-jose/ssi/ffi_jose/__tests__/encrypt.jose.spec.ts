@@ -20,8 +20,8 @@ describe("jose", () => {
           const enc = 'A128GCM'
           const cek = Uint8Array.from(Buffer.from('b8aae648b9c7819e24f2b2c684efcef1', 'hex'))
     
-          const encrypted = await encrypt(enc, cek, iv, plaintext, aad)
-    
+          const encrypted = await encrypt(enc, plaintext, cek, iv, aad)
+
           expect(encrypted).toBeInstanceOf(Object)
           expect(Object.keys(encrypted).sort()).toEqual([ 'ciphertext', "tag" ])
           expect(Buffer.from(encrypted.ciphertext).toString('base64')).toEqual("myTSDh9Ltc1H")
@@ -32,7 +32,7 @@ describe("jose", () => {
           const enc = 'A192GCM'
           const cek = Uint8Array.from(Buffer.from('5d9e61b7536901f89ffe729b2e94917987d6aee671d7c1a7', 'hex'))
     
-          const encrypted = await encrypt(enc, cek, iv, plaintext, aad)
+          const encrypted = await encrypt(enc, plaintext, cek, iv, aad)
     
           expect(encrypted).toBeInstanceOf(Object)
           expect(Object.keys(encrypted).sort()).toEqual([ 'ciphertext', "tag" ])
@@ -44,7 +44,7 @@ describe("jose", () => {
           const enc = 'A256GCM'
           const cek = Uint8Array.from(Buffer.from('4f0579c975d04ae004c9a2fd6620ad10bf763159a0e6894c6c0818acc5c24854', 'hex'))
     
-          const encrypted = await encrypt(enc, cek, iv, plaintext, aad)
+          const encrypted = await encrypt(enc, plaintext, cek, iv, aad)
     
           expect(encrypted).toBeInstanceOf(Object)
           expect(Object.keys(encrypted).sort()).toEqual([ 'ciphertext', "tag" ])
@@ -61,7 +61,7 @@ describe("jose", () => {
           const enc = 'A128CBC-HS256'
           const cek = Uint8Array.from(Buffer.from('4f0579c975d04ae004c9a2fd6620ad10bf763159a0e6894c6c0818acc5c24854', 'hex'))
     
-          const encrypted = await encrypt(enc, cek, iv, plaintext, aad)
+          const encrypted = await encrypt(enc, plaintext, cek, iv, aad)
     
           expect(encrypted).toBeInstanceOf(Object)
           expect(Object.keys(encrypted).sort()).toEqual([ 'ciphertext', "tag" ])
@@ -73,7 +73,7 @@ describe("jose", () => {
           const enc = 'A192CBC-HS384'
           const cek = Uint8Array.from(Buffer.from('1d859097f5c1c883bdb5947466a85c2182373e94087b6f9895bc082e476da8d29817b0966db6e8003706d4d4daaf5a86', 'hex'))
     
-          const encrypted = await encrypt(enc, cek, iv, plaintext, aad)
+          const encrypted = await encrypt(enc, plaintext, cek, iv, aad)
     
           expect(encrypted).toBeInstanceOf(Object)
           expect(Object.keys(encrypted).sort()).toEqual([ 'ciphertext', "tag" ])
@@ -85,7 +85,7 @@ describe("jose", () => {
           const enc = 'A256CBC-HS512'
           const cek = Uint8Array.from(Buffer.from('cbd2a7b6f333ace24f3b7dad6579b40f97546ea59b3cf2325100ab78e46126d0521e515aa33e2af140308988d06ea15f96a0d3c794b311a755dca5ace7fa1e94', 'hex'))
     
-          const encrypted = await encrypt(enc, cek, iv, plaintext, aad)
+          const encrypted = await encrypt(enc, plaintext, cek, iv, aad)
     
           expect(encrypted).toBeInstanceOf(Object)
           expect(Object.keys(encrypted).sort()).toEqual([ 'ciphertext', "tag" ])
