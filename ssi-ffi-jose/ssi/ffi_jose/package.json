@@ -1,6 +1,6 @@
 {
   "name": "@nuggetslife/ffi-jose",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "description": "Foreign Function Interface (FFI) for Rust JOSE package",
   "main": "lib/index.js",
   "directories": {
@@ -22,7 +22,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "install": "./scripts/install-dependencies.sh",
+    "install:rust": "./scripts/install-dependencies.sh",
     "build": "./scripts/build.sh",
     "build:neon": "yarn build NODE",
     "build:ios": "yarn build IOS",
