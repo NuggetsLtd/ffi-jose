@@ -11,6 +11,9 @@ parameters:
   aws_ecr_host:
     type: string
     default: "454245708275.dkr.ecr.eu-west-1.amazonaws.com"
+  project_name:
+    type: string
+    default: "Node FFI Jose"
 
 #+-----------------------------------------------------------------------------+
 #|                                 ORBS                                        |
@@ -251,7 +254,7 @@ workflows:
             branches:
               ignore:
                 - master
-          name: "Node BBS+ Signatures: << matrix.executor >>"
+          name: "<< pipeline.parameters.project_name >>: << matrix.executor >>"
           matrix:
             parameters:
               executor: [node-14-linux-libc, node-14-linux-musl, node-16-linux-libc, node-16-linux-musl]
@@ -261,7 +264,7 @@ workflows:
             branches:
               ignore:
                 - master
-          name: "Node BBS+ Signatures: node-<< matrix.node-version >>-macos"
+          name: "<< pipeline.parameters.project_name >>: node-<< matrix.node-version >>-macos"
           matrix:
             parameters:
               node-version: ["14", "16"]
@@ -275,28 +278,28 @@ workflows:
             branches:
               only:
                 - master
-          name: "Publish: NPM Package"
+          name: "<< pipeline.parameters.project_name >> Publish: NPM Package"
       - publish-linux:
           context: nuggets
           requires:
-            - "Publish: NPM Package"
+            - "<< pipeline.parameters.project_name >> Publish: NPM Package"
           filters:
             branches:
               only:
                 - master
-          name: "Publish: << matrix.executor >>"
+          name: "<< pipeline.parameters.project_name >> Publish: << matrix.executor >>"
           matrix:
             parameters:
               executor: [node-14-linux-libc, node-14-linux-musl, node-16-linux-libc, node-16-linux-musl]
       - publish-mac:
           context: nuggets
           requires:
-            - "Publish: NPM Package"
+            - "<< pipeline.parameters.project_name >> Publish: NPM Package"
           filters:
             branches:
               only:
                 - master
-          name: "Publish: node-<< matrix.node-version >>-macos-undefined"
+          name: "<< pipeline.parameters.project_name >> Publish: node-<< matrix.node-version >>-macos-undefined"
           matrix:
             parameters:
               node-version: ["14", "16"]
