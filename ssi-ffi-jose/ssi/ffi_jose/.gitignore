@@ -1,0 +1,19 @@
+native/target
+native/index.node
+native/artifacts.json
+**/*~
+**/node_modules
+**/.DS_Store
+out
+
+# JS
+lib
+
+# C
+wrappers/c/libjose.h
+wrappers/c/test.out
+
+# java
+wrappers/java/src/main/java/life/nuggets/rs/jose.h
+wrappers/java/src/main/java/life/nuggets/rs/*.class
+wrappers/java/src/main/jniLibs

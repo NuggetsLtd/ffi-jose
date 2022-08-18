@@ -1,0 +1,61 @@
+{
+  "name": "@nuggetslife/ffi-jose",
+  "version": "1.1.1",
+  "description": "Foreign Function Interface (FFI) for Rust JOSE package",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "native": "native"
+  },
+  "files": [
+    "lib",
+    "native/index.node",
+    "src"
+  ],
+  "typings": "lib/index.d.ts",
+  "author": {
+    "name": "Nuggets Ltd",
+    "email": "support@nuggets.life",
+    "url": "http://nuggets.life"
+  },
+  "contributors": [
+    "Andrew Lord (andrew.lord@nuggets.life)"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "install:rust": "./scripts/install-dependencies.sh",
+    "build": "./scripts/build.sh",
+    "build:neon": "yarn build NODE",
+    "build:ios": "yarn build IOS",
+    "build:android": "yarn build ANDROID",
+    "build:ts": "tsc --pretty",
+    "docs:rust": "cd native && cargo doc --no-deps --open",
+    "test:c": "./scripts/c_test.sh",
+    "test:java": "./scripts/java_test.sh",
+    "test:neon": "./scripts/neon_test.sh",
+    "test:ts": "jest --config jest.config.typescript.js",
+    "lint:node": "eslint . --ignore-path .gitignore",
+    "clean": "neon clean"
+  },
+  "dependencies": {
+    "neon-cli": "^0.10.1"
+  },
+  "devDependencies": {
+    "@appliedblockchain/eslint-config": "^3.0.0",
+    "@stablelib/base64": "^1.0.1",
+    "@stablelib/random": "^1.0.1",
+    "@types/jest": "^27.5.1",
+    "eslint": "^7.32.0",
+    "jest": "^28.1.1",
+    "ts-jest": "28.0.5",
+    "ts-node": "8.4.1",
+    "typescript": "4.7.4"
+  },
+  "eslintConfig": {
+    "extends": "@appliedblockchain/eslint-config",
+    "globals": {
+      "def": true,
+      "xcontext": true
+    }
+  }
+}
