@@ -29,7 +29,7 @@ yarn add @nuggetslife/ffi-jose
 
 ## Usage
 
-See the [sample](./sample) directory for a runnable demo.
+<!-- See the [sample](./sample) directory for a runnable demo. -->
 
 **Key generation:**
 
