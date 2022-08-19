@@ -43,8 +43,6 @@
     "test:neon": "./scripts/neon_test.sh",
     "test:ts": "jest --config jest.config.typescript.js",
     "test": "yarn test:neon && yarn test:ts",
-    "benchmark": "ts-node ./bench/index.ts",
-    "benchmark:stress": "ts-node ./bench/stress.ts",
     "build": "yarn build:neon && yarn build:ts",
     "build:env": "./scripts/build.sh",
     "build:neon": "yarn build:env NODE",
