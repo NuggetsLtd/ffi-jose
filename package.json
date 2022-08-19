@@ -1,6 +1,6 @@
 {
   "name": "@nuggetslife/ffi-jose",
-  "version": "1.1.6",
+  "version": "1.2.0",
   "description": "Foreign Function Interface (FFI) for Rust JOSE package",
   "homepage": "https://github.com/NuggetsLtd/ffi-jose",
   "main": "lib/index.js",

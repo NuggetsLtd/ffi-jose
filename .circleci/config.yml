@@ -247,7 +247,7 @@ workflows:
           filters:
             branches:
               ignore:
-                - main
+                - master
           name: "<< pipeline.parameters.project_name >>: << matrix.executor >>"
           matrix:
             parameters:
@@ -257,7 +257,7 @@ workflows:
           filters:
             branches:
               ignore:
-                - main
+                - master
           name: "<< pipeline.parameters.project_name >>: node-<< matrix.node-version >>-macos"
           matrix:
             parameters:
@@ -271,7 +271,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - master
           name: "<< pipeline.parameters.project_name >> Publish: NPM Package"
       - publish-linux:
           context: nuggets
@@ -280,7 +280,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - master
           name: "<< pipeline.parameters.project_name >> Publish: << matrix.executor >>"
           matrix:
             parameters:
@@ -292,7 +292,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - master
           name: "<< pipeline.parameters.project_name >> Publish: node-<< matrix.node-version >>-macos-undefined"
           matrix:
             parameters:
