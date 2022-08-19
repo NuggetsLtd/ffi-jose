@@ -1,7 +1,7 @@
 "use strict";
 
 const fs = require("fs");
-let packageJson = require("../package.json");
+const packageJson = require("../package.json");
 
 // Add the post install script that will build the rust using neon
 packageJson.scripts.install = "yarn build:neon";
