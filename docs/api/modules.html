@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html class="default">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="IE=edge" />
+    <title>@nuggetslife/ffi-jose</title>
+    <meta name="description" content="Documentation for @nuggetslife/ffi-jose" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="assets/style.css" />
+    <link rel="stylesheet" href="assets/highlight.css" />
+    <script async src="assets/search.js" id="search-script"></script>
+  </head>
+  <body>
+    <script>
+      document.body.classList.add(localStorage.getItem("tsd-theme") || "os");
+    </script>
+    <header>
+      <div class="tsd-page-toolbar">
+        <div class="container">
+          <div class="table-wrap">
+            <div class="table-cell" id="tsd-search" data-base=".">
+              <div class="field">
+                <label for="tsd-search-field" class="tsd-widget search no-caption">Search</label
+                ><input type="text" id="tsd-search-field" />
+              </div>
+              <ul class="results">
+                <li class="state loading">Preparing search index...</li>
+                <li class="state failure">The search index is not available</li>
+              </ul>
+              <a href="index.html" class="title">@nuggetslife/ffi-jose</a>
+            </div>
+            <div class="table-cell" id="tsd-widgets">
+              <div id="tsd-filter">
+                <a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+                <div class="tsd-filter-group">
+                  <div class="tsd-select" id="tsd-filter-visibility">
+                    <span class="tsd-select-label">All</span>
+                    <ul class="tsd-select-list">
+                      <li data-value="public">Public</li>
+                      <li data-value="protected">Public/Protected</li>
+                      <li data-value="private" class="selected">All</li>
+                    </ul>
+                  </div>
+                  <input type="checkbox" id="tsd-filter-inherited" checked /><label
+                    class="tsd-widget"
+                    for="tsd-filter-inherited"
+                    >Inherited</label
+                  ><input type="checkbox" id="tsd-filter-externals" checked /><label
+                    class="tsd-widget"
+                    for="tsd-filter-externals"
+                    >Externals</label
+                  >
+                </div>
+              </div>
+              <a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tsd-page-title">
+        <div class="container"><h1>@nuggetslife/ffi-jose</h1></div>
+      </div>
+    </header>
+    <div class="container container-main">
+      <div class="row">
+        <div class="col-8 col-content">
+          <section class="tsd-panel-group tsd-index-group">
+            <h2>Index</h2>
+            <section class="tsd-panel tsd-index-panel">
+              <div class="tsd-index-content">
+                <section class="tsd-index-section">
+                  <h3>Enumerations</h3>
+                  <ul class="tsd-index-list">
+                    <li class="tsd-kind-enum">
+                      <a href="enums/ContentEncryption.html" class="tsd-kind-icon">Content<wbr />Encryption</a>
+                    </li>
+                    <li class="tsd-kind-enum">
+                      <a href="enums/KeyEncryption.html" class="tsd-kind-icon">Key<wbr />Encryption</a>
+                    </li>
+                    <li class="tsd-kind-enum">
+                      <a href="enums/NamedCurve.html" class="tsd-kind-icon">Named<wbr />Curve</a>
+                    </li>
+                  </ul>
+                </section>
+                <section class="tsd-index-section">
+                  <h3>Classes</h3>
+                  <ul class="tsd-index-list">
+                    <li class="tsd-kind-class">
+                      <a href="classes/KeyObject.html" class="tsd-kind-icon">Key<wbr />Object</a>
+                    </li>
+                    <li class="tsd-kind-class">
+                      <a href="classes/PrivateKeyObject.html" class="tsd-kind-icon">Private<wbr />Key<wbr />Object</a>
+                    </li>
+                    <li class="tsd-kind-class">
+                      <a href="classes/PublicKeyObject.html" class="tsd-kind-icon">Public<wbr />Key<wbr />Object</a>
+                    </li>
+                  </ul>
+                </section>
+                <section class="tsd-index-section">
+                  <h3>Interfaces</h3>
+                  <ul class="tsd-index-list">
+                    <li class="tsd-kind-interface"><a href="interfaces/JWK.html" class="tsd-kind-icon">JWK</a></li>
+                    <li class="tsd-kind-interface">
+                      <a href="interfaces/JoseEncryptResponse.html" class="tsd-kind-icon"
+                        >Jose<wbr />Encrypt<wbr />Response</a
+                      >
+                    </li>
+                    <li class="tsd-kind-interface">
+                      <a href="interfaces/JoseGenerateJwkRequest.html" class="tsd-kind-icon"
+                        >Jose<wbr />Generate<wbr />Jwk<wbr />Request</a
+                      >
+                    </li>
+                    <li class="tsd-kind-interface">
+                      <a href="interfaces/JoseGenerateKeyPairResponse.html" class="tsd-kind-icon"
+                        >Jose<wbr />Generate<wbr />Key<wbr />Pair<wbr />Response</a
+                      >
+                    </li>
+                    <li class="tsd-kind-interface">
+                      <a href="interfaces/PrivateKeyExportOptions.html" class="tsd-kind-icon"
+                        >Private<wbr />Key<wbr />Export<wbr />Options</a
+                      >
+                    </li>
+                    <li class="tsd-kind-interface">
+                      <a href="interfaces/PublicKeyExportOptions.html" class="tsd-kind-icon"
+                        >Public<wbr />Key<wbr />Export<wbr />Options</a
+                      >
+                    </li>
+                    <li class="tsd-kind-interface">
+                      <a href="interfaces/SymmetricKeyExportOptions.html" class="tsd-kind-icon"
+                        >Symmetric<wbr />Key<wbr />Export<wbr />Options</a
+                      >
+                    </li>
+                  </ul>
+                </section>
+                <section class="tsd-index-section">
+                  <h3>Functions</h3>
+                  <ul class="tsd-index-list">
+                    <li class="tsd-kind-function"><a href="modules.html#decrypt" class="tsd-kind-icon">decrypt</a></li>
+                    <li class="tsd-kind-function">
+                      <a href="modules.html#decryptJson" class="tsd-kind-icon">decrypt<wbr />Json</a>
+                    </li>
+                    <li class="tsd-kind-function"><a href="modules.html#encrypt" class="tsd-kind-icon">encrypt</a></li>
+                    <li class="tsd-kind-function">
+                      <a href="modules.html#generalEncryptJson" class="tsd-kind-icon"
+                        >general<wbr />Encrypt<wbr />Json</a
+                      >
+                    </li>
+                    <li class="tsd-kind-function">
+                      <a href="modules.html#generateJWK" class="tsd-kind-icon">generateJWK</a>
+                    </li>
+                    <li class="tsd-kind-function">
+                      <a href="modules.html#generateKeyPair" class="tsd-kind-icon">generate<wbr />Key<wbr />Pair</a>
+                    </li>
+                  </ul>
+                </section>
+              </div>
+            </section>
+          </section>
+          <section class="tsd-panel-group tsd-member-group">
+            <h2>Functions</h2>
+            <section class="tsd-panel tsd-member tsd-kind-function">
+              <a id="decrypt" class="tsd-anchor"></a>
+              <h3 class="tsd-anchor-link">
+                decrypt<a href="#decrypt" aria-label="Permalink" class="tsd-anchor-icon"
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="icon icon-tabler icon-tabler-link"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path>
+                    <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></svg
+                ></a>
+              </h3>
+              <ul class="tsd-signatures tsd-kind-function">
+                <li class="tsd-signature tsd-kind-icon">
+                  decrypt<span class="tsd-signature-symbol">(</span>enc<span class="tsd-signature-symbol">: </span
+                  ><span class="tsd-signature-type">string</span>, cek<span class="tsd-signature-symbol">: </span
+                  ><span class="tsd-signature-type">Uint8Array</span>, ciphertext<span class="tsd-signature-symbol"
+                    >: </span
+                  ><span class="tsd-signature-type">Uint8Array</span>, iv<span class="tsd-signature-symbol">: </span
+                  ><span class="tsd-signature-type">Uint8Array</span>, tag<span class="tsd-signature-symbol">: </span
+                  ><span class="tsd-signature-type">Uint8Array</span>, aad<span class="tsd-signature-symbol">: </span
+                  ><span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">)</span
+                  ><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span
+                  ><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Uint8Array</span
+                  ><span class="tsd-signature-symbol">&gt;</span>
+                </li>
+              </ul>
+              <ul class="tsd-descriptions">
+                <li class="tsd-description">
+                  <aside class="tsd-sources">
+                    <ul>
+                      <li>
+                        Defined in
+                        <a href="https://github.com/NuggetsLtd/ffi-jose/blob/0f52fa2/src/jose.ts#L138">jose.ts:138</a>
+                      </li>
+                    </ul>
+                  </aside>
+                  <h4 class="tsd-parameters-title">Parameters</h4>
+                  <ul class="tsd-parameters">
+                    <li>
+                      <h5>enc: <span class="tsd-signature-type">string</span></h5>
+                    </li>
+                    <li>
+                      <h5>cek: <span class="tsd-signature-type">Uint8Array</span></h5>
+                    </li>
+                    <li>
+                      <h5>ciphertext: <span class="tsd-signature-type">Uint8Array</span></h5>
+                    </li>
+                    <li>
+                      <h5>iv: <span class="tsd-signature-type">Uint8Array</span></h5>
+                    </li>
+                    <li>
+                      <h5>tag: <span class="tsd-signature-type">Uint8Array</span></h5>
+                    </li>
+                    <li>
+                      <h5>aad: <span class="tsd-signature-type">Uint8Array</span></h5>
+                    </li>
+                  </ul>
+                  <h4 class="tsd-returns-title">
+                    Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span
+                    ><span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">&gt;</span>
+                  </h4>
+                </li>
+              </ul>
+            </section>
+            <section class="tsd-panel tsd-member tsd-kind-function">
+              <a id="decryptJson" class="tsd-anchor"></a>
+              <h3 class="tsd-anchor-link">
+                decrypt<wbr />Json<a href="#decryptJson" aria-label="Permalink" class="tsd-anchor-icon"
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="icon icon-tabler icon-tabler-link"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path>
+                    <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></svg
+                ></a>
+              </h3>
+              <ul class="tsd-signatures tsd-kind-function">
+                <li class="tsd-signature tsd-kind-icon">
+                  decrypt<wbr />Json<span class="tsd-signature-symbol">(</span>jwe<span class="tsd-signature-symbol"
+                    >: </span
+                  ><span class="tsd-signature-type">any</span>, jwk<span class="tsd-signature-symbol">: </span
+                  ><a href="interfaces/JWK.html" class="tsd-signature-type" data-tsd-kind="Interface">JWK</a
+                  ><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span
+                  ><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span
+                  ><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>
+                </li>
+              </ul>
+              <ul class="tsd-descriptions">
+                <li class="tsd-description">
+                  <aside class="tsd-sources">
+                    <ul>
+                      <li>
+                        Defined in
+                        <a href="https://github.com/NuggetsLtd/ffi-jose/blob/0f52fa2/src/jose.ts#L230">jose.ts:230</a>
+                      </li>
+                    </ul>
+                  </aside>
+                  <h4 class="tsd-parameters-title">Parameters</h4>
+                  <ul class="tsd-parameters">
+                    <li>
+                      <h5>jwe: <span class="tsd-signature-type">any</span></h5>
+                    </li>
+                    <li>
+                      <h5>
+                        jwk: <a href="interfaces/JWK.html" class="tsd-signature-type" data-tsd-kind="Interface">JWK</a>
+                      </h5>
+                    </li>
+                  </ul>
+                  <h4 class="tsd-returns-title">
+                    Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span
+                    ><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>
+                  </h4>
+                </li>
+              </ul>
+            </section>
+            <section class="tsd-panel tsd-member tsd-kind-function">
+              <a id="encrypt" class="tsd-anchor"></a>
+              <h3 class="tsd-anchor-link">
+                encrypt<a href="#encrypt" aria-label="Permalink" class="tsd-anchor-icon"
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="icon icon-tabler icon-tabler-link"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path>
+                    <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></svg
+                ></a>
+              </h3>
+              <ul class="tsd-signatures tsd-kind-function">
+                <li class="tsd-signature tsd-kind-icon">
+                  encrypt<span class="tsd-signature-symbol">(</span>enc<span class="tsd-signature-symbol">: </span
+                  ><span class="tsd-signature-type">string</span>, plaintext<span class="tsd-signature-symbol">: </span
+                  ><span class="tsd-signature-type">Uint8Array</span>, cek<span class="tsd-signature-symbol">: </span
+                  ><span class="tsd-signature-type">Uint8Array</span>, iv<span class="tsd-signature-symbol">: </span
+                  ><span class="tsd-signature-type">Uint8Array</span>, aad<span class="tsd-signature-symbol">: </span
+                  ><span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">)</span
+                  ><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span
+                  ><span class="tsd-signature-symbol">&lt;</span
+                  ><a href="interfaces/JoseEncryptResponse.html" class="tsd-signature-type" data-tsd-kind="Interface"
+                    >JoseEncryptResponse</a
+                  ><span class="tsd-signature-symbol">&gt;</span>
+                </li>
+              </ul>
+              <ul class="tsd-descriptions">
+                <li class="tsd-description">
+                  <aside class="tsd-sources">
+                    <ul>
+                      <li>
+                        Defined in
+                        <a href="https://github.com/NuggetsLtd/ffi-jose/blob/0f52fa2/src/jose.ts#L93">jose.ts:93</a>
+                      </li>
+                    </ul>
+                  </aside>
+                  <h4 class="tsd-parameters-title">Parameters</h4>
+                  <ul class="tsd-parameters">
+                    <li>
+                      <h5>enc: <span class="tsd-signature-type">string</span></h5>
+                    </li>
+                    <li>
+                      <h5>plaintext: <span class="tsd-signature-type">Uint8Array</span></h5>
+                    </li>
+                    <li>
+                      <h5>cek: <span class="tsd-signature-type">Uint8Array</span></h5>
+                    </li>
+                    <li>
+                      <h5>iv: <span class="tsd-signature-type">Uint8Array</span></h5>
+                    </li>
+                    <li>
+                      <h5>aad: <span class="tsd-signature-type">Uint8Array</span></h5>
+                    </li>
+                  </ul>
+                  <h4 class="tsd-returns-title">
+                    Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span
+                    ><a href="interfaces/JoseEncryptResponse.html" class="tsd-signature-type" data-tsd-kind="Interface"
+                      >JoseEncryptResponse</a
+                    ><span class="tsd-signature-symbol">&gt;</span>
+                  </h4>
+                </li>
+              </ul>
+            </section>
+            <section class="tsd-panel tsd-member tsd-kind-function">
+              <a id="generalEncryptJson" class="tsd-anchor"></a>
+              <h3 class="tsd-anchor-link">
+                general<wbr />Encrypt<wbr />Json<a
+                  href="#generalEncryptJson"
+                  aria-label="Permalink"
+                  class="tsd-anchor-icon"
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="icon icon-tabler icon-tabler-link"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path>
+                    <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></svg
+                ></a>
+              </h3>
+              <ul class="tsd-signatures tsd-kind-function">
+                <li class="tsd-signature tsd-kind-icon">
+                  general<wbr />Encrypt<wbr />Json<span class="tsd-signature-symbol">(</span>alg<span
+                    class="tsd-signature-symbol"
+                    >: </span
+                  ><a href="enums/KeyEncryption.html" class="tsd-signature-type" data-tsd-kind="Enumeration"
+                    >KeyEncryption</a
+                  >, enc<span class="tsd-signature-symbol">: </span
+                  ><a href="enums/ContentEncryption.html" class="tsd-signature-type" data-tsd-kind="Enumeration"
+                    >ContentEncryption</a
+                  >, payload<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>,
+                  recipients<span class="tsd-signature-symbol">: </span
+                  ><a href="interfaces/JWK.html" class="tsd-signature-type" data-tsd-kind="Interface">JWK</a
+                  ><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span
+                  ><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span
+                  ><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span
+                  ><span class="tsd-signature-symbol">&gt;</span>
+                </li>
+              </ul>
+              <ul class="tsd-descriptions">
+                <li class="tsd-description">
+                  <aside class="tsd-sources">
+                    <ul>
+                      <li>
+                        Defined in
+                        <a href="https://github.com/NuggetsLtd/ffi-jose/blob/0f52fa2/src/jose.ts#L208">jose.ts:208</a>
+                      </li>
+                    </ul>
+                  </aside>
+                  <h4 class="tsd-parameters-title">Parameters</h4>
+                  <ul class="tsd-parameters">
+                    <li>
+                      <h5>
+                        alg:
+                        <a href="enums/KeyEncryption.html" class="tsd-signature-type" data-tsd-kind="Enumeration"
+                          >KeyEncryption</a
+                        >
+                      </h5>
+                    </li>
+                    <li>
+                      <h5>
+                        enc:
+                        <a href="enums/ContentEncryption.html" class="tsd-signature-type" data-tsd-kind="Enumeration"
+                          >ContentEncryption</a
+                        >
+                      </h5>
+                    </li>
+                    <li>
+                      <h5>payload: <span class="tsd-signature-type">any</span></h5>
+                    </li>
+                    <li>
+                      <h5>
+                        recipients:
+                        <a href="interfaces/JWK.html" class="tsd-signature-type" data-tsd-kind="Interface">JWK</a
+                        ><span class="tsd-signature-symbol">[]</span>
+                      </h5>
+                    </li>
+                  </ul>
+                  <h4 class="tsd-returns-title">
+                    Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span
+                    ><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>
+                  </h4>
+                </li>
+              </ul>
+            </section>
+            <section class="tsd-panel tsd-member tsd-kind-function">
+              <a id="generateJWK" class="tsd-anchor"></a>
+              <h3 class="tsd-anchor-link">
+                generateJWK<a href="#generateJWK" aria-label="Permalink" class="tsd-anchor-icon"
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="icon icon-tabler icon-tabler-link"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path>
+                    <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></svg
+                ></a>
+              </h3>
+              <ul class="tsd-signatures tsd-kind-function">
+                <li class="tsd-signature tsd-kind-icon">
+                  generateJWK<span class="tsd-signature-symbol">(</span>request<span class="tsd-signature-symbol"
+                    >: </span
+                  ><a href="interfaces/JoseGenerateJwkRequest.html" class="tsd-signature-type" data-tsd-kind="Interface"
+                    >JoseGenerateJwkRequest</a
+                  ><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span
+                  ><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span
+                  ><a href="interfaces/JWK.html" class="tsd-signature-type" data-tsd-kind="Interface">JWK</a
+                  ><span class="tsd-signature-symbol">&gt;</span>
+                </li>
+              </ul>
+              <ul class="tsd-descriptions">
+                <li class="tsd-description">
+                  <aside class="tsd-sources">
+                    <ul>
+                      <li>
+                        Defined in
+                        <a href="https://github.com/NuggetsLtd/ffi-jose/blob/0f52fa2/src/jose.ts#L25">jose.ts:25</a>
+                      </li>
+                    </ul>
+                  </aside>
+                  <h4 class="tsd-parameters-title">Parameters</h4>
+                  <ul class="tsd-parameters">
+                    <li>
+                      <h5>
+                        request:
+                        <a
+                          href="interfaces/JoseGenerateJwkRequest.html"
+                          class="tsd-signature-type"
+                          data-tsd-kind="Interface"
+                          >JoseGenerateJwkRequest</a
+                        >
+                      </h5>
+                    </li>
+                  </ul>
+                  <h4 class="tsd-returns-title">
+                    Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span
+                    ><a href="interfaces/JWK.html" class="tsd-signature-type" data-tsd-kind="Interface">JWK</a
+                    ><span class="tsd-signature-symbol">&gt;</span>
+                  </h4>
+                </li>
+              </ul>
+            </section>
+            <section class="tsd-panel tsd-member tsd-kind-function">
+              <a id="generateKeyPair" class="tsd-anchor"></a>
+              <h3 class="tsd-anchor-link">
+                generate<wbr />Key<wbr />Pair<a href="#generateKeyPair" aria-label="Permalink" class="tsd-anchor-icon"
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="icon icon-tabler icon-tabler-link"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path>
+                    <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></svg
+                ></a>
+              </h3>
+              <ul class="tsd-signatures tsd-kind-function">
+                <li class="tsd-signature tsd-kind-icon">
+                  generate<wbr />Key<wbr />Pair<span class="tsd-signature-symbol">(</span>type<span
+                    class="tsd-signature-symbol"
+                    >: </span
+                  ><span class="tsd-signature-type">string</span>, options<span class="tsd-signature-symbol">?: </span
+                  ><span class="tsd-signature-symbol">{ </span>namedCurve<span class="tsd-signature-symbol">: </span
+                  ><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span
+                  ><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span
+                  ><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span
+                  ><span class="tsd-signature-symbol">{ </span>privateKey<span class="tsd-signature-symbol">: </span
+                  ><a href="classes/PrivateKeyObject.html" class="tsd-signature-type" data-tsd-kind="Class"
+                    >PrivateKeyObject</a
+                  ><span class="tsd-signature-symbol">; </span>publicKey<span class="tsd-signature-symbol">: </span
+                  ><a href="classes/PublicKeyObject.html" class="tsd-signature-type" data-tsd-kind="Class"
+                    >PublicKeyObject</a
+                  ><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span>
+                </li>
+              </ul>
+              <ul class="tsd-descriptions">
+                <li class="tsd-description">
+                  <aside class="tsd-sources">
+                    <ul>
+                      <li>
+                        Defined in
+                        <a href="https://github.com/NuggetsLtd/ffi-jose/blob/0f52fa2/src/jose.ts#L42">jose.ts:42</a>
+                      </li>
+                    </ul>
+                  </aside>
+                  <h4 class="tsd-parameters-title">Parameters</h4>
+                  <ul class="tsd-parameters">
+                    <li>
+                      <h5>type: <span class="tsd-signature-type">string</span></h5>
+                    </li>
+                    <li>
+                      <h5>
+                        <span class="tsd-flag ts-flagOptional">Optional</span> options:
+                        <span class="tsd-signature-symbol">{ </span>namedCurve<span class="tsd-signature-symbol"
+                          >: </span
+                        ><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span>
+                      </h5>
+                      <ul class="tsd-parameters">
+                        <li class="tsd-parameter">
+                          <h5>
+                            named<wbr />Curve<span class="tsd-signature-symbol">: </span
+                            ><span class="tsd-signature-type">string</span>
+                          </h5>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <h4 class="tsd-returns-title">
+                    Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span
+                    ><span class="tsd-signature-symbol">{ </span>privateKey<span class="tsd-signature-symbol">: </span
+                    ><a href="classes/PrivateKeyObject.html" class="tsd-signature-type" data-tsd-kind="Class"
+                      >PrivateKeyObject</a
+                    ><span class="tsd-signature-symbol">; </span>publicKey<span class="tsd-signature-symbol">: </span
+                    ><a href="classes/PublicKeyObject.html" class="tsd-signature-type" data-tsd-kind="Class"
+                      >PublicKeyObject</a
+                    ><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span>
+                  </h4>
+                </li>
+              </ul>
+            </section>
+          </section>
+        </div>
+        <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+          <nav class="tsd-navigation primary">
+            <ul>
+              <li class="current"><a href="modules.html">Exports</a></li>
+            </ul>
+          </nav>
+          <nav class="tsd-navigation secondary menu-sticky">
+            <ul>
+              <li class="tsd-kind-enum">
+                <a href="enums/ContentEncryption.html" class="tsd-kind-icon">Content<wbr />Encryption</a>
+              </li>
+              <li class="tsd-kind-enum">
+                <a href="enums/KeyEncryption.html" class="tsd-kind-icon">Key<wbr />Encryption</a>
+              </li>
+              <li class="tsd-kind-enum">
+                <a href="enums/NamedCurve.html" class="tsd-kind-icon">Named<wbr />Curve</a>
+              </li>
+              <li class="tsd-kind-class">
+                <a href="classes/KeyObject.html" class="tsd-kind-icon">Key<wbr />Object</a>
+              </li>
+              <li class="tsd-kind-class">
+                <a href="classes/PrivateKeyObject.html" class="tsd-kind-icon">Private<wbr />Key<wbr />Object</a>
+              </li>
+              <li class="tsd-kind-class">
+                <a href="classes/PublicKeyObject.html" class="tsd-kind-icon">Public<wbr />Key<wbr />Object</a>
+              </li>
+              <li class="tsd-kind-interface"><a href="interfaces/JWK.html" class="tsd-kind-icon">JWK</a></li>
+              <li class="tsd-kind-interface">
+                <a href="interfaces/JoseEncryptResponse.html" class="tsd-kind-icon"
+                  >Jose<wbr />Encrypt<wbr />Response</a
+                >
+              </li>
+              <li class="tsd-kind-interface">
+                <a href="interfaces/JoseGenerateJwkRequest.html" class="tsd-kind-icon"
+                  >Jose<wbr />Generate<wbr />Jwk<wbr />Request</a
+                >
+              </li>
+              <li class="tsd-kind-interface">
+                <a href="interfaces/JoseGenerateKeyPairResponse.html" class="tsd-kind-icon"
+                  >Jose<wbr />Generate<wbr />Key<wbr />Pair<wbr />Response</a
+                >
+              </li>
+              <li class="tsd-kind-interface">
+                <a href="interfaces/PrivateKeyExportOptions.html" class="tsd-kind-icon"
+                  >Private<wbr />Key<wbr />Export<wbr />Options</a
+                >
+              </li>
+              <li class="tsd-kind-interface">
+                <a href="interfaces/PublicKeyExportOptions.html" class="tsd-kind-icon"
+                  >Public<wbr />Key<wbr />Export<wbr />Options</a
+                >
+              </li>
+              <li class="tsd-kind-interface">
+                <a href="interfaces/SymmetricKeyExportOptions.html" class="tsd-kind-icon"
+                  >Symmetric<wbr />Key<wbr />Export<wbr />Options</a
+                >
+              </li>
+              <li class="tsd-kind-function"><a href="modules.html#decrypt" class="tsd-kind-icon">decrypt</a></li>
+              <li class="tsd-kind-function">
+                <a href="modules.html#decryptJson" class="tsd-kind-icon">decrypt<wbr />Json</a>
+              </li>
+              <li class="tsd-kind-function"><a href="modules.html#encrypt" class="tsd-kind-icon">encrypt</a></li>
+              <li class="tsd-kind-function">
+                <a href="modules.html#generalEncryptJson" class="tsd-kind-icon">general<wbr />Encrypt<wbr />Json</a>
+              </li>
+              <li class="tsd-kind-function">
+                <a href="modules.html#generateJWK" class="tsd-kind-icon">generateJWK</a>
+              </li>
+              <li class="tsd-kind-function">
+                <a href="modules.html#generateKeyPair" class="tsd-kind-icon">generate<wbr />Key<wbr />Pair</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+    <footer class="with-border-bottom">
+      <div class="container">
+        <h2>Legend</h2>
+        <div class="tsd-legend-group">
+          <ul class="tsd-legend">
+            <li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+            <li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+            <li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+          </ul>
+          <ul class="tsd-legend">
+            <li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+          </ul>
+          <ul class="tsd-legend">
+            <li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+              <span class="tsd-kind-icon">Inherited property</span>
+            </li>
+          </ul>
+        </div>
+        <h2>Settings</h2>
+        <p>
+          Theme
+          <select id="theme"
+            ><option value="os">OS</option
+            ><option value="light">Light</option
+            ><option value="dark">Dark</option></select
+          >
+        </p>
+      </div>
+    </footer>
+    <div class="container tsd-generator">
+      <p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+    </div>
+    <div class="overlay"></div>
+    <script src="assets/main.js"></script>
+  </body>
+</html>
