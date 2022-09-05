@@ -145,6 +145,14 @@ To benchmark the implementation locally run:
 yarn benchmark
 ```
 
+#### Publish
+
+To publish the package locally run:
+
+```
+yarn version:release
+```
+
 ## Dependencies
 
 This library uses the [josekit](https://crates.io/crates/josekit) rust crate for the implementation of JOSE, which is

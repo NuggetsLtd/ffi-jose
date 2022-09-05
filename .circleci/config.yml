@@ -14,6 +14,9 @@ parameters:
   project_name:
     type: string
     default: "Node FFI Jose"
+  mac_openssl_location:
+    type: string
+    default: /usr/local/Cellar/openssl@1.1/1.1.1q
 
 #+-----------------------------------------------------------------------------+
 #|                                 ORBS                                        |
@@ -140,7 +143,7 @@ jobs:
           name: Build Typescript & Rust Binary
           command: yarn build
           environment:
-            OPENSSL_DIR: /usr/local/Cellar/openssl@1.1
+            OPENSSL_DIR: << pipeline.parameters.mac_openssl_location >>
       - run:
           name: Test
           command: yarn test
@@ -172,7 +175,7 @@ jobs:
           name: Build Typescript & Rust Binary
           command: yarn build
           environment:
-            OPENSSL_DIR: /usr/local/Cellar/openssl@1.1
+            OPENSSL_DIR: << pipeline.parameters.mac_openssl_location >>
       - run:
           name: Publish NPM Package
           command: yarn publish:ts
@@ -233,7 +236,7 @@ jobs:
           name: Build Typescript & Rust Binary
           command: yarn build
           environment:
-            OPENSSL_DIR: /usr/local/Cellar/openssl@1.1
+            OPENSSL_DIR: << pipeline.parameters.mac_openssl_location >>
       - run:
           name: Publish Rust Binary
           command: yarn publish:binary

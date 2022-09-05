@@ -1,3 +1,7 @@
+# [1.5.0](https://github.com/NuggetsLtd/ffi-jose/compare/v1.3.0...v1.5.0) (2022-09-05)
+
+
+
 # 1.3.0 (2022-08-19)
 
 
