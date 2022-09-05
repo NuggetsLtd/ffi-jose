@@ -139,6 +139,8 @@ jobs:
       - run:
           name: Build Typescript & Rust Binary
           command: yarn build
+          environment:
+            OPENSSL_DIR: /usr/local/Cellar/openssl@1.1
       - run:
           name: Test
           command: yarn test
@@ -169,6 +171,8 @@ jobs:
       - run:
           name: Build Typescript & Rust Binary
           command: yarn build
+          environment:
+            OPENSSL_DIR: /usr/local/Cellar/openssl@1.1
       - run:
           name: Publish NPM Package
           command: yarn publish:ts
@@ -228,6 +232,8 @@ jobs:
       - run:
           name: Build Typescript & Rust Binary
           command: yarn build
+          environment:
+            OPENSSL_DIR: /usr/local/Cellar/openssl@1.1
       - run:
           name: Publish Rust Binary
           command: yarn publish:binary
