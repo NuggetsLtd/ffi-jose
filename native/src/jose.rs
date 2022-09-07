@@ -27,6 +27,7 @@ use josekit::{
     serialize_general_json,
     deserialize_json
   },
+  jws,
   JoseError,
 };
 
@@ -677,4 +678,103 @@ pub fn rust_decrypt_json(
     // unknown
     _ => panic!("Unknown key encryption algorithm"),
   }
+}
+
+#[allow(dead_code)]
+#[repr(C)]
+pub enum SigningAlgorithm {
+  // ECDSA
+  Es256,
+  Es384,
+  Es512,
+  Es256k,
+  // EdDSA
+  Eddsa,
+  // HMAC
+  Hs256,
+  Hs384,
+  Hs512,
+  // RSASSA
+  Rs256,
+  Rs384,
+  Rs512,
+  // RSASSA PSS
+  Ps256,
+  Ps384,
+  Ps512,
+}
+
+#[allow(dead_code)]
+pub fn rust_compact_sign_json(
+  alg: SigningAlgorithm,
+  typ: TokenType,
+  payload: &[u8],
+  jwk: &Jwk,
+) -> Result<String, JoseError> {
+  // convert token type enum to string
+  let token_type = match typ {
+    TokenType::DidcommPlain => "application/didcomm-plain+json",
+    TokenType::DidcommSigned => "application/didcomm-signed+json",
+    TokenType::DidcommEncrypted => "application/didcomm-encrypted+json",
+  };
+
+  // set `typ` header
+  let mut header = jws::JwsHeader::new();
+  header.set_token_type(token_type);
+
+  // mutalbe signer variables
+  let mut signer_ecdsa: Option<jws::alg::ecdsa::EcdsaJwsSigner> = None;
+  let mut signer_eddsa: Option<jws::alg::eddsa::EddsaJwsSigner> = None;
+  let mut signer_hmac: Option<jws::alg::hmac::HmacJwsSigner> = None;
+  let mut signer_rsassa: Option<jws::alg::rsassa::RsassaJwsSigner> = None;
+  let mut signer_rsassa_pss: Option<jws::alg::rsassa_pss::RsassaPssJwsSigner> = None;
+
+  // map `alg` to specific signer type (from private key)
+  match alg {
+    // ECDSA
+    SigningAlgorithm::Es256 => signer_ecdsa = Some(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es256.signer_from_jwk(&jwk).unwrap()),
+    SigningAlgorithm::Es384 => signer_ecdsa = Some(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es384.signer_from_jwk(&jwk).unwrap()),
+    SigningAlgorithm::Es512 => signer_ecdsa = Some(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es512.signer_from_jwk(&jwk).unwrap()),
+    SigningAlgorithm::Es256k => signer_ecdsa = Some(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es256k.signer_from_jwk(&jwk).unwrap()),
+    // EdDSA
+    SigningAlgorithm::Eddsa => signer_eddsa = Some(jws::alg::eddsa::EddsaJwsAlgorithm::Eddsa.signer_from_jwk(&jwk).unwrap()),
+    // HMAC
+    SigningAlgorithm::Hs256 => signer_hmac = Some(jws::alg::hmac::HmacJwsAlgorithm::Hs256.signer_from_jwk(&jwk).unwrap()),
+    SigningAlgorithm::Hs384 => signer_hmac = Some(jws::alg::hmac::HmacJwsAlgorithm::Hs384.signer_from_jwk(&jwk).unwrap()),
+    SigningAlgorithm::Hs512 => signer_hmac = Some(jws::alg::hmac::HmacJwsAlgorithm::Hs512.signer_from_jwk(&jwk).unwrap()),
+    // RSASSA
+    SigningAlgorithm::Rs256 => signer_rsassa = Some(jws::alg::rsassa::RsassaJwsAlgorithm::Rs384.signer_from_jwk(&jwk).unwrap()),
+    SigningAlgorithm::Rs384 => signer_rsassa = Some(jws::alg::rsassa::RsassaJwsAlgorithm::Rs384.signer_from_jwk(&jwk).unwrap()),
+    SigningAlgorithm::Rs512 => signer_rsassa = Some(jws::alg::rsassa::RsassaJwsAlgorithm::Rs512.signer_from_jwk(&jwk).unwrap()),
+    // RSASSA PSS
+    SigningAlgorithm::Ps256 => signer_rsassa_pss = Some(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps256.signer_from_jwk(&jwk).unwrap()),
+    SigningAlgorithm::Ps384 => signer_rsassa_pss = Some(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps512.signer_from_jwk(&jwk).unwrap()),
+    SigningAlgorithm::Ps512 => signer_rsassa_pss = Some(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps512.signer_from_jwk(&jwk).unwrap()),
+  }
+
+  let mut jws: Option<Result<String, JoseError>> = None;
+
+  // sign payload with specified signer
+  match signer_ecdsa {
+    Some(signer) => jws = Some(jws::serialize_compact(payload, &header, &signer)),
+    None => ()
+  };
+  match signer_eddsa {
+    Some(signer) => jws = Some(jws::serialize_compact(payload, &header, &signer)),
+    None => ()
+  };
+  match signer_hmac {
+    Some(signer) => jws = Some(jws::serialize_compact(payload, &header, &signer)),
+    None => ()
+  };
+  match signer_rsassa {
+    Some(signer) => jws = Some(jws::serialize_compact(payload, &header, &signer)),
+    None => ()
+  };
+  match signer_rsassa_pss {
+    Some(signer) => jws = Some(jws::serialize_compact(payload, &header, &signer)),
+    None => ()
+  };
+
+  jws.unwrap()
 }
