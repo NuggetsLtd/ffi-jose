@@ -1065,3 +1065,103 @@ pub fn rust_json_verify(
   }
 }
 
+#[allow(dead_code)]
+pub fn rust_general_sign_json(
+  alg: SigningAlgorithm,
+  typ: TokenType,
+  payload: &[u8],
+  jwks: &[Jwk],
+) -> Result<String, JoseError> {
+  // convert token type enum to string
+  let token_type = match typ {
+    TokenType::DidcommPlain => "application/didcomm-plain+json",
+    TokenType::DidcommSigned => "application/didcomm-signed+json",
+    TokenType::DidcommEncrypted => "application/didcomm-encrypted+json",
+  };
+
+  // array to hold headers
+  let mut jws_headers: Vec<jws::JwsHeaderSet> = Vec::new();
+
+  // arrays of mutable signers
+  let mut signers_ecdsa: Vec<jws::alg::ecdsa::EcdsaJwsSigner> = Vec::new();
+  let mut signers_eddsa: Vec<jws::alg::eddsa::EddsaJwsSigner> = Vec::new();
+  let mut signers_hmac: Vec<jws::alg::hmac::HmacJwsSigner> = Vec::new();
+  let mut signers_rsassa: Vec<jws::alg::rsassa::RsassaJwsSigner> = Vec::new();
+  let mut signers_rsassa_pss: Vec<jws::alg::rsassa_pss::RsassaPssJwsSigner> = Vec::new();
+
+  // determine signers & headers for each given jwk
+  for i in 0..jwks.len() {
+    let jwk = &jwks[i];
+
+    let kid = match jwk.key_id() {
+      Some(kid) => kid,
+      None => panic!("Key identifier (`kid`) required for jwk")
+    };
+
+    // set headers
+    let mut header = jws::JwsHeaderSet::new();
+    header.set_key_id(kid, false);
+    header.set_token_type(token_type, true);
+    jws_headers.push(header);
+
+    // map `alg` to specific signer type (from private key)
+    match alg {
+      // ECDSA
+      SigningAlgorithm::Es256 => signers_ecdsa.push(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es256.signer_from_jwk(&jwk).unwrap()),
+      SigningAlgorithm::Es384 => signers_ecdsa.push(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es384.signer_from_jwk(&jwk).unwrap()),
+      SigningAlgorithm::Es512 => signers_ecdsa.push(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es512.signer_from_jwk(&jwk).unwrap()),
+      SigningAlgorithm::Es256k => signers_ecdsa.push(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es256k.signer_from_jwk(&jwk).unwrap()),
+      // EdDSA
+      SigningAlgorithm::Eddsa => signers_eddsa.push(jws::alg::eddsa::EddsaJwsAlgorithm::Eddsa.signer_from_jwk(&jwk).unwrap()),
+      // HMAC
+      SigningAlgorithm::Hs256 => signers_hmac.push(jws::alg::hmac::HmacJwsAlgorithm::Hs256.signer_from_jwk(&jwk).unwrap()),
+      SigningAlgorithm::Hs384 => signers_hmac.push(jws::alg::hmac::HmacJwsAlgorithm::Hs384.signer_from_jwk(&jwk).unwrap()),
+      SigningAlgorithm::Hs512 => signers_hmac.push(jws::alg::hmac::HmacJwsAlgorithm::Hs512.signer_from_jwk(&jwk).unwrap()),
+      // RSASSA
+      SigningAlgorithm::Rs256 => signers_rsassa.push(jws::alg::rsassa::RsassaJwsAlgorithm::Rs384.signer_from_jwk(&jwk).unwrap()),
+      SigningAlgorithm::Rs384 => signers_rsassa.push(jws::alg::rsassa::RsassaJwsAlgorithm::Rs384.signer_from_jwk(&jwk).unwrap()),
+      SigningAlgorithm::Rs512 => signers_rsassa.push(jws::alg::rsassa::RsassaJwsAlgorithm::Rs512.signer_from_jwk(&jwk).unwrap()),
+      // RSASSA PSS
+      SigningAlgorithm::Ps256 => signers_rsassa_pss.push(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps256.signer_from_jwk(&jwk).unwrap()),
+      SigningAlgorithm::Ps384 => signers_rsassa_pss.push(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps512.signer_from_jwk(&jwk).unwrap()),
+      SigningAlgorithm::Ps512 => signers_rsassa_pss.push(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps512.signer_from_jwk(&jwk).unwrap()),
+    }
+  }
+
+  let mut signers_combined = Vec::new();
+
+  // combine all signers
+  for i in 0..signers_ecdsa.len() {
+    let signer = &signers_ecdsa[i];
+    let signer_ecdsa: &dyn jws::JwsSigner = signer;
+
+    signers_combined.push((&jws_headers[i], signer_ecdsa));
+  }
+  for i in 0..signers_eddsa.len() {
+    let signer = &signers_eddsa[i];
+    let signer_eddsa: &dyn jws::JwsSigner = signer;
+
+    signers_combined.push((&jws_headers[i], signer_eddsa));
+  }
+  for i in 0..signers_hmac.len() {
+    let signer = &signers_hmac[i];
+    let signer_hmac: &dyn jws::JwsSigner = signer;
+
+    signers_combined.push((&jws_headers[i], signer_hmac));
+  }
+  for i in 0..signers_rsassa.len() {
+    let signer = &signers_rsassa[i];
+    let signer_rsassa: &dyn jws::JwsSigner = signer;
+
+    signers_combined.push((&jws_headers[i], signer_rsassa));
+  }
+  for i in 0..signers_rsassa_pss.len() {
+    let signer = &signers_rsassa_pss[i];
+    let signer_rsassa_pss: &dyn jws::JwsSigner = signer;
+
+    signers_combined.push((&jws_headers[i], signer_rsassa_pss));
+  }
+
+  // sign & return jws
+  jws::serialize_general_json(payload, &signers_combined)
+}
