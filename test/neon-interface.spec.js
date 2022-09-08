@@ -53,11 +53,67 @@ const KeyEncryption = {
   A256GCMKW: 18
 }
 
+const SigningAlgorithm = {
+  ES256: 0,
+  ES384: 1,
+  ES512: 2,
+  ES256K: 3,
+  EdDSA: 4,
+
+  HS256: 5,
+  HS384: 6,
+  HS512: 7,
+
+  RS256: 8,
+  RS384: 9,
+  RS512: 10,
+
+  PS256: 11,
+  PS384: 12,
+  PS512: 13
+}
+
+
+const jwks = [
+  {
+    public: {
+      kid: 'did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1',
+      kty: 'EC',
+      crv: 'P-256',
+      x: 'A4NKTvWeEv3b-sJnlmwrATDklidT_qo3jTYRV2shaAc',
+      y: '_06GxhBcbxJzOCTz4F0kq_mETgGti33WkFpMKZHc-SY'
+    },
+    private: {
+      kid: 'did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1',
+      kty: 'EC',
+      crv: 'P-256',
+      d: 'qjx4ib5Ea94YnyypBBPnvtGUuoRgGtF_0BtPuOSMJPc'
+    }
+  },
+  {
+    public: {
+      kid: 'did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p256-1',
+      kty: 'EC',
+      crv: 'P-256',
+      x: 'YQbhZhp4ORKjwMqQIGFbIVSyYaaBuJbym_UWEWJPgbM',
+      y: 'hxHEiOwPXUt1Nv_3MO5oRkUoMtYFaWIzW0iiZMNTnFE'
+    },
+    private: {
+      kid: 'did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p256-1',
+      kty: 'EC',
+      crv: 'P-256',
+      d: 'pndx4RjZSMpYjkokcn5xcIfmhZV19-jr_0n4l1kcphI'
+    }
+  }
+]
+
 const base64ToArrayBuffer = (value) => Uint8Array.from(Buffer.from(value, 'base64')).buffer
 
 describe('NEON NodeJS Interface:', () => {
   it('should export the expected items', () => {
     expect(Object.keys(jose).sort()).toEqual([
+      'compact_json_verify',
+      'compact_sign_json',
       'decrypt',
       'decrypt_json',
       'encrypt',
@@ -68,6 +124,8 @@ describe('NEON NodeJS Interface:', () => {
   })
 
   it('should export foreign function interface functions', () => {
+    expect(typeof jose.compact_json_verify).toBe('function')
+    expect(typeof jose.compact_sign_json).toBe('function')
     expect(typeof jose.decrypt).toBe('function')
     expect(typeof jose.decrypt_json).toBe('function')
     expect(typeof jose.encrypt).toBe('function')
@@ -508,38 +566,6 @@ describe('NEON NodeJS Interface:', () => {
         const enc = ContentEncryption.A128GCM
         const jwt = { hello: 'there' }
         const payload = JSON.stringify(jwt)
-        const jwks = [
-          {
-            public: {
-              kid: 'did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1',
-              kty: 'EC',
-              crv: 'P-256',
-              x: 'A4NKTvWeEv3b-sJnlmwrATDklidT_qo3jTYRV2shaAc',
-              y: '_06GxhBcbxJzOCTz4F0kq_mETgGti33WkFpMKZHc-SY'
-            },
-            private: {
-              kid: 'did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1',
-              kty: 'EC',
-              crv: 'P-256',
-              d: 'qjx4ib5Ea94YnyypBBPnvtGUuoRgGtF_0BtPuOSMJPc'
-            }
-          },
-          {
-            public: {
-              kid: 'did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p256-1',
-              kty: 'EC',
-              crv: 'P-256',
-              x: 'YQbhZhp4ORKjwMqQIGFbIVSyYaaBuJbym_UWEWJPgbM',
-              y: 'hxHEiOwPXUt1Nv_3MO5oRkUoMtYFaWIzW0iiZMNTnFE'
-            },
-            private: {
-              kid: 'did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p256-1',
-              kty: 'EC',
-              crv: 'P-256',
-              d: 'pndx4RjZSMpYjkokcn5xcIfmhZV19-jr_0n4l1kcphI'
-            }
-          }
-        ]
 
         it('for single recipient', async () => {
           const recipients = JSON.stringify([ jwks[0].public ])
@@ -567,6 +593,60 @@ describe('NEON NodeJS Interface:', () => {
           expect(decryptedMsg2).toEqual(jwt)
         })
       })
+    })
+
+    describe('compact_sign_json', () => {
+
+      it('should sign json with private key', () => {
+        const jwt = { hello: 'there' }
+        const payload = JSON.stringify(jwt)
+        const jwk = JSON.stringify(jwks[0].private)
+        const alg = SigningAlgorithm.ES256
+
+        const jws = jose.compact_sign_json(alg, payload, jwk)
+
+        const [ header_b64, payload_b64 ] = jws.split('.')
+
+        expect(Buffer.from(header_b64, 'base64').toString()).toBe('{"typ":"application/didcomm-signed+json","alg":"ES256","kid":"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1"}')
+        expect(Buffer.from(payload_b64, 'base64').toString()).toBe(payload)
+      })
+
+    })
+
+    describe('compact_json_verify', () => {
+
+      it('should verify signed json', () => {
+        const jwt = { hello: 'there' }
+        const payload = JSON.stringify(jwt)
+        const jwk_public = JSON.stringify(jwks[0].public)
+
+        const jws = 'eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYiLCJraWQiOiJkaWQ6bnVnZ2V0czpzWnppRnZkWHc4c2lNdmcxUDRZUzkxZ0c0TGMja2V5LXAyNTYtMSJ9.eyJoZWxsbyI6InRoZXJlIn0.TtXvFTkQvD9SOve5yzEgzLAVgAm9WefaP99A0HZrYztniE2GD9HLNqVlf2b1VzCvDtvy4Iq54UUtX8079pPSOg'
+
+        expect(jose.compact_json_verify(jws, jwk_public)).toBe(payload)
+      })
+
+      describe('should throw', () => {
+
+        it('where public key is incorrect', () => {
+          const jwk_public_incorrect = JSON.stringify(jwks[1].public)
+
+          const jws_valid = 'eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYiLCJraWQiOiJkaWQ6bnVnZ2V0czpzWnppRnZkWHc4c2lNdmcxUDRZUzkxZ0c0TGMja2V5LXAyNTYtMSJ9.eyJoZWxsbyI6InRoZXJlIn0.TtXvFTkQvD9SOve5yzEgzLAVgAm9WefaP99A0HZrYztniE2GD9HLNqVlf2b1VzCvDtvy4Iq54UUtX8079pPSOg'
+
+          expect(() => jose.compact_json_verify(jws_valid, jwk_public_incorrect))
+            .toThrow(/internal error in Neon module: Failed to verify data/)
+        })
+
+        it('where payload has been changed', () => {
+          const jwk_public = JSON.stringify(jwks[0].public)
+
+          const jws_invalid = 'eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYiLCJraWQiOiJkaWQ6bnVnZ2V0czpzWnppRnZkWHc4c2lNdmcxUDRZUzkxZ0c0TGMja2V5LXAyNTYtMSJ9.eyJoZWxsbyI6InlvdSJ9.TtXvFTkQvD9SOve5yzEgzLAVgAm9WefaP99A0HZrYztniE2GD9HLNqVlf2b1VzCvDtvy4Iq54UUtX8079pPSOg'
+
+          expect(() => jose.compact_json_verify(jws_invalid, jwk_public))
+            .toThrow(/internal error in Neon module: Failed to verify data/)
+        })
+
+      })
+
     })
   })
 })

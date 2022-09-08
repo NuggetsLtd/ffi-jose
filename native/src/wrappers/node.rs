@@ -9,12 +9,15 @@ use crate::jose::{
   KeyEncryptionAlgorithm,
   NamedCurve,
   TokenType,
+  SigningAlgorithm,
   rust_generate_key_pair_jwk,
   rust_generate_key_pair,
   rust_encrypt,
   rust_decrypt,
   rust_general_encrypt_json,
-  rust_decrypt_json
+  rust_decrypt_json,
+  rust_compact_sign_json,
+  rust_compact_json_verify,
 };
 use josekit::jwk::Jwk;
 
@@ -216,6 +219,66 @@ fn node_decrypt_json(mut cx: FunctionContext) -> JsResult<JsString> {
   }
 }
 
+fn node_compact_sign_json(mut cx: FunctionContext) -> JsResult<JsString> {
+  let alg = cx.argument::<JsNumber>(0)?;
+  let payload = cx.argument::<JsString>(1)?;
+  let jwk = cx.argument::<JsString>(2)?;
+
+  // determine signing algorithm
+  let signing_alg = match alg.value() as u8 {
+    0 => SigningAlgorithm::Es256,
+    1 => SigningAlgorithm::Es384,
+    2 => SigningAlgorithm::Es512,
+    3 => SigningAlgorithm::Es256k,
+    4 => SigningAlgorithm::Eddsa,
+    5 => SigningAlgorithm::Hs256,
+    6 => SigningAlgorithm::Hs384,
+    7 => SigningAlgorithm::Hs512,
+    8 => SigningAlgorithm::Rs256,
+    9 => SigningAlgorithm::Rs384,
+    10 => SigningAlgorithm::Rs512,
+    11 => SigningAlgorithm::Ps256,
+    12 => SigningAlgorithm::Ps384,
+    13 => SigningAlgorithm::Ps512,
+    _ => panic!("Unsupported signing algorithm")
+  };
+
+  // convert serialised data to Jwk
+  let signer_jwk: Jwk = serde_json::from_str(&jwk.value()).unwrap();
+
+  // convert JsString to String
+  let payload_string: String = payload.value();
+
+  // sign message
+  let signed = match rust_compact_sign_json(
+    signing_alg,
+    TokenType::DidcommSigned,
+    payload_string.as_bytes(),
+    &signer_jwk
+  ) {
+    Ok(signed) => signed,
+    Err(_) => panic!("Failed to sign data")
+  };
+
+  Ok(JsString::new(&mut cx, signed))
+}
+
+fn node_compact_json_verify(mut cx: FunctionContext) -> JsResult<JsString> {
+  let jws = cx.argument::<JsString>(0)?;
+  let jwk_string = cx.argument::<JsString>(1)?;
+
+  let jwk: Jwk = serde_json::from_str(&jwk_string.value()).unwrap();
+  
+  match rust_compact_json_verify(&jws.value(), &jwk) {
+    Ok(verified) => {
+      let ( payload, _header ) = verified;
+      let payload_string = String::from_utf8(payload).unwrap();
+      Ok(JsString::new(&mut cx, payload_string))
+    },
+    Err(_) => panic!("Failed to verify data")
+  }
+}
+
 register_module!(mut cx, {
   cx.export_function("generate_key_pair_jwk", node_generate_key_pair_jwk)?;
   cx.export_function("generate_key_pair", node_generate_key_pair)?;
@@ -223,5 +286,7 @@ register_module!(mut cx, {
   cx.export_function("decrypt", node_decrypt)?;
   cx.export_function("general_encrypt_json", node_general_encrypt_json)?;
   cx.export_function("decrypt_json", node_decrypt_json)?;
+  cx.export_function("compact_sign_json", node_compact_sign_json)?;
+  cx.export_function("compact_json_verify", node_compact_json_verify)?;
   Ok(())
 });
