@@ -943,3 +943,125 @@ pub fn rust_flattened_sign_json(
   jws.unwrap()
 }
 
+#[allow(dead_code)]
+pub fn rust_json_verify(
+  jws_string: &str,
+  jwk: &Jwk,
+) -> Result<(Vec<u8>, jws::JwsHeader), JoseError> {
+  // mutable verifier variables
+  let mut verifier_ecdsa: Option<jws::alg::ecdsa::EcdsaJwsVerifier> = None;
+  let mut verifier_eddsa: Option<jws::alg::eddsa::EddsaJwsVerifier> = None;
+  let mut verifier_hmac: Option<jws::alg::hmac::HmacJwsVerifier> = None;
+  let mut verifier_rsassa: Option<jws::alg::rsassa::RsassaJwsVerifier> = None;
+  let mut verifier_rsassa_pss: Option<jws::alg::rsassa_pss::RsassaPssJwsVerifier> = None;
+
+  // retrieve `alg` from `jws_string`
+  let jws_json: Value = serde_json::from_str(jws_string).unwrap();
+
+  let mut alg: String = "".to_owned();
+
+  match &jws_json["protected"] {
+    // get `alg` from main `protected` header
+    serde_json::Value::String(protected) => {
+      let protected = protected.as_str();
+      let protected_decoded_bytes = base64::decode(protected).unwrap();
+      let protected_json_string = String::from_utf8(protected_decoded_bytes).unwrap();
+      let protected_json: Value = serde_json::from_str(&protected_json_string).unwrap();
+      alg = String::from(protected_json["alg"].as_str().unwrap());
+    },
+    // get `alg` from `signatures`
+    _ => {
+      let kid = match jwk.key_id() {
+        Some(kid) => kid,
+        None => panic!("Key identifier (`kid`) required for jwk")
+      };
+
+      println!("HERE? \n\n{:?}\n\n", kid);
+
+      match &jws_json["signatures"] {
+        serde_json::Value::Array(signatures) => {
+
+          // loop through signatures
+          for i in 0..signatures.len() {
+            // find correct signature for passed jwk
+            match signatures[i]["header"]["kid"] == kid {
+              true => {
+                let protected = signatures[i]["protected"].as_str().unwrap();
+                let protected_decoded_bytes = base64::decode(protected).unwrap();
+                let protected_json_string = String::from_utf8(protected_decoded_bytes).unwrap();
+                let protected_json: Value = serde_json::from_str(&protected_json_string).unwrap();
+                alg = String::from(protected_json["alg"].as_str().unwrap());
+              },
+              false => ()
+            };
+          }
+        },
+        _ => panic!("Signatures not found")
+      }
+    }
+  }
+
+  match &alg[..] {
+    // ECDSA
+    "ES256" => verifier_ecdsa = Some(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es256.verifier_from_jwk(&jwk).unwrap()),
+    "ES384" => verifier_ecdsa = Some(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es384.verifier_from_jwk(&jwk).unwrap()),
+    "ES512" => verifier_ecdsa = Some(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es512.verifier_from_jwk(&jwk).unwrap()),
+    "ES256K" => verifier_ecdsa = Some(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es256k.verifier_from_jwk(&jwk).unwrap()),
+    // EdDSA
+    "EdDSA" => verifier_eddsa = Some(jws::alg::eddsa::EddsaJwsAlgorithm::Eddsa.verifier_from_jwk(&jwk).unwrap()),
+    // HMAC
+    "HS256" => verifier_hmac = Some(jws::alg::hmac::HmacJwsAlgorithm::Hs256.verifier_from_jwk(&jwk).unwrap()),
+    "HS384" => verifier_hmac = Some(jws::alg::hmac::HmacJwsAlgorithm::Hs384.verifier_from_jwk(&jwk).unwrap()),
+    "HS512" => verifier_hmac = Some(jws::alg::hmac::HmacJwsAlgorithm::Hs512.verifier_from_jwk(&jwk).unwrap()),
+    // RSASSA
+    "RS256" => verifier_rsassa = Some(jws::alg::rsassa::RsassaJwsAlgorithm::Rs256.verifier_from_jwk(&jwk).unwrap()),
+    "RS384" => verifier_rsassa = Some(jws::alg::rsassa::RsassaJwsAlgorithm::Rs384.verifier_from_jwk(&jwk).unwrap()),
+    "RS512" => verifier_rsassa = Some(jws::alg::rsassa::RsassaJwsAlgorithm::Rs512.verifier_from_jwk(&jwk).unwrap()),
+    // RSASSA PSS
+    "PS256" => verifier_rsassa_pss = Some(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps256.verifier_from_jwk(&jwk).unwrap()),
+    "PS384" => verifier_rsassa_pss = Some(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps256.verifier_from_jwk(&jwk).unwrap()),
+    "PS512" => verifier_rsassa_pss = Some(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps256.verifier_from_jwk(&jwk).unwrap()),
+    // unknown
+    _ => panic!("Unknown signature algorithm"),
+  }
+
+  match &alg[..] {
+    // ECDSA
+    "ES256" |
+    "ES384" |
+    "ES512" |
+    "ES256K" => {
+      let verifier: &dyn jws::JwsVerifier = &verifier_ecdsa.unwrap();
+      jws::deserialize_json(jws_string, verifier)
+    },
+    // EdDSA
+    "EdDSA" => {
+      let verifier: &dyn jws::JwsVerifier = &verifier_eddsa.unwrap();
+      jws::deserialize_json(jws_string, verifier)
+    },
+    // HMAC
+    "HS256" |
+    "HS384" |
+    "HS512" => {
+      let verifier: &dyn jws::JwsVerifier = &verifier_hmac.unwrap();
+      jws::deserialize_json(jws_string, verifier)
+    },
+    // RSASSA
+    "RS256" |
+    "RS384" |
+    "RS512" => {
+      let verifier: &dyn jws::JwsVerifier = &verifier_rsassa.unwrap();
+      jws::deserialize_json(jws_string, verifier)
+    },
+    // RSASSA PSS
+    "PS256" |
+    "PS384" |
+    "PS512" => {
+      let verifier: &dyn jws::JwsVerifier = &verifier_rsassa_pss.unwrap();
+      jws::deserialize_json(jws_string, verifier)
+    },
+    // unknown
+    _ => panic!("Unknown signature algorithm"),
+  }
+}
+
