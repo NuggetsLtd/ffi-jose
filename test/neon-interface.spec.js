@@ -117,9 +117,12 @@ describe('NEON NodeJS Interface:', () => {
       'decrypt',
       'decrypt_json',
       'encrypt',
+      'flattened_sign_json',
       'general_encrypt_json',
+      'general_sign_json',
       'generate_key_pair',
-      'generate_key_pair_jwk'
+      'generate_key_pair_jwk',
+      'json_verify'
     ])
   })
 
@@ -129,9 +132,12 @@ describe('NEON NodeJS Interface:', () => {
     expect(typeof jose.decrypt).toBe('function')
     expect(typeof jose.decrypt_json).toBe('function')
     expect(typeof jose.encrypt).toBe('function')
+    expect(typeof jose.flattened_sign_json).toBe('function')
     expect(typeof jose.general_encrypt_json).toBe('function')
+    expect(typeof jose.general_sign_json).toBe('function')
     expect(typeof jose.generate_key_pair).toBe('function')
     expect(typeof jose.generate_key_pair_jwk).toBe('function')
+    expect(typeof jose.json_verify).toBe('function')
   })
 
   describe('Functions', () => {
@@ -648,5 +654,90 @@ describe('NEON NodeJS Interface:', () => {
       })
 
     })
+
+    describe('flattened_sign_json', () => {
+
+      it('should sign json with private key', () => {
+        const jwt = { hello: 'there' }
+        const payload = JSON.stringify(jwt)
+        const jwk = JSON.stringify(jwks[0].private)
+        const alg = SigningAlgorithm.ES256
+
+        const jws = JSON.parse(jose.flattened_sign_json(alg, payload, jwk))
+
+        expect(Buffer.from(jws.protected, 'base64').toString()).toBe('{"typ":"application/didcomm-signed+json","alg":"ES256"}')
+        expect(Buffer.from(jws.payload, 'base64').toString()).toBe(payload)
+        expect(jws.header.kid).toBe('did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1')
+      })
+
+    })
+
+    describe('json_verify', () => {
+
+      describe('should verify signed json', () => {
+
+        it('where structure is "flattened" (only for single signatures)', () => {
+          const jwt = { hello: 'there' }
+          const payload = JSON.stringify(jwt)
+          const jwk_public = JSON.stringify(jwks[0].public)
+
+          const jws = '{"protected":"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYifQ","header":{"kid":"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1"},"payload":"eyJoZWxsbyI6InRoZXJlIn0","signature":"y_Ytj-OJmLfnR_LUcFD60KZJuiqfWJBrATdvvVg3bn1pS5fpaKCNb3JBv1EAZ7gz7NrI_MoG3_xfSjBALRt1-w"}'
+
+          expect(jose.json_verify(jws, jwk_public)).toBe(payload)
+        })
+
+        it('where structure is "general" (used for multiple signatures)', () => {
+          const jwt = { hello: 'there' }
+          const payload = JSON.stringify(jwt)
+          const jwk_public = JSON.stringify(jwks[0].public)
+
+          const jws = '{"signatures":[{"protected":"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYifQ","header":{"kid":"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1"},"signature":"Zi-Xv-cNB-zaFTJNFCCfN8AHRXPMHVujRC-ZeFXRi5l7N_gWWJ0-63GwOtgCMqSATJloBQw3A0gc42478Ck7qQ"},{"protected":"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYifQ","header":{"kid":"did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p256-1"},"signature":"ZF8ZNNQPLmu8RtxCZER1Ewt2Mlb8IJZlAIJpt7fjiXVHsnAbLERm0yEOskIoyJ-cF1fhBD1j6zU9nelj30W8jg"}],"payload":"eyJoZWxsbyI6InRoZXJlIn0"}'
+
+          expect(jose.json_verify(jws, jwk_public)).toBe(payload)
+        })
+
+      })
+
+      describe('should throw', () => {
+
+        it('where public key is incorrect', () => {
+          const jwk_public_incorrect = JSON.stringify(jwks[1].public)
+
+          const jws_valid = '{"protected":"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYifQ","header":{"kid":"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1"},"payload":"eyJoZWxsbyI6InRoZXJlIn0","signature":"y_Ytj-OJmLfnR_LUcFD60KZJuiqfWJBrATdvvVg3bn1pS5fpaKCNb3JBv1EAZ7gz7NrI_MoG3_xfSjBALRt1-w"}'
+
+          expect(() => jose.json_verify(jws_valid, jwk_public_incorrect))
+            .toThrow(/internal error in Neon module: Failed to verify data/)
+        })
+
+        it('where payload has been changed', () => {
+          const jwk_public = JSON.stringify(jwks[0].public)
+
+          const jws_invalid = '{"protected":"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYifQ","header":{"kid":"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1"},"payload":"eyJoZWxsbyI6InlvdSJ9","signature":"y_Ytj-OJmLfnR_LUcFD60KZJuiqfWJBrATdvvVg3bn1pS5fpaKCNb3JBv1EAZ7gz7NrI_MoG3_xfSjBALRt1-w"}'
+
+          expect(() => jose.json_verify(jws_invalid, jwk_public))
+            .toThrow(/internal error in Neon module: Failed to verify data/)
+        })
+
+      })
+
+    })
+
+    describe('general_sign_json', () => {
+
+      it('should sign json with private keys', () => {
+        const jwt = { hello: 'there' }
+        const payload = JSON.stringify(jwt)
+        const signer_jwks = JSON.stringify([ jwks[0].private, jwks[1].private ])
+        const alg = SigningAlgorithm.ES256
+
+        const jws = JSON.parse(jose.general_sign_json(alg, payload, signer_jwks))
+        console.log({ jws })
+
+        expect(jws.signatures.length).toBe(2)
+        expect(jws.payload).toBe('eyJoZWxsbyI6InRoZXJlIn0')
+      })
+
+    })
+
   })
 })
