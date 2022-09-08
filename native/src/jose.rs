@@ -722,7 +722,7 @@ pub fn rust_compact_sign_json(
   let mut header = jws::JwsHeader::new();
   header.set_token_type(token_type);
 
-  // mutalbe signer variables
+  // mutable signer variables
   let mut signer_ecdsa: Option<jws::alg::ecdsa::EcdsaJwsSigner> = None;
   let mut signer_eddsa: Option<jws::alg::eddsa::EddsaJwsSigner> = None;
   let mut signer_hmac: Option<jws::alg::hmac::HmacJwsSigner> = None;
@@ -777,4 +777,87 @@ pub fn rust_compact_sign_json(
   };
 
   jws.unwrap()
+}
+
+#[allow(dead_code)]
+pub fn rust_compact_json_verify(
+  jws_string: &str,
+  jwk: &Jwk,
+) -> Result<(Vec<u8>, jws::JwsHeader), JoseError> {
+  // mutable verifier variables
+  let mut verifier_ecdsa: Option<jws::alg::ecdsa::EcdsaJwsVerifier> = None;
+  let mut verifier_eddsa: Option<jws::alg::eddsa::EddsaJwsVerifier> = None;
+  let mut verifier_hmac: Option<jws::alg::hmac::HmacJwsVerifier> = None;
+  let mut verifier_rsassa: Option<jws::alg::rsassa::RsassaJwsVerifier> = None;
+  let mut verifier_rsassa_pss: Option<jws::alg::rsassa_pss::RsassaPssJwsVerifier> = None;
+
+  // retrieve `alg` from `jws_string`
+  let jws_parts: Vec<&str> = jws_string.split('.').collect();
+  let protected_decoded_bytes = base64::decode(jws_parts[0]).unwrap();
+  let protected_json_string = String::from_utf8(protected_decoded_bytes).unwrap();
+  let protected_json: Value = serde_json::from_str(&protected_json_string).unwrap();
+  let alg = protected_json["alg"].as_str().unwrap();
+
+  match alg {
+    // ECDSA
+    "ES256" => verifier_ecdsa = Some(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es256.verifier_from_jwk(&jwk).unwrap()),
+    "ES384" => verifier_ecdsa = Some(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es384.verifier_from_jwk(&jwk).unwrap()),
+    "ES512" => verifier_ecdsa = Some(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es512.verifier_from_jwk(&jwk).unwrap()),
+    "ES256K" => verifier_ecdsa = Some(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es256k.verifier_from_jwk(&jwk).unwrap()),
+    // EdDSA
+    "EdDSA" => verifier_eddsa = Some(jws::alg::eddsa::EddsaJwsAlgorithm::Eddsa.verifier_from_jwk(&jwk).unwrap()),
+    // HMAC
+    "HS256" => verifier_hmac = Some(jws::alg::hmac::HmacJwsAlgorithm::Hs256.verifier_from_jwk(&jwk).unwrap()),
+    "HS384" => verifier_hmac = Some(jws::alg::hmac::HmacJwsAlgorithm::Hs384.verifier_from_jwk(&jwk).unwrap()),
+    "HS512" => verifier_hmac = Some(jws::alg::hmac::HmacJwsAlgorithm::Hs512.verifier_from_jwk(&jwk).unwrap()),
+    // RSASSA
+    "RS256" => verifier_rsassa = Some(jws::alg::rsassa::RsassaJwsAlgorithm::Rs256.verifier_from_jwk(&jwk).unwrap()),
+    "RS384" => verifier_rsassa = Some(jws::alg::rsassa::RsassaJwsAlgorithm::Rs384.verifier_from_jwk(&jwk).unwrap()),
+    "RS512" => verifier_rsassa = Some(jws::alg::rsassa::RsassaJwsAlgorithm::Rs512.verifier_from_jwk(&jwk).unwrap()),
+    // RSASSA PSS
+    "PS256" => verifier_rsassa_pss = Some(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps256.verifier_from_jwk(&jwk).unwrap()),
+    "PS384" => verifier_rsassa_pss = Some(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps256.verifier_from_jwk(&jwk).unwrap()),
+    "PS512" => verifier_rsassa_pss = Some(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps256.verifier_from_jwk(&jwk).unwrap()),
+    // unknown
+    _ => panic!("Unknown signature algorithm"),
+  }
+
+  match alg {
+    // ECDSA
+    "ES256" |
+    "ES384" |
+    "ES512" |
+    "ES256K" => {
+      let verifier: &dyn jws::JwsVerifier = &verifier_ecdsa.unwrap();
+      jws::deserialize_compact(jws_string, verifier)
+    },
+    // EdDSA
+    "EdDSA" => {
+      let verifier: &dyn jws::JwsVerifier = &verifier_eddsa.unwrap();
+      jws::deserialize_compact(jws_string, verifier)
+    },
+    // HMAC
+    "HS256" |
+    "HS384" |
+    "HS512" => {
+      let verifier: &dyn jws::JwsVerifier = &verifier_hmac.unwrap();
+      jws::deserialize_compact(jws_string, verifier)
+    },
+    // RSASSA
+    "RS256" |
+    "RS384" |
+    "RS512" => {
+      let verifier: &dyn jws::JwsVerifier = &verifier_rsassa.unwrap();
+      jws::deserialize_compact(jws_string, verifier)
+    },
+    // RSASSA PSS
+    "PS256" |
+    "PS384" |
+    "PS512" => {
+      let verifier: &dyn jws::JwsVerifier = &verifier_rsassa_pss.unwrap();
+      jws::deserialize_compact(jws_string, verifier)
+    },
+    // unknown
+    _ => panic!("Unknown signature algorithm"),
+  }
 }
