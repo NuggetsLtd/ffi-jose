@@ -17,6 +17,7 @@ use crate::jose::{
   rust_general_encrypt_json,
   rust_decrypt_json,
   rust_compact_sign_json,
+  rust_compact_json_verify,
 };
 use josekit::jwk::Jwk;
 
@@ -262,6 +263,22 @@ fn node_compact_sign_json(mut cx: FunctionContext) -> JsResult<JsString> {
   Ok(JsString::new(&mut cx, signed))
 }
 
+fn node_compact_json_verify(mut cx: FunctionContext) -> JsResult<JsString> {
+  let jws = cx.argument::<JsString>(0)?;
+  let jwk_string = cx.argument::<JsString>(1)?;
+
+  let jwk: Jwk = serde_json::from_str(&jwk_string.value()).unwrap();
+  
+  match rust_compact_json_verify(&jws.value(), &jwk) {
+    Ok(verified) => {
+      let ( payload, _header ) = verified;
+      let payload_string = String::from_utf8(payload).unwrap();
+      Ok(JsString::new(&mut cx, payload_string))
+    },
+    Err(_) => panic!("Failed to verify data")
+  }
+}
+
 register_module!(mut cx, {
   cx.export_function("generate_key_pair_jwk", node_generate_key_pair_jwk)?;
   cx.export_function("generate_key_pair", node_generate_key_pair)?;
@@ -270,5 +287,6 @@ register_module!(mut cx, {
   cx.export_function("general_encrypt_json", node_general_encrypt_json)?;
   cx.export_function("decrypt_json", node_decrypt_json)?;
   cx.export_function("compact_sign_json", node_compact_sign_json)?;
+  cx.export_function("compact_json_verify", node_compact_json_verify)?;
   Ok(())
 });
