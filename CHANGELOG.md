@@ -1,3 +1,14 @@
+# [1.7.0](https://github.com/NuggetsLtd/ffi-jose/compare/v1.6.1...v1.7.0) (2022-09-09)
+
+
+### Features
+
+* update 'generalSignJson' to pass 'alg' on each 'jwk' ([1dc6c69](https://github.com/NuggetsLtd/ffi-jose/commit/1dc6c697e40c75e6fc1de1c761cae75a2678cb21))
+* update neon FFI to use 'alg' from jwk for 'node_general_sign_json' ([087f164](https://github.com/NuggetsLtd/ffi-jose/commit/087f164fec0dbfd989c1d5a760724064d258c0cf))
+* use 'alg' from jwk for 'rust_general_sign_json' ([fcbbd23](https://github.com/NuggetsLtd/ffi-jose/commit/fcbbd23298d711e52ac3dd7d22288c4aaed4598d))
+
+
+
 ## [1.6.1](https://github.com/NuggetsLtd/ffi-jose/compare/v1.6.0...v1.6.1) (2022-09-09)
 
 
