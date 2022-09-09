@@ -14,4 +14,5 @@ export interface JWK {
   readonly x?: string;
   readonly y?: string;
   readonly use?: "sig" | "enc";
+  readonly alg?: string;
 }
