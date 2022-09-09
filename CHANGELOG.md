@@ -1,3 +1,12 @@
+## [1.7.1](https://github.com/NuggetsLtd/ffi-jose/compare/v1.7.0...v1.7.1) (2022-09-09)
+
+
+### Bug Fixes
+
+* use correct header for respective signers ([b7b82d2](https://github.com/NuggetsLtd/ffi-jose/commit/b7b82d2b014f402b9b72c5c13a452301033f3d9d))
+
+
+
 # [1.7.0](https://github.com/NuggetsLtd/ffi-jose/compare/v1.6.1...v1.7.0) (2022-09-09)
 
 
