@@ -343,28 +343,8 @@ fn node_json_verify(mut cx: FunctionContext) -> JsResult<JsString> {
 }
 
 fn node_general_sign_json(mut cx: FunctionContext) -> JsResult<JsString> {
-  let alg = cx.argument::<JsNumber>(0)?;
-  let payload = cx.argument::<JsString>(1)?;
-  let jwks = cx.argument::<JsString>(2)?;
-
-  // determine signing algorithm
-  let signing_alg = match alg.value() as u8 {
-    0 => SigningAlgorithm::Es256,
-    1 => SigningAlgorithm::Es384,
-    2 => SigningAlgorithm::Es512,
-    3 => SigningAlgorithm::Es256k,
-    4 => SigningAlgorithm::Eddsa,
-    5 => SigningAlgorithm::Hs256,
-    6 => SigningAlgorithm::Hs384,
-    7 => SigningAlgorithm::Hs512,
-    8 => SigningAlgorithm::Rs256,
-    9 => SigningAlgorithm::Rs384,
-    10 => SigningAlgorithm::Rs512,
-    11 => SigningAlgorithm::Ps256,
-    12 => SigningAlgorithm::Ps384,
-    13 => SigningAlgorithm::Ps512,
-    _ => panic!("Unsupported signing algorithm")
-  };
+  let payload = cx.argument::<JsString>(0)?;
+  let jwks = cx.argument::<JsString>(1)?;
 
   // convert serialised data to array of Jwks
   let signer_jwks: Vec<Jwk> = serde_json::from_str(&jwks.value()).unwrap();
@@ -374,7 +354,6 @@ fn node_general_sign_json(mut cx: FunctionContext) -> JsResult<JsString> {
 
   // sign message
   let signed = match rust_general_sign_json(
-    signing_alg,
     TokenType::DidcommSigned,
     payload_string.as_bytes(),
     &signer_jwks
