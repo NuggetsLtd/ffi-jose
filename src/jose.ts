@@ -232,3 +232,10 @@ export const flattenedSignJson = async (
   return JSON.parse(json_string);
 };
 
+export const jsonVerify = async (
+  jws: any,
+  jwk: JWK
+): Promise<any> => {
+  return jose.json_verify(_jsonConvertToString(jws), _jsonConvertToString(jwk));
+};
+
