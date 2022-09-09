@@ -239,3 +239,12 @@ export const jsonVerify = async (
   return jose.json_verify(_jsonConvertToString(jws), _jsonConvertToString(jwk));
 };
 
+export const generalSignJson = async (
+  alg: SigningAlgorithm,
+  payload: any,
+  jwks: [JWK]
+): Promise<any> => {
+  let json_string = await jose.general_sign_json(alg, _jsonConvertToString(payload), _jsonConvertToString(jwks));
+
+  return JSON.parse(json_string);
+};

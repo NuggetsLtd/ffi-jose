@@ -9,6 +9,7 @@ export {
   compactJsonVerify,
   flattenedSignJson,
   jsonVerify,
+  generalSignJson,
 } from "./jose";
 export * from "./types";
 export * from "./KeyObject";
