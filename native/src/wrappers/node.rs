@@ -278,7 +278,7 @@ fn node_compact_json_verify(mut cx: FunctionContext) -> JsResult<JsString> {
       let payload_string = String::from_utf8(payload).unwrap();
       Ok(JsString::new(&mut cx, payload_string))
     },
-    Err(_) => panic!("Failed to verify data")
+    Err(error) => panic!("Failed to verify data - {:?}", error)
   }
 }
 
@@ -338,7 +338,7 @@ fn node_json_verify(mut cx: FunctionContext) -> JsResult<JsString> {
       let payload_string = String::from_utf8(payload).unwrap();
       Ok(JsString::new(&mut cx, payload_string))
     },
-    Err(_) => panic!("Failed to verify data")
+    Err(error) => panic!("Failed to verify data - {:?}", error)
   }
 }
 
