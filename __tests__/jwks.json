@@ -28,5 +28,20 @@
       "crv": "P-256",
       "d": "pndx4RjZSMpYjkokcn5xcIfmhZV19-jr_0n4l1kcphI"
     }
+  },
+  {
+    "public": {
+      "kid": "did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p512-1",
+      "kty": "EC",
+      "crv": "P-521",
+      "x": "AX4LwkzNKXyElqOWziAdnLO2eMkSpWFrhMYiVjVVLV53s0AqRieeTFDN1SlL_z6TIYyhjnKujX9KgJpTuyiJMHSZ",
+      "y": "AeZidrXIe8oO6qE6V92oPa3yMSahdyn4av-uCqAMfQixdXVDtbX0toX6HEWjdx-Xo7LsqtscUX7_nO0BjCYOQCJj"
+    },
+    "private": {
+      "kid": "did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p512-1",
+      "kty": "EC",
+      "crv": "P-521",
+      "d": "AP8cf2Tl1uZbXIAUH9gqy0y3ZFDSwwcS7xGTYSuOo3i5SThDLy-ongZRmJC001HqfeTtkmXCebnt8tNfH5q_1aEb"
+    }
   }
 ]

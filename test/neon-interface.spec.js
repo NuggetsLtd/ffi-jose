@@ -1,4 +1,5 @@
 const jose = require('../native')
+const jwks = require('../__tests__/jwks.json')
 
 const base64RegExp = /^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}==|[A-Za-z0-9+\\/]{3}=)?$/i
 
@@ -72,39 +73,6 @@ const SigningAlgorithm = {
   PS384: 12,
   PS512: 13
 }
-
-const jwks = [
-  {
-    public: {
-      kid: 'did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1',
-      kty: 'EC',
-      crv: 'P-256',
-      x: 'A4NKTvWeEv3b-sJnlmwrATDklidT_qo3jTYRV2shaAc',
-      y: '_06GxhBcbxJzOCTz4F0kq_mETgGti33WkFpMKZHc-SY'
-    },
-    private: {
-      kid: 'did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1',
-      kty: 'EC',
-      crv: 'P-256',
-      d: 'qjx4ib5Ea94YnyypBBPnvtGUuoRgGtF_0BtPuOSMJPc'
-    }
-  },
-  {
-    public: {
-      kid: 'did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p256-1',
-      kty: 'EC',
-      crv: 'P-256',
-      x: 'YQbhZhp4ORKjwMqQIGFbIVSyYaaBuJbym_UWEWJPgbM',
-      y: 'hxHEiOwPXUt1Nv_3MO5oRkUoMtYFaWIzW0iiZMNTnFE'
-    },
-    private: {
-      kid: 'did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p256-1',
-      kty: 'EC',
-      crv: 'P-256',
-      d: 'pndx4RjZSMpYjkokcn5xcIfmhZV19-jr_0n4l1kcphI'
-    }
-  }
-]
 
 const base64ToArrayBuffer = (value) => Uint8Array.from(Buffer.from(value, 'base64')).buffer
 
@@ -723,13 +691,34 @@ describe('NEON NodeJS Interface:', () => {
 
     describe('general_sign_json', () => {
 
-      it('should sign json with private keys', () => {
+      it('should sign json with a single private key', () => {
         const jwt = { hello: 'there' }
         const payload = JSON.stringify(jwt)
-        const signer_jwks = JSON.stringify([ jwks[0].private, jwks[1].private ])
-        const alg = SigningAlgorithm.ES256
+        const signer_jwks = JSON.stringify([ { ...jwks[0].private, alg: 'ES256' } ])
 
-        const jws = JSON.parse(jose.general_sign_json(alg, payload, signer_jwks))
+        const jws = JSON.parse(jose.general_sign_json(payload, signer_jwks))
+
+        expect(jws.signatures.length).toBe(1)
+        expect(jws.payload).toBe('eyJoZWxsbyI6InRoZXJlIn0')
+      })
+
+      it('should sign json with private keys of the same `alg` type', () => {
+        const jwt = { hello: 'there' }
+        const payload = JSON.stringify(jwt)
+        const signer_jwks = JSON.stringify([ { ...jwks[0].private, alg: 'ES256' }, { ...jwks[1].private, alg: 'ES256' } ])
+
+        const jws = JSON.parse(jose.general_sign_json(payload, signer_jwks))
+
+        expect(jws.signatures.length).toBe(2)
+        expect(jws.payload).toBe('eyJoZWxsbyI6InRoZXJlIn0')
+      })
+
+      it('should sign json with private keys of different `alg` types', () => {
+        const jwt = { hello: 'there' }
+        const payload = JSON.stringify(jwt)
+        const signer_jwks = JSON.stringify([ { ...jwks[0].private, alg: 'ES256' }, { ...jwks[2].private, alg: 'ES512' } ])
+
+        const jws = JSON.parse(jose.general_sign_json(payload, signer_jwks))
 
         expect(jws.signatures.length).toBe(2)
         expect(jws.payload).toBe('eyJoZWxsbyI6InRoZXJlIn0')
