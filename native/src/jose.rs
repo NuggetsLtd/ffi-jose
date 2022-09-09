@@ -1065,7 +1065,6 @@ pub fn rust_json_verify(
 
 #[allow(dead_code)]
 pub fn rust_general_sign_json(
-  alg: SigningAlgorithm,
   typ: TokenType,
   payload: &[u8],
   jwks: &[Jwk],
@@ -1102,27 +1101,34 @@ pub fn rust_general_sign_json(
     header.set_token_type(token_type, true);
     jws_headers.push(header);
 
+    let alg = match jwk.algorithm() {
+      Some(alg) => alg,
+      None => panic!("Signing algorithm (`alg`) required for jwk")
+    };
+
     // map `alg` to specific signer type (from private key)
     match alg {
       // ECDSA
-      SigningAlgorithm::Es256 => signers_ecdsa.push(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es256.signer_from_jwk(&jwk).unwrap()),
-      SigningAlgorithm::Es384 => signers_ecdsa.push(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es384.signer_from_jwk(&jwk).unwrap()),
-      SigningAlgorithm::Es512 => signers_ecdsa.push(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es512.signer_from_jwk(&jwk).unwrap()),
-      SigningAlgorithm::Es256k => signers_ecdsa.push(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es256k.signer_from_jwk(&jwk).unwrap()),
+      "ES256" => signers_ecdsa.push(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es256.signer_from_jwk(&jwk).unwrap()),
+      "ES384" => signers_ecdsa.push(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es384.signer_from_jwk(&jwk).unwrap()),
+      "ES512" => signers_ecdsa.push(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es512.signer_from_jwk(&jwk).unwrap()),
+      "ES256K" => signers_ecdsa.push(jws::alg::ecdsa::EcdsaJwsAlgorithm::Es256k.signer_from_jwk(&jwk).unwrap()),
       // EdDSA
-      SigningAlgorithm::Eddsa => signers_eddsa.push(jws::alg::eddsa::EddsaJwsAlgorithm::Eddsa.signer_from_jwk(&jwk).unwrap()),
+      "EdDSA" => signers_eddsa.push(jws::alg::eddsa::EddsaJwsAlgorithm::Eddsa.signer_from_jwk(&jwk).unwrap()),
       // HMAC
-      SigningAlgorithm::Hs256 => signers_hmac.push(jws::alg::hmac::HmacJwsAlgorithm::Hs256.signer_from_jwk(&jwk).unwrap()),
-      SigningAlgorithm::Hs384 => signers_hmac.push(jws::alg::hmac::HmacJwsAlgorithm::Hs384.signer_from_jwk(&jwk).unwrap()),
-      SigningAlgorithm::Hs512 => signers_hmac.push(jws::alg::hmac::HmacJwsAlgorithm::Hs512.signer_from_jwk(&jwk).unwrap()),
+      "HS256" => signers_hmac.push(jws::alg::hmac::HmacJwsAlgorithm::Hs256.signer_from_jwk(&jwk).unwrap()),
+      "HS384" => signers_hmac.push(jws::alg::hmac::HmacJwsAlgorithm::Hs384.signer_from_jwk(&jwk).unwrap()),
+      "HS512" => signers_hmac.push(jws::alg::hmac::HmacJwsAlgorithm::Hs512.signer_from_jwk(&jwk).unwrap()),
       // RSASSA
-      SigningAlgorithm::Rs256 => signers_rsassa.push(jws::alg::rsassa::RsassaJwsAlgorithm::Rs384.signer_from_jwk(&jwk).unwrap()),
-      SigningAlgorithm::Rs384 => signers_rsassa.push(jws::alg::rsassa::RsassaJwsAlgorithm::Rs384.signer_from_jwk(&jwk).unwrap()),
-      SigningAlgorithm::Rs512 => signers_rsassa.push(jws::alg::rsassa::RsassaJwsAlgorithm::Rs512.signer_from_jwk(&jwk).unwrap()),
+      "RS256" => signers_rsassa.push(jws::alg::rsassa::RsassaJwsAlgorithm::Rs384.signer_from_jwk(&jwk).unwrap()),
+      "RS384" => signers_rsassa.push(jws::alg::rsassa::RsassaJwsAlgorithm::Rs384.signer_from_jwk(&jwk).unwrap()),
+      "RS512" => signers_rsassa.push(jws::alg::rsassa::RsassaJwsAlgorithm::Rs512.signer_from_jwk(&jwk).unwrap()),
       // RSASSA PSS
-      SigningAlgorithm::Ps256 => signers_rsassa_pss.push(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps256.signer_from_jwk(&jwk).unwrap()),
-      SigningAlgorithm::Ps384 => signers_rsassa_pss.push(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps512.signer_from_jwk(&jwk).unwrap()),
-      SigningAlgorithm::Ps512 => signers_rsassa_pss.push(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps512.signer_from_jwk(&jwk).unwrap()),
+      "PS256" => signers_rsassa_pss.push(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps256.signer_from_jwk(&jwk).unwrap()),
+      "PS384" => signers_rsassa_pss.push(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps512.signer_from_jwk(&jwk).unwrap()),
+      "PS512" => signers_rsassa_pss.push(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps512.signer_from_jwk(&jwk).unwrap()),
+      // unknown
+      _ => panic!("Unknown or unsupported `alg` value: {:?}", alg)
     }
   }
 
