@@ -699,6 +699,7 @@ describe('NEON NodeJS Interface:', () => {
         const jws = JSON.parse(jose.general_sign_json(payload, signer_jwks))
 
         expect(jws.signatures.length).toBe(1)
+        expect(jws.signatures[0].header.kid).toBe(jwks[0].private.kid)
         expect(jws.payload).toBe('eyJoZWxsbyI6InRoZXJlIn0')
       })
 
@@ -710,6 +711,8 @@ describe('NEON NodeJS Interface:', () => {
         const jws = JSON.parse(jose.general_sign_json(payload, signer_jwks))
 
         expect(jws.signatures.length).toBe(2)
+        expect(jws.signatures[0].header.kid).toBe(jwks[0].private.kid)
+        expect(jws.signatures[1].header.kid).toBe(jwks[1].private.kid)
         expect(jws.payload).toBe('eyJoZWxsbyI6InRoZXJlIn0')
       })
 
@@ -721,6 +724,8 @@ describe('NEON NodeJS Interface:', () => {
         const jws = JSON.parse(jose.general_sign_json(payload, signer_jwks))
 
         expect(jws.signatures.length).toBe(2)
+        expect(jws.signatures[0].header.kid).toBe(jwks[0].private.kid)
+        expect(jws.signatures[1].header.kid).toBe(jwks[2].private.kid)
         expect(jws.payload).toBe('eyJoZWxsbyI6InRoZXJlIn0')
       })
 
