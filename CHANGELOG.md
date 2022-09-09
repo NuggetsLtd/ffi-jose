@@ -1,3 +1,12 @@
+## [1.6.1](https://github.com/NuggetsLtd/ffi-jose/compare/v1.6.0...v1.6.1) (2022-09-09)
+
+
+### Features
+
+* add error msg to verification failure ([42cdb31](https://github.com/NuggetsLtd/ffi-jose/commit/42cdb31a6fcc684a7e6683e373375a0bb451856b))
+
+
+
 # [1.6.0](https://github.com/NuggetsLtd/ffi-jose/compare/1.5.0...1.6.0) (2022-09-09)
 
 
