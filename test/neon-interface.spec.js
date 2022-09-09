@@ -73,7 +73,6 @@ const SigningAlgorithm = {
   PS512: 13
 }
 
-
 const jwks = [
   {
     public: {
@@ -731,7 +730,6 @@ describe('NEON NodeJS Interface:', () => {
         const alg = SigningAlgorithm.ES256
 
         const jws = JSON.parse(jose.general_sign_json(alg, payload, signer_jwks))
-        console.log({ jws })
 
         expect(jws.signatures.length).toBe(2)
         expect(jws.payload).toBe('eyJoZWxsbyI6InRoZXJlIn0')

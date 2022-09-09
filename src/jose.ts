@@ -1,5 +1,5 @@
 import type { JoseGenerateJwkRequest, JoseGenerateKeyPairResponse, JoseEncryptResponse, JWK } from "./types";
-import { NamedCurve, ContentEncryption, KeyEncryption } from "./types";
+import { NamedCurve, ContentEncryption, KeyEncryption, SigningAlgorithm } from "./types";
 import { PrivateKeyObject, PublicKeyObject } from "./KeyObject";
 
 /**
@@ -203,6 +203,48 @@ export const generalEncryptJson = async (
 
 export const decryptJson = async (jwe: any, jwk: JWK): Promise<any> => {
   let json_string = await jose.decrypt_json(_jsonConvertToString(jwe), _jsonConvertToString(jwk));
+
+  return JSON.parse(json_string);
+};
+
+export const compactSignJson = async (
+  alg: SigningAlgorithm,
+  payload: any,
+  jwk: JWK
+): Promise<any> => {
+  return jose.compact_sign_json(alg, _jsonConvertToString(payload), _jsonConvertToString(jwk));
+};
+
+export const compactJsonVerify = async (
+  jws: String,
+  jwk: JWK
+): Promise<any> => {
+  return jose.compact_json_verify(jws, _jsonConvertToString(jwk));
+};
+
+export const flattenedSignJson = async (
+  alg: SigningAlgorithm,
+  payload: any,
+  jwk: JWK
+): Promise<any> => {
+  let json_string = await jose.flattened_sign_json(alg, _jsonConvertToString(payload), _jsonConvertToString(jwk));
+
+  return JSON.parse(json_string);
+};
+
+export const jsonVerify = async (
+  jws: any,
+  jwk: JWK
+): Promise<any> => {
+  return jose.json_verify(_jsonConvertToString(jws), _jsonConvertToString(jwk));
+};
+
+export const generalSignJson = async (
+  alg: SigningAlgorithm,
+  payload: any,
+  jwks: [JWK]
+): Promise<any> => {
+  let json_string = await jose.general_sign_json(alg, _jsonConvertToString(payload), _jsonConvertToString(jwks));
 
   return JSON.parse(json_string);
 };

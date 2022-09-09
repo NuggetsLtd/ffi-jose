@@ -976,8 +976,6 @@ pub fn rust_json_verify(
         None => panic!("Key identifier (`kid`) required for jwk")
       };
 
-      println!("HERE? \n\n{:?}\n\n", kid);
-
       match &jws_json["signatures"] {
         serde_json::Value::Array(signatures) => {
 
