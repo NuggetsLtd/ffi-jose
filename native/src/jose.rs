@@ -1133,37 +1133,43 @@ pub fn rust_general_sign_json(
   }
 
   let mut signers_combined = Vec::new();
+  let mut header_index = 0;
 
   // combine all signers
   for i in 0..signers_ecdsa.len() {
     let signer = &signers_ecdsa[i];
     let signer_ecdsa: &dyn jws::JwsSigner = signer;
 
-    signers_combined.push((&jws_headers[i], signer_ecdsa));
+    signers_combined.push((&jws_headers[header_index], signer_ecdsa));
+    header_index += 1;
   }
   for i in 0..signers_eddsa.len() {
     let signer = &signers_eddsa[i];
     let signer_eddsa: &dyn jws::JwsSigner = signer;
 
-    signers_combined.push((&jws_headers[i], signer_eddsa));
+    signers_combined.push((&jws_headers[header_index], signer_eddsa));
+    header_index += 1;
   }
   for i in 0..signers_hmac.len() {
     let signer = &signers_hmac[i];
     let signer_hmac: &dyn jws::JwsSigner = signer;
 
-    signers_combined.push((&jws_headers[i], signer_hmac));
+    signers_combined.push((&jws_headers[header_index], signer_hmac));
+    header_index += 1;
   }
   for i in 0..signers_rsassa.len() {
     let signer = &signers_rsassa[i];
     let signer_rsassa: &dyn jws::JwsSigner = signer;
 
-    signers_combined.push((&jws_headers[i], signer_rsassa));
+    signers_combined.push((&jws_headers[header_index], signer_rsassa));
+    header_index += 1;
   }
   for i in 0..signers_rsassa_pss.len() {
     let signer = &signers_rsassa_pss[i];
     let signer_rsassa_pss: &dyn jws::JwsSigner = signer;
 
-    signers_combined.push((&jws_headers[i], signer_rsassa_pss));
+    signers_combined.push((&jws_headers[header_index], signer_rsassa_pss));
+    header_index += 1;
   }
 
   // sign & return jws
