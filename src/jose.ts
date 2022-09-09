@@ -1,5 +1,5 @@
 import type { JoseGenerateJwkRequest, JoseGenerateKeyPairResponse, JoseEncryptResponse, JWK } from "./types";
-import { NamedCurve, ContentEncryption, KeyEncryption } from "./types";
+import { NamedCurve, ContentEncryption, KeyEncryption, SigningAlgorithm } from "./types";
 import { PrivateKeyObject, PublicKeyObject } from "./KeyObject";
 
 /**
@@ -206,3 +206,12 @@ export const decryptJson = async (jwe: any, jwk: JWK): Promise<any> => {
 
   return JSON.parse(json_string);
 };
+
+export const compactSignJson = async (
+  alg: SigningAlgorithm,
+  payload: any,
+  jwk: JWK
+): Promise<any> => {
+  return jose.compact_sign_json(alg, _jsonConvertToString(payload), _jsonConvertToString(jwk));
+};
+
