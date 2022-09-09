@@ -215,3 +215,10 @@ export const compactSignJson = async (
   return jose.compact_sign_json(alg, _jsonConvertToString(payload), _jsonConvertToString(jwk));
 };
 
+export const compactJsonVerify = async (
+  jws: String,
+  jwk: JWK
+): Promise<any> => {
+  return jose.compact_json_verify(jws, _jsonConvertToString(jwk));
+};
+
