@@ -16,6 +16,7 @@ use crate::jose::{
   rust_compact_sign_json,
   rust_compact_json_verify,
   rust_flattened_sign_json,
+  rust_json_verify,
 };
 use josekit::jwk::Jwk;
 use std::panic;
@@ -540,6 +541,49 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_flattened_1sign_1json(
   let output = env
         .new_string(signed)
         .expect("Unable to create string from signed data");
+
+  output.into_inner()
+}
+
+#[no_mangle]
+pub extern "system" fn Java_life_nuggets_rs_Jose_json_1verify(
+  env: JNIEnv,
+  _class: JClass,
+  jws: jbyteArray,
+  jwk: jbyteArray,
+) -> jstring {
+  let jws_bytes;
+  match env.convert_byte_array(jws) {
+      Err(_) => panic!("Failed converting `jws` to byte array"),
+      Ok(j) => jws_bytes = j,
+  };
+
+  let jwk_bytes;
+  match env.convert_byte_array(jwk) {
+      Err(_) => panic!("Failed converting `jwk` to byte array"),
+      Ok(k) => jwk_bytes = k,
+  };
+
+  let jws_string = String::from_utf8(jws_bytes.to_vec()).unwrap();
+
+  // convert jwk byte array to Jwk
+  let jwk_string = String::from_utf8(jwk_bytes.to_vec()).unwrap();
+  let jwk: Jwk = serde_json::from_str(&jwk_string).unwrap();
+
+  // decrypt JWs to JSON
+  let (payload, _header) = match rust_json_verify(
+    &jws_string,
+    &jwk,
+  ) {
+    Ok(payload) => payload,
+    _ => panic!("Failed to verify data")
+  };
+
+  let payload_string = String::from_utf8(payload).unwrap();
+
+  let output = env
+        .new_string(payload_string)
+        .expect("Unable to create string from payload data");
 
   output.into_inner()
 }
