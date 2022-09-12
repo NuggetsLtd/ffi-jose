@@ -178,5 +178,12 @@ class Jose {
 
       System.out.println("\nDecrypt JSON:");
       System.out.println(Jose.decrypt_json(jwe1Bytes, jwk1Bytes));
+
+      // ----- JOSE Signing (Compact) -------------------------------------------------------------
+      String payload = "{\"hello\":\"you\"}";
+      String jwkSigner = "{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"d\":\"-uGB3yMayMJbhAolwzVzdjchW0W2i3pYZOii2N7Wg88\"}";
+      System.out.println("\nSign JSON (Compact):");
+      System.out.println(Jose.compact_sign_json(SigningAlgorithm.Es256.ordinal(), payload.getBytes(), jwkSigner.getBytes()));
+
   }
 }
