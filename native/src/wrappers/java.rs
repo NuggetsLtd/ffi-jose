@@ -17,6 +17,7 @@ use crate::jose::{
   rust_compact_json_verify,
   rust_flattened_sign_json,
   rust_json_verify,
+  rust_general_sign_json,
 };
 use josekit::jwk::Jwk;
 use std::panic;
@@ -588,3 +589,42 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_json_1verify(
   output.into_inner()
 }
 
+#[no_mangle]
+pub extern "system" fn Java_life_nuggets_rs_Jose_general_1sign_1json(
+  env: JNIEnv,
+  _class: JClass,
+  payload: jbyteArray,
+  jwks: jbyteArray,
+) -> jstring {
+  let payload_bytes;
+  match env.convert_byte_array(payload) {
+      Err(_) => panic!("Failed converting `payload` to byte array"),
+      Ok(p) => payload_bytes = p,
+  };
+
+  let jwks_bytes;
+  match env.convert_byte_array(jwks) {
+      Err(_) => panic!("Failed converting `jwk` to byte array"),
+      Ok(r) => jwks_bytes = r,
+  };
+
+  // convert jwk byte array to array of Jwks
+  let jwks_string = String::from_utf8(jwks_bytes.to_vec()).unwrap();
+  let signer_jwks: Vec<Jwk> = serde_json::from_str(&jwks_string).unwrap();
+
+  // sign JSON to JWS
+  let signed = match rust_general_sign_json(
+    TokenType::DidcommSigned,
+    &payload_bytes.to_vec(),
+    &signer_jwks
+  ) {
+    Ok(signed) => signed,
+    _ => panic!("Failed to sign data")
+  };
+
+  let output = env
+      .new_string(signed)
+      .expect("Unable to create string from signed data");
+
+  output.into_inner()
+}
