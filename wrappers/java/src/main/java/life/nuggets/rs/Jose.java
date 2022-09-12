@@ -190,5 +190,10 @@ class Jose {
       System.out.println("\nVerify JSON (Compact):");
       System.out.println(Jose.compact_json_verify(jwsCompact.getBytes(), jwkVerifierCompact.getBytes()));
 
+      // ----- JOSE Signing (Flattened) -------------------------------------------------------------
+      String jwkVerifier = "{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"t2aXVivRDLhttpb8bKWLmn73eaNj3xOaWgP405z7pjU\",\"y\":\"YSjJhceBD_GaCTns1UNLSVvxXPziftTcEv7LSG6AxcE\"}";
+      System.out.println("\nSign JSON (Flattened):");
+      System.out.println(Jose.flattened_sign_json(SigningAlgorithm.Es256.ordinal(), payload.getBytes(), jwkSigner.getBytes()));
+
   }
 }
