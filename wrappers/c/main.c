@@ -197,6 +197,146 @@ void decryptJson(char* jwe, char* jwk)
   ffi_jose_free_json_string(json_string);
 }
 
+void compactSignJson(SigningAlgorithm alg, char* jwk, char* payload)
+{
+  JsonString json_string;
+  ByteArray payloadBuffer;
+  ByteArray jwkBuffer;
+
+  // populate jwk buffer
+  jwkBuffer.length = strlen(jwk);
+  BYTE jwkBufferData[jwkBuffer.length];
+  string2ByteArray(jwk, jwkBufferData);
+  jwkBuffer.data = jwkBufferData;
+
+  // populate payload buffer
+  payloadBuffer.length = strlen(payload);
+  BYTE payloadBufferData[payloadBuffer.length];
+  string2ByteArray(payload, payloadBufferData);
+  payloadBuffer.data = payloadBufferData;
+
+  int outcome = ffi_jose_compact_sign_json(alg, payloadBuffer, jwkBuffer, &json_string);
+
+  if (outcome == 0)
+  {
+    printf("Compact Signed Msg:\n%s\n\n", json_string.ptr);
+  }
+
+  ffi_jose_free_json_string(json_string);
+}
+
+void verifyCompactJson(char* jws, char* jwk)
+{
+  JsonString json_string;
+  ByteArray jwsBuffer;
+  ByteArray jwkBuffer;
+
+  // populate jws buffer
+  jwsBuffer.length = strlen(jws);
+  BYTE jwsBufferData[jwsBuffer.length];
+  string2ByteArray(jws, jwsBufferData);
+  jwsBuffer.data = jwsBufferData;
+
+  // populate jwk buffer
+  jwkBuffer.length = strlen(jwk);
+  BYTE jwkBufferData[jwkBuffer.length];
+  string2ByteArray(jwk, jwkBufferData);
+  jwkBuffer.data = jwkBufferData;
+
+  int outcome = ffi_jose_compact_json_verify(jwsBuffer, jwkBuffer, &json_string);
+
+  if (outcome == 0)
+  {
+    printf("Verified Msg:\n%s\n\n", json_string.ptr);
+  }
+
+  ffi_jose_free_json_string(json_string);
+}
+
+void flattenedSignJson(SigningAlgorithm alg, char* jwk, char* payload)
+{
+  JsonString json_string;
+  ByteArray payloadBuffer;
+  ByteArray jwkBuffer;
+
+  // populate jwk buffer
+  jwkBuffer.length = strlen(jwk);
+  BYTE jwkBufferData[jwkBuffer.length];
+  string2ByteArray(jwk, jwkBufferData);
+  jwkBuffer.data = jwkBufferData;
+
+  // populate payload buffer
+  payloadBuffer.length = strlen(payload);
+  BYTE payloadBufferData[payloadBuffer.length];
+  string2ByteArray(payload, payloadBufferData);
+  payloadBuffer.data = payloadBufferData;
+
+  int outcome = ffi_jose_flattened_sign_json(alg, payloadBuffer, jwkBuffer, &json_string);
+
+  if (outcome == 0)
+  {
+    printf("Flattened Signed Msg:\n%s\n\n", json_string.ptr);
+  }
+
+  ffi_jose_free_json_string(json_string);
+}
+
+void verifyJson(char* jws, char* jwk)
+{
+  JsonString json_string;
+  ByteArray jwsBuffer;
+  ByteArray jwkBuffer;
+
+  // populate jws buffer
+  jwsBuffer.length = strlen(jws);
+  BYTE jwsBufferData[jwsBuffer.length];
+  string2ByteArray(jws, jwsBufferData);
+  jwsBuffer.data = jwsBufferData;
+
+  // populate jwk buffer
+  jwkBuffer.length = strlen(jwk);
+  BYTE jwkBufferData[jwkBuffer.length];
+  string2ByteArray(jwk, jwkBufferData);
+  jwkBuffer.data = jwkBufferData;
+
+  int outcome = ffi_jose_json_verify(jwsBuffer, jwkBuffer, &json_string);
+
+  if (outcome == 0)
+  {
+    printf("Verified Msg:\n%s\n\n", json_string.ptr);
+  }
+
+  ffi_jose_free_json_string(json_string);
+}
+
+void generalSignJson(char* jwks, char* payload)
+{
+  JsonString json_string;
+  ByteArray payloadBuffer;
+  ByteArray jwksBuffer;
+
+  // populate jwks buffer
+  jwksBuffer.length = strlen(jwks);
+  BYTE jwksBufferData[jwksBuffer.length];
+  string2ByteArray(jwks, jwksBufferData);
+  jwksBuffer.data = jwksBufferData;
+
+  // populate payload buffer
+  payloadBuffer.length = strlen(payload);
+  BYTE payloadBufferData[payloadBuffer.length];
+  string2ByteArray(payload, payloadBufferData);
+  payloadBuffer.data = payloadBufferData;
+
+  int outcome = ffi_jose_general_sign_json(payloadBuffer, jwksBuffer, &json_string);
+
+  if (outcome == 0)
+  {
+    printf("General Signed Msg:\n%s\n\n", json_string.ptr);
+  }
+
+  ffi_jose_free_json_string(json_string);
+}
+
 int main()
 {
   generateKeyPairJWK(P256);
@@ -230,4 +370,23 @@ int main()
   char* jwe2 = "{\"protected\":\"eyJhbGciOiJFQ0RILUVTK0EyNTZLVyIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLWVuY3J5cHRlZCtqc29uIn0\",\"recipients\":[{\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"epk\":{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"KEt3oBE9bpsu3meaYQvRmF_y6zNtml4ziN3fXq4Tpa8\",\"y\":\"qtoKMfk5bxo4_TEGz1GCJSwanNtt-enZvuWUi_42Pko\"}},\"encrypted_key\":\"8H45Ib-7SB8hFPBF7adVCt0fm1su4WZ_\"},{\"header\":{\"kid\":\"did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p256-1\",\"epk\":{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"7Xdm9ui6DV3yT10oUe3kl-NAisnywvVTFp0TVo9ILVg\",\"y\":\"HcC88ngI0gHAKp7GR-a4E_VDEgqpnKs-yfgt0Lx-Lgw\"}},\"encrypted_key\":\"nPbYDVJPcL1w1aZsikU8uXwCwppGlvC4\"}],\"iv\":\"8flfc6gEcmROAsIq\",\"ciphertext\":\"jZ5hTy5pxSb0\",\"tag\":\"pfGFGYwsOcke0QrrT04Izw\"}";
   char* jwk2 = "{\"kid\":\"did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"d\":\"pndx4RjZSMpYjkokcn5xcIfmhZV19-jr_0n4l1kcphI\"}";
   decryptJson(jwe2, jwk2);
+
+  char* signer_jwk = "{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"d\":\"-uGB3yMayMJbhAolwzVzdjchW0W2i3pYZOii2N7Wg88\"}";
+  char* payload = "{\"hello\":\"you\"}";
+  compactSignJson(Es256, signer_jwk, payload);
+
+  char* verifier_jwk = "{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"t2aXVivRDLhttpb8bKWLmn73eaNj3xOaWgP405z7pjU\",\"y\":\"YSjJhceBD_GaCTns1UNLSVvxXPziftTcEv7LSG6AxcE\"}";
+  char* jws_compact = "eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLWVuY3J5cHRlZCtqc29uIiwiYWxnIjoiRVMyNTYifQ.eyJoZWxsbyI6InlvdSJ9.sfs9z4cJS1x75STCNvot50tGzg6zo8bvW2lP3rJzIfnCD9NO2_GNNL8l0BhXEeIhapHq7Tma-Ys0iQWNL2PpAw";
+  verifyCompactJson(jws_compact, verifier_jwk);
+
+  flattenedSignJson(Es256, signer_jwk, payload);
+
+  char* jws_flattened = "{\"protected\":\"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLWVuY3J5cHRlZCtqc29uIiwiYWxnIjoiRVMyNTYifQ\",\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\"},\"payload\":\"eyJoZWxsbyI6InlvdSJ9\",\"signature\":\"RAUzc3UCIz-Nc7JU7hFUXLPOIgTvNpbmWdzOBEsRNhmgt7Pa0T3hFkWgfNnBxTLyYh5d3Fr58OqzPPF6d2CUFQ\"}";
+  verifyJson(jws_flattened, verifier_jwk);
+
+  char* signer_jwks = "[{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"d\":\"-uGB3yMayMJbhAolwzVzdjchW0W2i3pYZOii2N7Wg88\",\"alg\":\"ES256\"}]";
+  generalSignJson(signer_jwks, payload);
+
+  char* jws_general = "{\"signatures\":[{\"protected\":\"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLWVuY3J5cHRlZCtqc29uIiwiYWxnIjoiRVMyNTYifQ\",\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\"},\"signature\":\"mlU_zFE6lW9GqlRjKaQfRpQ5dgOjUE9E407br-gxqYl5qmjE1V1FH2bFCP-mAr3hmdl8jSzH6PYFHrJFcwRcUg\"}],\"payload\":\"eyJoZWxsbyI6InlvdSJ9\"}";
+  verifyJson(jws_flattened, verifier_jwk);
 }
