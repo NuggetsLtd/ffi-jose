@@ -371,22 +371,25 @@ int main()
   char* jwk2 = "{\"kid\":\"did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"d\":\"pndx4RjZSMpYjkokcn5xcIfmhZV19-jr_0n4l1kcphI\"}";
   decryptJson(jwe2, jwk2);
 
+  // ----- JOSE Signing (Compact) -------------------------------------------------------------
   char* signer_jwk = "{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"d\":\"-uGB3yMayMJbhAolwzVzdjchW0W2i3pYZOii2N7Wg88\"}";
   char* payload = "{\"hello\":\"you\"}";
   compactSignJson(Es256, signer_jwk, payload);
 
   char* verifier_jwk = "{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"t2aXVivRDLhttpb8bKWLmn73eaNj3xOaWgP405z7pjU\",\"y\":\"YSjJhceBD_GaCTns1UNLSVvxXPziftTcEv7LSG6AxcE\"}";
-  char* jws_compact = "eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLWVuY3J5cHRlZCtqc29uIiwiYWxnIjoiRVMyNTYifQ.eyJoZWxsbyI6InlvdSJ9.sfs9z4cJS1x75STCNvot50tGzg6zo8bvW2lP3rJzIfnCD9NO2_GNNL8l0BhXEeIhapHq7Tma-Ys0iQWNL2PpAw";
+  char* jws_compact = "eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYiLCJraWQiOiJkaWQ6bnVnZ2V0czpzWnppRnZkWHc4c2lNdmcxUDRZUzkxZ0c0TGMja2V5LXAyNTYtMSJ9.eyJoZWxsbyI6InlvdSJ9.uy1bNLNDPNU2YiOThNVWEaGzczXiMzsCqm4kSVAmNY89bRCRYkDPcQ3QEt9BbsrukG82zU_TIs3qzeiYJSLZ-Q";
   verifyCompactJson(jws_compact, verifier_jwk);
 
+  // ----- JOSE Signing (Flattened) -------------------------------------------------------------
   flattenedSignJson(Es256, signer_jwk, payload);
 
-  char* jws_flattened = "{\"protected\":\"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLWVuY3J5cHRlZCtqc29uIiwiYWxnIjoiRVMyNTYifQ\",\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\"},\"payload\":\"eyJoZWxsbyI6InlvdSJ9\",\"signature\":\"RAUzc3UCIz-Nc7JU7hFUXLPOIgTvNpbmWdzOBEsRNhmgt7Pa0T3hFkWgfNnBxTLyYh5d3Fr58OqzPPF6d2CUFQ\"}";
+  char* jws_flattened = "{\"protected\":\"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYifQ\",\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\"},\"payload\":\"eyJoZWxsbyI6InlvdSJ9\",\"signature\":\"wGtQSZYvq6y2h8oM2D8WLvdnHaOn0Oktx93rPWRjqyguOEzZfKno1KumKVHlun5ICyGKmy1gG4RnRaEIU4q3sA\"}";
   verifyJson(jws_flattened, verifier_jwk);
 
+  // ----- JOSE Signing (General) -------------------------------------------------------------
   char* signer_jwks = "[{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"d\":\"-uGB3yMayMJbhAolwzVzdjchW0W2i3pYZOii2N7Wg88\",\"alg\":\"ES256\"}]";
   generalSignJson(signer_jwks, payload);
 
-  char* jws_general = "{\"signatures\":[{\"protected\":\"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLWVuY3J5cHRlZCtqc29uIiwiYWxnIjoiRVMyNTYifQ\",\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\"},\"signature\":\"mlU_zFE6lW9GqlRjKaQfRpQ5dgOjUE9E407br-gxqYl5qmjE1V1FH2bFCP-mAr3hmdl8jSzH6PYFHrJFcwRcUg\"}],\"payload\":\"eyJoZWxsbyI6InlvdSJ9\"}";
+  char* jws_general = "{\"signatures\":[{\"protected\":\"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYifQ\",\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\"},\"signature\":\"UnGP7dQyOY9cJ9_jrx6Ja8cbQGNyaPtKHFyEVp21V00iq0wAM-Hkdphk5zumywV672XIwBjMcrA-Hl3KBMkZrA\"}],\"payload\":\"eyJoZWxsbyI6InlvdSJ9\"}";
   verifyJson(jws_flattened, verifier_jwk);
 }
