@@ -16,6 +16,7 @@ use crate::jose::{
   rust_compact_json_verify,
   rust_flattened_sign_json,
   rust_json_verify,
+  rust_general_sign_json,
 };
 use josekit::jwk::Jwk;
 use std::os::raw::c_char;
@@ -426,3 +427,39 @@ pub unsafe extern "C" fn ffi_jose_json_verify(
   }
 }
 
+/// General Sign JSON
+///
+/// # SAFETY
+/// The `json_string.ptr` pointer needs to follow the same safety requirements
+/// as Rust's `std::ffi::CStr::from_ptr`
+#[no_mangle]
+pub unsafe extern "C" fn ffi_jose_general_sign_json(
+  payload: ffi::ByteArray,
+  jwks: ffi::ByteArray,
+  json_string: &mut JsonString,
+) -> i32 {
+  // convert recipients byte array to array of Jwks
+  let jwks_string = String::from_utf8(jwks.to_vec()).unwrap();
+  let signer_jwks: Vec<Jwk> = serde_json::from_str(&jwks_string).unwrap();
+
+  // encrypt payload for recipients and return
+  match rust_general_sign_json(
+    TokenType::DidcommEncrypted,
+    &payload.to_vec(),
+    &signer_jwks,
+  ) {
+    Ok(mut jws_string) => {
+      // add null terminator (for C-string)
+      jws_string.push('\0');
+
+      // box the string, so string isn't de-allocated on leaving the scope of this fn
+      let boxed: Box<str> = jws_string.into_boxed_str();
+    
+      // set json_string pointer to boxed jws_string
+      json_string.ptr = Box::into_raw(boxed).cast();
+
+      0
+    },
+    Err(_) => 1
+  }
+}
