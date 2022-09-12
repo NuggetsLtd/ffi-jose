@@ -281,6 +281,34 @@ void flattenedSignJson(SigningAlgorithm alg, char* jwk, char* payload)
   ffi_jose_free_json_string(json_string);
 }
 
+void verifyJson(char* jws, char* jwk)
+{
+  JsonString json_string;
+  ByteArray jwsBuffer;
+  ByteArray jwkBuffer;
+
+  // populate jws buffer
+  jwsBuffer.length = strlen(jws);
+  BYTE jwsBufferData[jwsBuffer.length];
+  string2ByteArray(jws, jwsBufferData);
+  jwsBuffer.data = jwsBufferData;
+
+  // populate jwk buffer
+  jwkBuffer.length = strlen(jwk);
+  BYTE jwkBufferData[jwkBuffer.length];
+  string2ByteArray(jwk, jwkBufferData);
+  jwkBuffer.data = jwkBufferData;
+
+  int outcome = ffi_jose_json_verify(jwsBuffer, jwkBuffer, &json_string);
+
+  if (outcome == 0)
+  {
+    printf("Verified Msg:\n%s\n\n", json_string.ptr);
+  }
+
+  ffi_jose_free_json_string(json_string);
+}
+
 int main()
 {
   generateKeyPairJWK(P256);
@@ -324,4 +352,8 @@ int main()
   verifyCompactJson(jws_compact, verifier_jwk);
 
   flattenedSignJson(Es256, signer_jwk, payload);
+
+  char* jws_flattened = "{\"protected\":\"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLWVuY3J5cHRlZCtqc29uIiwiYWxnIjoiRVMyNTYifQ\",\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\"},\"payload\":\"eyJoZWxsbyI6InlvdSJ9\",\"signature\":\"RAUzc3UCIz-Nc7JU7hFUXLPOIgTvNpbmWdzOBEsRNhmgt7Pa0T3hFkWgfNnBxTLyYh5d3Fr58OqzPPF6d2CUFQ\"}";
+  verifyJson(jws_flattened, verifier_jwk);
+
 }
