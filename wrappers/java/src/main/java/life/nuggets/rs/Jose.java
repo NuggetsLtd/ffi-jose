@@ -199,5 +199,13 @@ class Jose {
       String jwsFlattened = "{\"protected\":\"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYifQ\",\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\"},\"payload\":\"eyJoZWxsbyI6InlvdSJ9\",\"signature\":\"Jz0FINLujxKXQ5Viajp6Lkxpdh5fZwPwvA_kCQ58PoduQVBG6xu2ak2zCfxcTHEglovcze--t5jp2fQHxvCtKA\"}";
       System.out.println(Jose.json_verify(jwsFlattened.getBytes(), jwkVerifier.getBytes()));
 
+      // ----- JOSE Signing (General) -------------------------------------------------------------
+      String jwkSigners = "[{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"d\":\"-uGB3yMayMJbhAolwzVzdjchW0W2i3pYZOii2N7Wg88\",\"alg\":\"ES256\"}]";
+      System.out.println("\nSign JSON (General):");
+      System.out.println(Jose.general_sign_json(payload.getBytes(), jwkSigners.getBytes()));
+
+      System.out.println("\nVerify JSON (General):");
+      String jwsGeneral = "{\"signatures\":[{\"protected\":\"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYifQ\",\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\"},\"signature\":\"M-lHEx3QU2SjIyuyhKAuUGjim_z-3kCkTSvh8JbNSch2wuQN_0lQgSZ-jyWEE08owevB5Da2QmNAsSonM90c3A\"}],\"payload\":\"eyJoZWxsbyI6InlvdSJ9\"}";
+      System.out.println(Jose.json_verify(jwsGeneral.getBytes(), jwkVerifier.getBytes()));
   }
 }
