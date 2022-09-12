@@ -197,6 +197,34 @@ void decryptJson(char* jwe, char* jwk)
   ffi_jose_free_json_string(json_string);
 }
 
+void compactSignJson(SigningAlgorithm alg, char* jwk, char* payload)
+{
+  JsonString json_string;
+  ByteArray payloadBuffer;
+  ByteArray jwkBuffer;
+
+  // populate jwk buffer
+  jwkBuffer.length = strlen(jwk);
+  BYTE jwkBufferData[jwkBuffer.length];
+  string2ByteArray(jwk, jwkBufferData);
+  jwkBuffer.data = jwkBufferData;
+
+  // populate payload buffer
+  payloadBuffer.length = strlen(payload);
+  BYTE payloadBufferData[payloadBuffer.length];
+  string2ByteArray(payload, payloadBufferData);
+  payloadBuffer.data = payloadBufferData;
+
+  int outcome = ffi_jose_compact_sign_json(alg, payloadBuffer, jwkBuffer, &json_string);
+
+  if (outcome == 0)
+  {
+    printf("Compact Signed Msg:\n%s\n\n", json_string.ptr);
+  }
+
+  ffi_jose_free_json_string(json_string);
+}
+
 int main()
 {
   generateKeyPairJWK(P256);
@@ -230,4 +258,9 @@ int main()
   char* jwe2 = "{\"protected\":\"eyJhbGciOiJFQ0RILUVTK0EyNTZLVyIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLWVuY3J5cHRlZCtqc29uIn0\",\"recipients\":[{\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"epk\":{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"KEt3oBE9bpsu3meaYQvRmF_y6zNtml4ziN3fXq4Tpa8\",\"y\":\"qtoKMfk5bxo4_TEGz1GCJSwanNtt-enZvuWUi_42Pko\"}},\"encrypted_key\":\"8H45Ib-7SB8hFPBF7adVCt0fm1su4WZ_\"},{\"header\":{\"kid\":\"did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p256-1\",\"epk\":{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"7Xdm9ui6DV3yT10oUe3kl-NAisnywvVTFp0TVo9ILVg\",\"y\":\"HcC88ngI0gHAKp7GR-a4E_VDEgqpnKs-yfgt0Lx-Lgw\"}},\"encrypted_key\":\"nPbYDVJPcL1w1aZsikU8uXwCwppGlvC4\"}],\"iv\":\"8flfc6gEcmROAsIq\",\"ciphertext\":\"jZ5hTy5pxSb0\",\"tag\":\"pfGFGYwsOcke0QrrT04Izw\"}";
   char* jwk2 = "{\"kid\":\"did:nuggets:qy8tyYBwveRXKDL2jjYTZENBDi3#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"d\":\"pndx4RjZSMpYjkokcn5xcIfmhZV19-jr_0n4l1kcphI\"}";
   decryptJson(jwe2, jwk2);
+
+  char* signer_jwk = "{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"d\":\"-uGB3yMayMJbhAolwzVzdjchW0W2i3pYZOii2N7Wg88\"}";
+  char* payload = "{\"hello\":\"you\"}";
+  compactSignJson(Es256, signer_jwk, payload);
+
 }
