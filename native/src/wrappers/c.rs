@@ -292,7 +292,7 @@ pub unsafe extern "C" fn ffi_jose_compact_sign_json(
   // encrypt payload for recipients and return
   match rust_compact_sign_json(
     alg,
-    TokenType::DidcommEncrypted,
+    TokenType::DidcommSigned,
     &payload.to_vec(),
     &signer_jwk,
   ) {
@@ -369,7 +369,7 @@ pub unsafe extern "C" fn ffi_jose_flattened_sign_json(
   // encrypt payload for recipients and return
   match rust_flattened_sign_json(
     alg,
-    TokenType::DidcommEncrypted,
+    TokenType::DidcommSigned,
     &payload.to_vec(),
     &signer_jwk,
   ) {
@@ -444,7 +444,7 @@ pub unsafe extern "C" fn ffi_jose_general_sign_json(
 
   // encrypt payload for recipients and return
   match rust_general_sign_json(
-    TokenType::DidcommEncrypted,
+    TokenType::DidcommSigned,
     &payload.to_vec(),
     &signer_jwks,
   ) {
