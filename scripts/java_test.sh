@@ -11,6 +11,7 @@ echo "${BLUE}----- ⏳ BUILD: Java -> RUST FOREIGN FUNCTION INTERFACE ----------
 echo ""
 pwd
 CARGO_CFG_TARGET_OS='android' CARGO_CFG_FEATURE='java' cargo build --manifest-path native/Cargo.toml --release --no-default-features --features java
+mkdir -p wrappers/java/src/main/jniLibs/darwin-x86_64
 cp native/target/release/libjose.dylib  wrappers/java/src/main/jniLibs/darwin-x86_64/libjose.dylib
 echo ""
 echo "${GREEN}----- ✅ DONE: Java -> RUST FOREIGN FUNCTION INTERFACE ----------------------------------${NC}"
