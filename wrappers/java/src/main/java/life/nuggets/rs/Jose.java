@@ -46,6 +46,27 @@ class Jose {
     A192cbcHs384,
     A256cbcHs512,
   }
+  enum SigningAlgorithm {
+    // ECCDSA
+    Es256,
+    Es384,
+    Es512,
+    Es256k,
+    // EdDSA
+    Eddsa,
+    // HMAC
+    Hs256,
+    Hs384,
+    Hs512,
+    // RSA
+    Rs256,
+    Rs384,
+    Rs512,
+    // RSA PSS
+    Ps256,
+    Ps384,
+    Ps512,
+  }
 
   static {
       // This actually loads the shared object that we'll be creating.
@@ -61,6 +82,11 @@ class Jose {
   private static native String decrypt(int enc, byte[] key, byte[] ciphertext, byte[] iv, byte[] tag, byte[] aad);
   private static native String general_encrypt_json(int alg, int enc, byte[] payload, byte[] recipients);
   private static native String decrypt_json(byte[] jwe, byte[] jwk);
+  private static native String compact_sign_json(int alg, byte[] payload, byte[] jwk);
+  private static native String compact_json_verify(byte[] jws, byte[] jwk);
+  private static native String flattened_sign_json(int alg, byte[] payload, byte[] jwk);
+  private static native String json_verify(byte[] jws, byte[] jwk);
+  private static native String general_sign_json(byte[] payload, byte[] jwks);
 
   public static byte hexToByte(String hexString) {
       int firstDigit = toDigit(hexString.charAt(0));
