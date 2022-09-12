@@ -185,5 +185,10 @@ class Jose {
       System.out.println("\nSign JSON (Compact):");
       System.out.println(Jose.compact_sign_json(SigningAlgorithm.Es256.ordinal(), payload.getBytes(), jwkSigner.getBytes()));
 
+      String jwkVerifierCompact = "{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"t2aXVivRDLhttpb8bKWLmn73eaNj3xOaWgP405z7pjU\",\"y\":\"YSjJhceBD_GaCTns1UNLSVvxXPziftTcEv7LSG6AxcE\"}";
+      String jwsCompact = "eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYiLCJraWQiOiJkaWQ6bnVnZ2V0czpzWnppRnZkWHc4c2lNdmcxUDRZUzkxZ0c0TGMja2V5LXAyNTYtMSJ9.eyJoZWxsbyI6InlvdSJ9.Qhlf4kCTV6qfBzUNj6Fb5iDHu5XjJJ-QMQZK4CycDlUq9HhJ_jUhMRpIpcXwjde88p3CMOItDVdwwxiC087LpQ";
+      System.out.println("\nVerify JSON (Compact):");
+      System.out.println(Jose.compact_json_verify(jwsCompact.getBytes(), jwkVerifierCompact.getBytes()));
+
   }
 }
