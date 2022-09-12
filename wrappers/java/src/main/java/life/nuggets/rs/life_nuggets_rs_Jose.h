@@ -55,6 +55,46 @@ JNIEXPORT jstring JNICALL Java_life_nuggets_rs_Jose_general_1encrypt_1json
 JNIEXPORT jstring JNICALL Java_life_nuggets_rs_Jose_decrypt_1json
   (JNIEnv *, jclass, jbyteArray, jbyteArray);
 
+/*
+ * Class:     life_nuggets_rs_Jose
+ * Method:    compact_sign_json
+ * Signature: (I[B[B)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_life_nuggets_rs_Jose_compact_1sign_1json
+  (JNIEnv *, jclass, jint, jbyteArray, jbyteArray);
+
+/*
+ * Class:     life_nuggets_rs_Jose
+ * Method:    compact_json_verify
+ * Signature: ([B[B)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_life_nuggets_rs_Jose_compact_1json_1verify
+  (JNIEnv *, jclass, jbyteArray, jbyteArray);
+
+/*
+ * Class:     life_nuggets_rs_Jose
+ * Method:    flattened_sign_json
+ * Signature: (I[B[B)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_life_nuggets_rs_Jose_flattened_1sign_1json
+  (JNIEnv *, jclass, jint, jbyteArray, jbyteArray);
+
+/*
+ * Class:     life_nuggets_rs_Jose
+ * Method:    json_verify
+ * Signature: ([B[B)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_life_nuggets_rs_Jose_json_1verify
+  (JNIEnv *, jclass, jbyteArray, jbyteArray);
+
+/*
+ * Class:     life_nuggets_rs_Jose
+ * Method:    general_sign_json
+ * Signature: ([B[B)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_life_nuggets_rs_Jose_general_1sign_1json
+  (JNIEnv *, jclass, jbyteArray, jbyteArray);
+
 #ifdef __cplusplus
 }
 #endif
