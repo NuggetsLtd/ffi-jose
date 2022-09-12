@@ -5,13 +5,15 @@ use crate::jose::{
   NamedCurve,
   ContentEncryptionAlgorithm,
   KeyEncryptionAlgorithm,
+  SigningAlgorithm,
   TokenType,
   rust_generate_key_pair_jwk,
   rust_generate_key_pair,
   rust_encrypt,
   rust_decrypt,
   rust_general_encrypt_json,
-  rust_decrypt_json
+  rust_decrypt_json,
+  rust_compact_sign_json,
 };
 use josekit::jwk::Jwk;
 use std::panic;
@@ -364,3 +366,70 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_decrypt_1json(
 
   output.into_inner()
 }
+
+#[no_mangle]
+pub extern "system" fn Java_life_nuggets_rs_Jose_compact_1sign_1json(
+  env: JNIEnv,
+  _class: JClass,
+  alg: jint,
+  payload: jbyteArray,
+  jwk: jbyteArray,
+) -> jstring {
+  // map signing algorithm integers to enum options
+  let alg = match alg as u8 {
+    // ECDSA
+    0 => SigningAlgorithm::Es256,
+    1 => SigningAlgorithm::Es384,
+    2 => SigningAlgorithm::Es512,
+    3 => SigningAlgorithm::Es256k,
+    // EdDSA
+    4 => SigningAlgorithm::Eddsa,
+    // HMAC
+    5 => SigningAlgorithm::Hs256,
+    6 => SigningAlgorithm::Hs384,
+    7 => SigningAlgorithm::Hs512,
+    // RSA
+    8 => SigningAlgorithm::Rs256,
+    9 => SigningAlgorithm::Rs384,
+    10 => SigningAlgorithm::Rs512,
+    // RSA PSS
+    11 => SigningAlgorithm::Ps256,
+    12 => SigningAlgorithm::Ps384,
+    13 => SigningAlgorithm::Ps512,
+    _ => panic!("Unknown `alg` value")
+  };
+
+  let payload_bytes;
+  match env.convert_byte_array(payload) {
+      Err(_) => panic!("Failed converting `payload` to byte array"),
+      Ok(p) => payload_bytes = p,
+  };
+
+  let jwk_bytes;
+  match env.convert_byte_array(jwk) {
+      Err(_) => panic!("Failed converting `jwk` to byte array"),
+      Ok(r) => jwk_bytes = r,
+  };
+
+  // convert jwk byte array to array of Jwks
+  let jwk_string = String::from_utf8(jwk_bytes.to_vec()).unwrap();
+  let signer_jwk: Jwk = serde_json::from_str(&jwk_string).unwrap();
+
+  // sign JSON to JWS
+  let signed = match rust_compact_sign_json(
+    alg,
+    TokenType::DidcommSigned,
+    &payload_bytes.to_vec(),
+    &signer_jwk
+  ) {
+    Ok(signed) => signed,
+    _ => panic!("Failed to sign data")
+  };
+
+  let output = env
+        .new_string(signed)
+        .expect("Unable to create string from signed data");
+
+  output.into_inner()
+}
+
