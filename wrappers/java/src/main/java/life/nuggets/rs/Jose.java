@@ -195,5 +195,9 @@ class Jose {
       System.out.println("\nSign JSON (Flattened):");
       System.out.println(Jose.flattened_sign_json(SigningAlgorithm.Es256.ordinal(), payload.getBytes(), jwkSigner.getBytes()));
 
+      System.out.println("\nVerify JSON (Flattened):");
+      String jwsFlattened = "{\"protected\":\"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYifQ\",\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\"},\"payload\":\"eyJoZWxsbyI6InlvdSJ9\",\"signature\":\"Jz0FINLujxKXQ5Viajp6Lkxpdh5fZwPwvA_kCQ58PoduQVBG6xu2ak2zCfxcTHEglovcze--t5jp2fQHxvCtKA\"}";
+      System.out.println(Jose.json_verify(jwsFlattened.getBytes(), jwkVerifier.getBytes()));
+
   }
 }
