@@ -309,6 +309,34 @@ void verifyJson(char* jws, char* jwk)
   ffi_jose_free_json_string(json_string);
 }
 
+void generalSignJson(char* jwks, char* payload)
+{
+  JsonString json_string;
+  ByteArray payloadBuffer;
+  ByteArray jwksBuffer;
+
+  // populate jwks buffer
+  jwksBuffer.length = strlen(jwks);
+  BYTE jwksBufferData[jwksBuffer.length];
+  string2ByteArray(jwks, jwksBufferData);
+  jwksBuffer.data = jwksBufferData;
+
+  // populate payload buffer
+  payloadBuffer.length = strlen(payload);
+  BYTE payloadBufferData[payloadBuffer.length];
+  string2ByteArray(payload, payloadBufferData);
+  payloadBuffer.data = payloadBufferData;
+
+  int outcome = ffi_jose_general_sign_json(payloadBuffer, jwksBuffer, &json_string);
+
+  if (outcome == 0)
+  {
+    printf("General Signed Msg:\n%s\n\n", json_string.ptr);
+  }
+
+  ffi_jose_free_json_string(json_string);
+}
+
 int main()
 {
   generateKeyPairJWK(P256);
@@ -356,4 +384,9 @@ int main()
   char* jws_flattened = "{\"protected\":\"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLWVuY3J5cHRlZCtqc29uIiwiYWxnIjoiRVMyNTYifQ\",\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\"},\"payload\":\"eyJoZWxsbyI6InlvdSJ9\",\"signature\":\"RAUzc3UCIz-Nc7JU7hFUXLPOIgTvNpbmWdzOBEsRNhmgt7Pa0T3hFkWgfNnBxTLyYh5d3Fr58OqzPPF6d2CUFQ\"}";
   verifyJson(jws_flattened, verifier_jwk);
 
+  char* signer_jwks = "[{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"d\":\"-uGB3yMayMJbhAolwzVzdjchW0W2i3pYZOii2N7Wg88\",\"alg\":\"ES256\"}]";
+  generalSignJson(signer_jwks, payload);
+
+  char* jws_general = "{\"signatures\":[{\"protected\":\"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLWVuY3J5cHRlZCtqc29uIiwiYWxnIjoiRVMyNTYifQ\",\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\"},\"signature\":\"mlU_zFE6lW9GqlRjKaQfRpQ5dgOjUE9E407br-gxqYl5qmjE1V1FH2bFCP-mAr3hmdl8jSzH6PYFHrJFcwRcUg\"}],\"payload\":\"eyJoZWxsbyI6InlvdSJ9\"}";
+  verifyJson(jws_flattened, verifier_jwk);
 }
