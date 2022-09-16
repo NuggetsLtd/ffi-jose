@@ -229,6 +229,11 @@ export const flattenedSignJson = async (
   payload: any,
   jwk: JWK
 ): Promise<any> => {
+
+  if(!jwk.kid) {
+    throw new Error('JWK `kid` property required for "flattened" signing')
+  }
+
   let json_string = await jose.flattened_sign_json(alg, _jsonConvertToString(payload), _jsonConvertToString(jwk));
 
   return JSON.parse(json_string);
@@ -247,6 +252,13 @@ export const generalSignJson = async (
   payload: any,
   jwks: [JWK]
 ): Promise<any> => {
+
+  jwks.forEach(jwk => {
+    if(!jwk.kid) {
+      throw new Error('JWK `kid` property required for "general" signing')
+    }
+  })
+
   let json_string = await jose.general_sign_json(_jsonConvertToString(payload), _jsonConvertToString(jwks));
 
   return JSON.parse(json_string);
