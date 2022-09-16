@@ -219,7 +219,9 @@ export const compactJsonVerify = async (
   jws: String,
   jwk: JWK
 ): Promise<any> => {
-  return jose.compact_json_verify(jws, _jsonConvertToString(jwk));
+  let json_string = await jose.compact_json_verify(jws, _jsonConvertToString(jwk));
+
+  return JSON.parse(json_string);
 };
 
 export const flattenedSignJson = async (
@@ -236,7 +238,9 @@ export const jsonVerify = async (
   jws: any,
   jwk: JWK
 ): Promise<any> => {
-  return jose.json_verify(_jsonConvertToString(jws), _jsonConvertToString(jwk));
+  let json_string = await jose.json_verify(_jsonConvertToString(jws), _jsonConvertToString(jwk));
+
+  return JSON.parse(json_string);
 };
 
 export const generalSignJson = async (
