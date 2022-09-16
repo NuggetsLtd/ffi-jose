@@ -24,7 +24,7 @@ describe("jose", () => {
   
             const verified = await jsonVerify(jws, jwk);
   
-            expect(verified).toBe('{"hello":"there"}')
+            expect(verified).toEqual({"hello":"there"})
           });
   
         });
@@ -57,7 +57,7 @@ describe("jose", () => {
   
             const verified = await jsonVerify(jws, jwk);
   
-            expect(verified).toBe('{"hello":"there"}')
+            expect(verified).toEqual({"hello":"there"})
           });
   
         });

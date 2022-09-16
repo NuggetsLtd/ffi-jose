@@ -16,8 +16,8 @@ describe("jose", () => {
           const jwk: JWK = jwks[0].public;
 
           const verified = await compactJsonVerify(jws, jwk);
-
-          expect(verified).toBe('{"hello":"there"}')
+  
+          expect(verified).toEqual({"hello":"there"})
         });
 
       });
