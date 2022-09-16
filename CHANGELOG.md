@@ -1,3 +1,30 @@
+## [1.7.2](https://github.com/NuggetsLtd/ffi-jose/compare/v1.7.1...v1.7.2) (2022-09-16)
+
+
+### Bug Fixes
+
+* create directory before copying dylib file ([ae27db9](https://github.com/NuggetsLtd/ffi-jose/commit/ae27db9f417c4bc1c7f7170826b9ed491726f30a))
+* return json from verification functions ([e1121d1](https://github.com/NuggetsLtd/ffi-jose/commit/e1121d14170b86e8e6c2ca5df44143e0d6fb4c0a))
+* set 'typ' to didcomm signed ([d7861eb](https://github.com/NuggetsLtd/ffi-jose/commit/d7861eb6adeae4c5a2391f803130f5e14c70084c))
+
+
+### Features
+
+* add 'Java_life_nuggets_rs_Jose_compact_1json_1verify' FFI function ([6f5d742](https://github.com/NuggetsLtd/ffi-jose/commit/6f5d742856b83e72dd2202e83a03b9dfc1c7a0fa))
+* add 'Java_life_nuggets_rs_Jose_compact_1sign_1json' FFI function ([800630c](https://github.com/NuggetsLtd/ffi-jose/commit/800630c814669cfa87bcf2fdf9feb49f37fb112e))
+* add 'Java_life_nuggets_rs_Jose_flattened_1sign_1json' FFI function ([6ad9bf6](https://github.com/NuggetsLtd/ffi-jose/commit/6ad9bf68ad7fbd934d8130de2371d62cc12fc52b))
+* add 'Java_life_nuggets_rs_Jose_general_1sign_1json' FFI function ([3542373](https://github.com/NuggetsLtd/ffi-jose/commit/35423739191b28aeaee39265101991f58e39be3b))
+* add 'Java_life_nuggets_rs_Jose_json_1verify' FFI function ([7e60416](https://github.com/NuggetsLtd/ffi-jose/commit/7e6041645dc30de1d47059f91f97baa26a377d93))
+* add C 'ffi_jose_compact_json_verify' function ([2d8d3cd](https://github.com/NuggetsLtd/ffi-jose/commit/2d8d3cd27a85ec2e52268a0103c77cbb5cdd2853))
+* add C 'ffi_jose_compact_sign_json' function ([4c27282](https://github.com/NuggetsLtd/ffi-jose/commit/4c27282054c2f0ab4611d49c69b3a7e9082d80a6))
+* add C 'ffi_jose_general_sign_json' function ([a606ba6](https://github.com/NuggetsLtd/ffi-jose/commit/a606ba63b2484f996f2977207d2698e81823209c))
+* add C 'rust_flattened_sign_json' function ([c62bc1c](https://github.com/NuggetsLtd/ffi-jose/commit/c62bc1c873e0d1ff3248f826db1cb03fa5a6bedd))
+* add C 'rust_json_verify' function ([440cdbf](https://github.com/NuggetsLtd/ffi-jose/commit/440cdbf05fc1b14f23e2ee897b1b1ee379d45d2f))
+* add signing methods to 'Jose' class ([dc99bf9](https://github.com/NuggetsLtd/ffi-jose/commit/dc99bf9843e0932ba933c8d6c13e2984f0fa8564))
+* check for 'kid' values on JWKs ([3106fc7](https://github.com/NuggetsLtd/ffi-jose/commit/3106fc7e92b1133cc973951493955144ed3bac7a))
+
+
+
 ## [1.7.1](https://github.com/NuggetsLtd/ffi-jose/compare/v1.7.0...v1.7.1) (2022-09-09)
 
 
