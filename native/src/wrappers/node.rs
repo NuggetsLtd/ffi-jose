@@ -147,6 +147,7 @@ fn node_general_encrypt_json(mut cx: FunctionContext) -> JsResult<JsString> {
   let enc = cx.argument::<JsNumber>(1)?;
   let payload = cx.argument::<JsString>(2)?;
   let recipients = cx.argument::<JsString>(3)?;
+  let didcomm = cx.argument::<JsBoolean>(4)?;
   let aad: Option<&[u8]> = None;
 
   // determine key encryption type
@@ -194,7 +195,7 @@ fn node_general_encrypt_json(mut cx: FunctionContext) -> JsResult<JsString> {
   let encrypted = match rust_general_encrypt_json(
     key_encryption,
     content_encryption,
-    TokenType::DidcommEncrypted,
+    if didcomm.value() { TokenType::DidcommEncrypted } else { TokenType::JWT },
     payload_string.as_bytes(),
     &recipient_jwks,
     aad
@@ -226,6 +227,7 @@ fn node_compact_sign_json(mut cx: FunctionContext) -> JsResult<JsString> {
   let alg = cx.argument::<JsNumber>(0)?;
   let payload = cx.argument::<JsString>(1)?;
   let jwk = cx.argument::<JsString>(2)?;
+  let didcomm = cx.argument::<JsBoolean>(3)?;
 
   // determine signing algorithm
   let signing_alg = match alg.value() as u8 {
@@ -255,7 +257,7 @@ fn node_compact_sign_json(mut cx: FunctionContext) -> JsResult<JsString> {
   // sign message
   let signed = match rust_compact_sign_json(
     signing_alg,
-    TokenType::DidcommSigned,
+    if didcomm.value() { TokenType::DidcommSigned } else { TokenType::JWT },
     payload_string.as_bytes(),
     &signer_jwk
   ) {
@@ -286,6 +288,7 @@ fn node_flattened_sign_json(mut cx: FunctionContext) -> JsResult<JsString> {
   let alg = cx.argument::<JsNumber>(0)?;
   let payload = cx.argument::<JsString>(1)?;
   let jwk = cx.argument::<JsString>(2)?;
+  let didcomm = cx.argument::<JsBoolean>(3)?;
 
   // determine signing algorithm
   let signing_alg = match alg.value() as u8 {
@@ -315,7 +318,7 @@ fn node_flattened_sign_json(mut cx: FunctionContext) -> JsResult<JsString> {
   // sign message
   let signed = match rust_flattened_sign_json(
     signing_alg,
-    TokenType::DidcommSigned,
+    if didcomm.value() { TokenType::DidcommSigned } else { TokenType::JWT },
     payload_string.as_bytes(),
     &signer_jwk
   ) {
@@ -345,6 +348,7 @@ fn node_json_verify(mut cx: FunctionContext) -> JsResult<JsString> {
 fn node_general_sign_json(mut cx: FunctionContext) -> JsResult<JsString> {
   let payload = cx.argument::<JsString>(0)?;
   let jwks = cx.argument::<JsString>(1)?;
+  let didcomm = cx.argument::<JsBoolean>(2)?;
 
   // convert serialised data to array of Jwks
   let signer_jwks: Vec<Jwk> = serde_json::from_str(&jwks.value()).unwrap();
@@ -354,7 +358,7 @@ fn node_general_sign_json(mut cx: FunctionContext) -> JsResult<JsString> {
 
   // sign message
   let signed = match rust_general_sign_json(
-    TokenType::DidcommSigned,
+    if didcomm.value() { TokenType::DidcommSigned } else { TokenType::JWT },
     payload_string.as_bytes(),
     &signer_jwks
   ) {
