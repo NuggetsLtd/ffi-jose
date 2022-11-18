@@ -1,3 +1,7 @@
+# [2.0.0](https://github.com/NuggetsLtd/ffi-jose/compare/v1.7.2...v2.0.0) (2022-11-18)
+
+
+
 ## [1.7.2](https://github.com/NuggetsLtd/ffi-jose/compare/v1.7.1...v1.7.2) (2022-09-16)
 
 
