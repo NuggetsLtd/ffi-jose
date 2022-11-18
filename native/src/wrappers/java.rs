@@ -1,6 +1,6 @@
 use jni::JNIEnv;
 use jni::objects::{JClass};
-use jni::sys::{jstring, jint, jbyteArray};
+use jni::sys::{jstring, jint, jbyteArray, jboolean, JNI_FALSE};
 use crate::jose::{
   NamedCurve,
   ContentEncryptionAlgorithm,
@@ -254,6 +254,7 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_general_1encrypt_1json(
   enc: jint,
   plaintext: jbyteArray,
   recipients: jbyteArray,
+  didcomm: jboolean,
 ) -> jstring {
   let aad: Option<&[u8]> = None;
 
@@ -308,11 +309,13 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_general_1encrypt_1json(
   let recipients_string = String::from_utf8(recipients_bytes.to_vec()).unwrap();
   let recipient_jwks: Vec<Jwk> = serde_json::from_str(&recipients_string).unwrap();
 
+  let typ = if didcomm != JNI_FALSE { TokenType::DidcommEncrypted } else { TokenType::JWT };
+
   // encrypt JSON to JWE
   let encrypted = match rust_general_encrypt_json(
     alg,
     enc,
-    TokenType::DidcommEncrypted,
+    typ,
     &plaintext_bytes.to_vec(),
     &recipient_jwks,
     aad
@@ -378,6 +381,7 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_compact_1sign_1json(
   alg: jint,
   payload: jbyteArray,
   jwk: jbyteArray,
+  didcomm: jboolean,
 ) -> jstring {
   // map signing algorithm integers to enum options
   let alg = match alg as u8 {
@@ -419,10 +423,12 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_compact_1sign_1json(
   let jwk_string = String::from_utf8(jwk_bytes.to_vec()).unwrap();
   let signer_jwk: Jwk = serde_json::from_str(&jwk_string).unwrap();
 
+  let typ = if didcomm != JNI_FALSE { TokenType::DidcommSigned } else { TokenType::JWT };
+
   // sign JSON to JWS
   let signed = match rust_compact_sign_json(
     alg,
-    TokenType::DidcommSigned,
+    typ,
     &payload_bytes.to_vec(),
     &signer_jwk
   ) {
@@ -487,6 +493,7 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_flattened_1sign_1json(
   alg: jint,
   payload: jbyteArray,
   jwk: jbyteArray,
+  didcomm: jboolean,
 ) -> jstring {
   // map signing algorithm integers to enum options
   let alg = match alg as u8 {
@@ -528,10 +535,12 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_flattened_1sign_1json(
   let jwk_string = String::from_utf8(jwk_bytes.to_vec()).unwrap();
   let signer_jwk: Jwk = serde_json::from_str(&jwk_string).unwrap();
 
+  let typ = if didcomm != JNI_FALSE { TokenType::DidcommSigned } else { TokenType::JWT };
+
   // sign JSON to JWS
   let signed = match rust_flattened_sign_json(
     alg,
-    TokenType::DidcommSigned,
+    typ,
     &payload_bytes.to_vec(),
     &signer_jwk
   ) {
@@ -595,6 +604,7 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_general_1sign_1json(
   _class: JClass,
   payload: jbyteArray,
   jwks: jbyteArray,
+  didcomm: jboolean,
 ) -> jstring {
   let payload_bytes;
   match env.convert_byte_array(payload) {
@@ -612,9 +622,11 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_general_1sign_1json(
   let jwks_string = String::from_utf8(jwks_bytes.to_vec()).unwrap();
   let signer_jwks: Vec<Jwk> = serde_json::from_str(&jwks_string).unwrap();
 
+  let typ = if didcomm != JNI_FALSE { TokenType::DidcommSigned } else { TokenType::JWT };
+
   // sign JSON to JWS
   let signed = match rust_general_sign_json(
-    TokenType::DidcommSigned,
+    typ,
     &payload_bytes.to_vec(),
     &signer_jwks
   ) {

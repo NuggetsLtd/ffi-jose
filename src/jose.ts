@@ -86,7 +86,8 @@ export const encrypt = async (
   plaintext: Uint8Array,
   cek: Uint8Array,
   iv: Uint8Array,
-  aad: Uint8Array
+  aad: Uint8Array,
+  didcomm: boolean = false,
 ): Promise<JoseEncryptResponse> => {
   let encryptedString;
   const enc_mapped = {
@@ -103,7 +104,7 @@ export const encrypt = async (
   }
 
   try {
-    encryptedString = await jose.encrypt(enc_mapped, cek.buffer, iv.buffer, plaintext.buffer, aad.buffer);
+    encryptedString = await jose.encrypt(enc_mapped, cek.buffer, iv.buffer, plaintext.buffer, aad.buffer, didcomm);
   } catch (error) {
     if (error.message === "internal error in Neon module: Unknown curve") {
       throw new TypeError("Unknown curve");
@@ -165,13 +166,6 @@ const _isJsonString = (str: string) => {
   return true;
 };
 
-const _jsonConvertToBase64 = (data: any) => {
-  // ensure data is serialised as JSON string
-  const dataSerialised = typeof data === "string" && _isJsonString(data) ? data : JSON.stringify(data);
-
-  return Buffer.from(dataSerialised).toString("base64");
-};
-
 const _jsonConvertToString = (data: any) => {
   // ensure data is serialised as JSON string
   const dataSerialised = typeof data === "string" && _isJsonString(data) ? data : JSON.stringify(data);
@@ -183,7 +177,8 @@ export const generalEncryptJson = async (
   alg: KeyEncryption,
   enc: ContentEncryption,
   payload: any,
-  recipients: JWK[]
+  recipients: JWK[],
+  didcomm: boolean = false,
 ): Promise<any> => {
   recipients.forEach((recipient) => {
     if (!recipient?.kid) {
@@ -195,7 +190,8 @@ export const generalEncryptJson = async (
     alg,
     enc,
     _jsonConvertToString(payload),
-    _jsonConvertToString(recipients)
+    _jsonConvertToString(recipients),
+    didcomm
   );
 
   return JSON.parse(jwe_string);
@@ -210,9 +206,10 @@ export const decryptJson = async (jwe: any, jwk: JWK): Promise<any> => {
 export const compactSignJson = async (
   alg: SigningAlgorithm,
   payload: any,
-  jwk: JWK
+  jwk: JWK,
+  didcomm: boolean = false,
 ): Promise<any> => {
-  return jose.compact_sign_json(alg, _jsonConvertToString(payload), _jsonConvertToString(jwk));
+  return jose.compact_sign_json(alg, _jsonConvertToString(payload), _jsonConvertToString(jwk), didcomm);
 };
 
 export const compactJsonVerify = async (
@@ -227,14 +224,15 @@ export const compactJsonVerify = async (
 export const flattenedSignJson = async (
   alg: SigningAlgorithm,
   payload: any,
-  jwk: JWK
+  jwk: JWK,
+  didcomm: boolean = false,
 ): Promise<any> => {
 
   if(!jwk.kid) {
     throw new Error('JWK `kid` property required for "flattened" signing')
   }
 
-  let json_string = await jose.flattened_sign_json(alg, _jsonConvertToString(payload), _jsonConvertToString(jwk));
+  let json_string = await jose.flattened_sign_json(alg, _jsonConvertToString(payload), _jsonConvertToString(jwk), didcomm);
 
   return JSON.parse(json_string);
 };
@@ -250,7 +248,8 @@ export const jsonVerify = async (
 
 export const generalSignJson = async (
   payload: any,
-  jwks: [JWK]
+  jwks: [JWK],
+  didcomm: boolean = false,
 ): Promise<any> => {
 
   jwks.forEach(jwk => {
@@ -259,7 +258,7 @@ export const generalSignJson = async (
     }
   })
 
-  let json_string = await jose.general_sign_json(_jsonConvertToString(payload), _jsonConvertToString(jwks));
+  let json_string = await jose.general_sign_json(_jsonConvertToString(payload), _jsonConvertToString(jwks), didcomm);
 
   return JSON.parse(json_string);
 };

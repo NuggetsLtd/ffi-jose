@@ -544,7 +544,7 @@ describe('NEON NodeJS Interface:', () => {
           const recipients = JSON.stringify([ jwks[0].public ])
 
           // encrypt message
-          const jwe = jose.general_encrypt_json(alg, enc, payload, recipients)
+          const jwe = jose.general_encrypt_json(alg, enc, payload, recipients, true)
 
           // decrypt message
           const decryptedMsg = JSON.parse(jose.decrypt_json(jwe, JSON.stringify(jwks[0].private)))
@@ -555,7 +555,7 @@ describe('NEON NodeJS Interface:', () => {
           const recipients = JSON.stringify([ jwks[0].public, jwks[1].public ])
 
           // encrypt message with multiple recipients
-          const jwe = jose.general_encrypt_json(alg, enc, payload, recipients)
+          const jwe = jose.general_encrypt_json(alg, enc, payload, recipients, true)
 
           // decrypt message for first recipient
           const decryptedMsg1 = JSON.parse(jose.decrypt_json(jwe, JSON.stringify(jwks[0].private)))
@@ -570,18 +570,36 @@ describe('NEON NodeJS Interface:', () => {
 
     describe('compact_sign_json', () => {
 
-      it('should sign json with private key', () => {
-        const jwt = { hello: 'there' }
-        const payload = JSON.stringify(jwt)
-        const jwk = JSON.stringify(jwks[0].private)
-        const alg = SigningAlgorithm.ES256
+      describe('should sign json with private key', () => {
 
-        const jws = jose.compact_sign_json(alg, payload, jwk)
+        it('where didcomm=true', () => {
+          const jwt = { hello: 'there' }
+          const payload = JSON.stringify(jwt)
+          const jwk = JSON.stringify(jwks[0].private)
+          const alg = SigningAlgorithm.ES256
 
-        const [ header_b64, payload_b64 ] = jws.split('.')
+          const jws = jose.compact_sign_json(alg, payload, jwk, true)
 
-        expect(Buffer.from(header_b64, 'base64').toString()).toBe('{"typ":"application/didcomm-signed+json","alg":"ES256","kid":"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1"}')
-        expect(Buffer.from(payload_b64, 'base64').toString()).toBe(payload)
+          const [ header_b64, payload_b64 ] = jws.split('.')
+
+          expect(Buffer.from(header_b64, 'base64').toString()).toBe('{"typ":"application/didcomm-signed+json","alg":"ES256","kid":"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1"}')
+          expect(Buffer.from(payload_b64, 'base64').toString()).toBe(payload)
+        })
+
+        it('where didcomm=false', () => {
+          const jwt = { hello: 'there' }
+          const payload = JSON.stringify(jwt)
+          const jwk = JSON.stringify(jwks[0].private)
+          const alg = SigningAlgorithm.ES256
+
+          const jws = jose.compact_sign_json(alg, payload, jwk, false)
+
+          const [ header_b64, payload_b64 ] = jws.split('.')
+
+          expect(Buffer.from(header_b64, 'base64').toString()).toBe('{"typ":"JWT","alg":"ES256","kid":"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1"}')
+          expect(Buffer.from(payload_b64, 'base64').toString()).toBe(payload)
+        })
+
       })
 
     })
@@ -595,7 +613,7 @@ describe('NEON NodeJS Interface:', () => {
 
         const jws = 'eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYiLCJraWQiOiJkaWQ6bnVnZ2V0czpzWnppRnZkWHc4c2lNdmcxUDRZUzkxZ0c0TGMja2V5LXAyNTYtMSJ9.eyJoZWxsbyI6InRoZXJlIn0.TtXvFTkQvD9SOve5yzEgzLAVgAm9WefaP99A0HZrYztniE2GD9HLNqVlf2b1VzCvDtvy4Iq54UUtX8079pPSOg'
 
-        expect(jose.compact_json_verify(jws, jwk_public)).toBe(payload)
+        expect(jose.compact_json_verify(jws, jwk_public, true)).toBe(payload)
       })
 
       describe('should throw', () => {
@@ -624,17 +642,34 @@ describe('NEON NodeJS Interface:', () => {
 
     describe('flattened_sign_json', () => {
 
-      it('should sign json with private key', () => {
-        const jwt = { hello: 'there' }
-        const payload = JSON.stringify(jwt)
-        const jwk = JSON.stringify(jwks[0].private)
-        const alg = SigningAlgorithm.ES256
+      describe('should sign json with private key', () => {
 
-        const jws = JSON.parse(jose.flattened_sign_json(alg, payload, jwk))
+        it('where didcomm=true', () => {
+          const jwt = { hello: 'there' }
+          const payload = JSON.stringify(jwt)
+          const jwk = JSON.stringify(jwks[0].private)
+          const alg = SigningAlgorithm.ES256
 
-        expect(Buffer.from(jws.protected, 'base64').toString()).toBe('{"typ":"application/didcomm-signed+json","alg":"ES256"}')
-        expect(Buffer.from(jws.payload, 'base64').toString()).toBe(payload)
-        expect(jws.header.kid).toBe('did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1')
+          const jws = JSON.parse(jose.flattened_sign_json(alg, payload, jwk, true))
+
+          expect(Buffer.from(jws.protected, 'base64').toString()).toBe('{"typ":"application/didcomm-signed+json","alg":"ES256"}')
+          expect(Buffer.from(jws.payload, 'base64').toString()).toBe(payload)
+          expect(jws.header.kid).toBe('did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1')
+        })
+
+        it('where didcomm=false', () => {
+          const jwt = { hello: 'there' }
+          const payload = JSON.stringify(jwt)
+          const jwk = JSON.stringify(jwks[0].private)
+          const alg = SigningAlgorithm.ES256
+
+          const jws = JSON.parse(jose.flattened_sign_json(alg, payload, jwk, false))
+
+          expect(Buffer.from(jws.protected, 'base64').toString()).toBe('{"typ":"JWT","alg":"ES256"}')
+          expect(Buffer.from(jws.payload, 'base64').toString()).toBe(payload)
+          expect(jws.header.kid).toBe('did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1')
+        })
+
       })
 
     })
@@ -696,7 +731,7 @@ describe('NEON NodeJS Interface:', () => {
         const payload = JSON.stringify(jwt)
         const signer_jwks = JSON.stringify([ { ...jwks[0].private, alg: 'ES256' } ])
 
-        const jws = JSON.parse(jose.general_sign_json(payload, signer_jwks))
+        const jws = JSON.parse(jose.general_sign_json(payload, signer_jwks, true))
 
         expect(jws.signatures.length).toBe(1)
         expect(jws.signatures[0].header.kid).toBe(jwks[0].private.kid)
@@ -708,7 +743,7 @@ describe('NEON NodeJS Interface:', () => {
         const payload = JSON.stringify(jwt)
         const signer_jwks = JSON.stringify([ { ...jwks[0].private, alg: 'ES256' }, { ...jwks[1].private, alg: 'ES256' } ])
 
-        const jws = JSON.parse(jose.general_sign_json(payload, signer_jwks))
+        const jws = JSON.parse(jose.general_sign_json(payload, signer_jwks, true))
 
         expect(jws.signatures.length).toBe(2)
         expect(jws.signatures[0].header.kid).toBe(jwks[0].private.kid)
@@ -721,7 +756,7 @@ describe('NEON NodeJS Interface:', () => {
         const payload = JSON.stringify(jwt)
         const signer_jwks = JSON.stringify([ { ...jwks[0].private, alg: 'ES256' }, { ...jwks[2].private, alg: 'ES512' } ])
 
-        const jws = JSON.parse(jose.general_sign_json(payload, signer_jwks))
+        const jws = JSON.parse(jose.general_sign_json(payload, signer_jwks, true))
 
         expect(jws.signatures.length).toBe(2)
         expect(jws.signatures[0].header.kid).toBe(jwks[0].private.kid)
