@@ -80,13 +80,13 @@ class Jose {
   private static native String generate_key_pair(int named_curve);
   private static native String encrypt(int enc, byte[] key, byte[] iv, byte[] message, byte[] aad);
   private static native String decrypt(int enc, byte[] key, byte[] ciphertext, byte[] iv, byte[] tag, byte[] aad);
-  private static native String general_encrypt_json(int alg, int enc, byte[] payload, byte[] recipients);
+  private static native String general_encrypt_json(int alg, int enc, byte[] payload, byte[] recipients, boolean didcomm);
   private static native String decrypt_json(byte[] jwe, byte[] jwk);
-  private static native String compact_sign_json(int alg, byte[] payload, byte[] jwk);
+  private static native String compact_sign_json(int alg, byte[] payload, byte[] jwk, boolean didcomm);
   private static native String compact_json_verify(byte[] jws, byte[] jwk);
-  private static native String flattened_sign_json(int alg, byte[] payload, byte[] jwk);
+  private static native String flattened_sign_json(int alg, byte[] payload, byte[] jwk, boolean didcomm);
   private static native String json_verify(byte[] jws, byte[] jwk);
-  private static native String general_sign_json(byte[] payload, byte[] jwks);
+  private static native String general_sign_json(byte[] payload, byte[] jwks, boolean didcomm);
 
   public static byte hexToByte(String hexString) {
       int firstDigit = toDigit(hexString.charAt(0));
@@ -169,7 +169,10 @@ class Jose {
       byte[] recipientsSingleBytes = recipientsSingle.getBytes();
 
       System.out.println("\nEncrypt JSON:");
-      System.out.println(Jose.general_encrypt_json(KeyEncryptionAlgorithm.EcdhEsA128kw.ordinal(), ContentEncryptionAlgorithm.A128gcm.ordinal(), msgBytes, recipientsSingleBytes));
+      System.out.println(Jose.general_encrypt_json(KeyEncryptionAlgorithm.EcdhEsA128kw.ordinal(), ContentEncryptionAlgorithm.A128gcm.ordinal(), msgBytes, recipientsSingleBytes, false));
+
+      System.out.println("\nEncrypt JSON (didcomm):");
+      System.out.println(Jose.general_encrypt_json(KeyEncryptionAlgorithm.EcdhEsA128kw.ordinal(), ContentEncryptionAlgorithm.A128gcm.ordinal(), msgBytes, recipientsSingleBytes, true));
 
       String jwe1 = "{\"protected\":\"eyJhbGciOiJFQ0RILUVTK0EyNTZLVyIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLWVuY3J5cHRlZCtqc29uIn0\",\"recipients\":[{\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"epk\":{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"gOck1VTJKClbIBckxyWDcvjgH7Hjh8l8JtZyMF_pcUg\",\"y\":\"erdiGdGNx_Bq3ZjIP0O6HqwnZ-hV4Qla1143vHg2CtA\"}},\"encrypted_key\":\"mYei_90yBUye5t54StnQWyZmpzgoaQ9N\"}],\"iv\":\"r7Tgd038slI_oE7v\",\"ciphertext\":\"0CPqmVTEOU3r\",\"tag\":\"WHzSP6R0tUK-w4UD1twngQ\"}";
       byte[] jwe1Bytes = jwe1.getBytes();
@@ -181,9 +184,14 @@ class Jose {
 
       // ----- JOSE Signing (Compact) -------------------------------------------------------------
       String payload = "{\"hello\":\"you\"}";
+
       String jwkSigner = "{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"d\":\"-uGB3yMayMJbhAolwzVzdjchW0W2i3pYZOii2N7Wg88\"}";
+      
       System.out.println("\nSign JSON (Compact):");
-      System.out.println(Jose.compact_sign_json(SigningAlgorithm.Es256.ordinal(), payload.getBytes(), jwkSigner.getBytes()));
+      System.out.println(Jose.compact_sign_json(SigningAlgorithm.Es256.ordinal(), payload.getBytes(), jwkSigner.getBytes(), false));
+
+      System.out.println("\nSign JSON (Compact, didcomm):");
+      System.out.println(Jose.compact_sign_json(SigningAlgorithm.Es256.ordinal(), payload.getBytes(), jwkSigner.getBytes(), true));
 
       String jwkVerifierCompact = "{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"t2aXVivRDLhttpb8bKWLmn73eaNj3xOaWgP405z7pjU\",\"y\":\"YSjJhceBD_GaCTns1UNLSVvxXPziftTcEv7LSG6AxcE\"}";
       String jwsCompact = "eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYiLCJraWQiOiJkaWQ6bnVnZ2V0czpzWnppRnZkWHc4c2lNdmcxUDRZUzkxZ0c0TGMja2V5LXAyNTYtMSJ9.eyJoZWxsbyI6InlvdSJ9.Qhlf4kCTV6qfBzUNj6Fb5iDHu5XjJJ-QMQZK4CycDlUq9HhJ_jUhMRpIpcXwjde88p3CMOItDVdwwxiC087LpQ";
@@ -192,8 +200,12 @@ class Jose {
 
       // ----- JOSE Signing (Flattened) -------------------------------------------------------------
       String jwkVerifier = "{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"t2aXVivRDLhttpb8bKWLmn73eaNj3xOaWgP405z7pjU\",\"y\":\"YSjJhceBD_GaCTns1UNLSVvxXPziftTcEv7LSG6AxcE\"}";
+      
       System.out.println("\nSign JSON (Flattened):");
-      System.out.println(Jose.flattened_sign_json(SigningAlgorithm.Es256.ordinal(), payload.getBytes(), jwkSigner.getBytes()));
+      System.out.println(Jose.flattened_sign_json(SigningAlgorithm.Es256.ordinal(), payload.getBytes(), jwkSigner.getBytes(), false));
+      
+      System.out.println("\nSign JSON (Flattened, didcomm):");
+      System.out.println(Jose.flattened_sign_json(SigningAlgorithm.Es256.ordinal(), payload.getBytes(), jwkSigner.getBytes(), true));
 
       System.out.println("\nVerify JSON (Flattened):");
       String jwsFlattened = "{\"protected\":\"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYifQ\",\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\"},\"payload\":\"eyJoZWxsbyI6InlvdSJ9\",\"signature\":\"Jz0FINLujxKXQ5Viajp6Lkxpdh5fZwPwvA_kCQ58PoduQVBG6xu2ak2zCfxcTHEglovcze--t5jp2fQHxvCtKA\"}";
@@ -201,8 +213,12 @@ class Jose {
 
       // ----- JOSE Signing (General) -------------------------------------------------------------
       String jwkSigners = "[{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\",\"kty\":\"EC\",\"crv\":\"P-256\",\"d\":\"-uGB3yMayMJbhAolwzVzdjchW0W2i3pYZOii2N7Wg88\",\"alg\":\"ES256\"}]";
+      
       System.out.println("\nSign JSON (General):");
-      System.out.println(Jose.general_sign_json(payload.getBytes(), jwkSigners.getBytes()));
+      System.out.println(Jose.general_sign_json(payload.getBytes(), jwkSigners.getBytes(), false));
+
+      System.out.println("\nSign JSON (General, didcomm):");
+      System.out.println(Jose.general_sign_json(payload.getBytes(), jwkSigners.getBytes(), true));
 
       System.out.println("\nVerify JSON (General):");
       String jwsGeneral = "{\"signatures\":[{\"protected\":\"eyJ0eXAiOiJhcHBsaWNhdGlvbi9kaWRjb21tLXNpZ25lZCtqc29uIiwiYWxnIjoiRVMyNTYifQ\",\"header\":{\"kid\":\"did:nuggets:sZziFvdXw8siMvg1P4YS91gG4Lc#key-p256-1\"},\"signature\":\"M-lHEx3QU2SjIyuyhKAuUGjim_z-3kCkTSvh8JbNSch2wuQN_0lQgSZ-jyWEE08owevB5Da2QmNAsSonM90c3A\"}],\"payload\":\"eyJoZWxsbyI6InlvdSJ9\"}";
