@@ -1,3 +1,19 @@
+## [2.0.1](https://github.com/NuggetsLtd/ffi-jose/compare/v1.7.2...v2.0.1) (2022-11-18)
+
+
+### Features
+
+* add  token type option ([4478178](https://github.com/NuggetsLtd/ffi-jose/commit/44781780a2f6c2d3fb333fd8f6aa580f2d546ea8))
+* tests for C FFI 'JWT' token type option ([ba63b24](https://github.com/NuggetsLtd/ffi-jose/commit/ba63b240720c6a6742266d20f92c7c1b11b918a6))
+* tests for Java 'JWT' token type option ([7dc5818](https://github.com/NuggetsLtd/ffi-jose/commit/7dc5818fa1ee21279d3013366560f9d8fd44428d))
+* tests for Node FFI 'JWT' token type option ([3481ded](https://github.com/NuggetsLtd/ffi-jose/commit/3481deda18568f66a9383e70ea04b0d05ab02dab))
+* update C FFI to add 'JWT' token type option ([d03f54f](https://github.com/NuggetsLtd/ffi-jose/commit/d03f54f654f5259768f6d65022a64d283e0c6632))
+* update Java FFI to add 'JWT' token type option ([dfc1837](https://github.com/NuggetsLtd/ffi-jose/commit/dfc18376e9a3bde8e8351419a6a30f37d7340e68))
+* update Node FFI to add 'JWT' token type option ([206971c](https://github.com/NuggetsLtd/ffi-jose/commit/206971c9ed03f5e22a1c32c4a862249024a0796c))
+* update typescript FFI 'JWT' token type option ([a88eb91](https://github.com/NuggetsLtd/ffi-jose/commit/a88eb91c21b666b7375a7ebad6ffa66d11c13832))
+
+
+
 ## [1.7.2](https://github.com/NuggetsLtd/ffi-jose/compare/v1.7.1...v1.7.2) (2022-09-16)
 
 
