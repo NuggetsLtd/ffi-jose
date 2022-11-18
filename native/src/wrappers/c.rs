@@ -203,6 +203,7 @@ pub unsafe extern "C" fn ffi_jose_general_encrypt_json(
   payload: ffi::ByteArray,
   recipients: ffi::ByteArray,
   json_string: &mut JsonString,
+  didcomm: bool,
 ) -> i32 {
   let aad: Option<&[u8]> = None;
 
@@ -210,11 +211,13 @@ pub unsafe extern "C" fn ffi_jose_general_encrypt_json(
   let recipients_string = String::from_utf8(recipients.to_vec()).unwrap();
   let recipient_jwks: Vec<Jwk> = serde_json::from_str(&recipients_string).unwrap();
 
+  let typ = if didcomm { TokenType::DidcommEncrypted } else { TokenType::JWT };
+
   // encrypt payload for recipients and return
   match rust_general_encrypt_json(
     alg,
     enc,
-    TokenType::DidcommEncrypted,
+    typ,
     &payload.to_vec(),
     &recipient_jwks,
     aad
@@ -284,15 +287,18 @@ pub unsafe extern "C" fn ffi_jose_compact_sign_json(
   payload: ffi::ByteArray,
   jwk: ffi::ByteArray,
   json_string: &mut JsonString,
+  didcomm: bool,
 ) -> i32 {
   // convert recipients byte array to array of Jwks
   let jwk_string = String::from_utf8(jwk.to_vec()).unwrap();
   let signer_jwk: Jwk = serde_json::from_str(&jwk_string).unwrap();
 
+  let typ = if didcomm { TokenType::DidcommSigned } else { TokenType::JWT };
+
   // encrypt payload for recipients and return
   match rust_compact_sign_json(
     alg,
-    TokenType::DidcommSigned,
+    typ,
     &payload.to_vec(),
     &signer_jwk,
   ) {
@@ -361,15 +367,18 @@ pub unsafe extern "C" fn ffi_jose_flattened_sign_json(
   payload: ffi::ByteArray,
   jwk: ffi::ByteArray,
   json_string: &mut JsonString,
+  didcomm: bool,
 ) -> i32 {
   // convert recipients byte array to array of Jwks
   let jwk_string = String::from_utf8(jwk.to_vec()).unwrap();
   let signer_jwk: Jwk = serde_json::from_str(&jwk_string).unwrap();
 
+  let typ = if didcomm { TokenType::DidcommSigned } else { TokenType::JWT };
+
   // encrypt payload for recipients and return
   match rust_flattened_sign_json(
     alg,
-    TokenType::DidcommSigned,
+    typ,
     &payload.to_vec(),
     &signer_jwk,
   ) {
@@ -437,14 +446,17 @@ pub unsafe extern "C" fn ffi_jose_general_sign_json(
   payload: ffi::ByteArray,
   jwks: ffi::ByteArray,
   json_string: &mut JsonString,
+  didcomm: bool,
 ) -> i32 {
   // convert recipients byte array to array of Jwks
   let jwks_string = String::from_utf8(jwks.to_vec()).unwrap();
   let signer_jwks: Vec<Jwk> = serde_json::from_str(&jwks_string).unwrap();
 
+  let typ = if didcomm { TokenType::DidcommSigned } else { TokenType::JWT };
+
   // encrypt payload for recipients and return
   match rust_general_sign_json(
-    TokenType::DidcommSigned,
+    typ,
     &payload.to_vec(),
     &signer_jwks,
   ) {
