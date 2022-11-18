@@ -396,6 +396,7 @@ pub fn rust_decrypt(
 #[allow(dead_code)]
 #[repr(C)]
 pub enum TokenType {
+  JWT,
   DidcommPlain,
   DidcommSigned,
   DidcommEncrypted,
@@ -441,6 +442,7 @@ pub fn rust_general_encrypt_json(
   aad: Option<&[u8]>
 ) -> Result<String, JoseError> {
   let token_type = match typ {
+    TokenType::JWT => "JWT",
     TokenType::DidcommPlain => "application/didcomm-plain+json",
     TokenType::DidcommSigned => "application/didcomm-signed+json",
     TokenType::DidcommEncrypted => "application/didcomm-encrypted+json",
@@ -713,6 +715,7 @@ pub fn rust_compact_sign_json(
 ) -> Result<String, JoseError> {
   // convert token type enum to string
   let token_type = match typ {
+    TokenType::JWT => "JWT",
     TokenType::DidcommPlain => "application/didcomm-plain+json",
     TokenType::DidcommSigned => "application/didcomm-signed+json",
     TokenType::DidcommEncrypted => "application/didcomm-encrypted+json",
@@ -871,6 +874,7 @@ pub fn rust_flattened_sign_json(
 ) -> Result<String, JoseError> {
   // convert token type enum to string
   let token_type = match typ {
+    TokenType::JWT => "JWT",
     TokenType::DidcommPlain => "application/didcomm-plain+json",
     TokenType::DidcommSigned => "application/didcomm-signed+json",
     TokenType::DidcommEncrypted => "application/didcomm-encrypted+json",
@@ -1071,6 +1075,7 @@ pub fn rust_general_sign_json(
 ) -> Result<String, JoseError> {
   // convert token type enum to string
   let token_type = match typ {
+    TokenType::JWT => "JWT",
     TokenType::DidcommPlain => "application/didcomm-plain+json",
     TokenType::DidcommSigned => "application/didcomm-signed+json",
     TokenType::DidcommEncrypted => "application/didcomm-encrypted+json",
