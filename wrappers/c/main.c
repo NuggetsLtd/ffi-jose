@@ -159,7 +159,7 @@ void generalEncryptJson(KeyEncryptionAlgorithm alg, ContentEncryptionAlgorithm e
   string2ByteArray(payload, payloadBufferData);
   payloadBuffer.data = payloadBufferData;
 
-  int outcome = ffi_jose_general_encrypt_json(alg, enc, payloadBuffer, recipientsBuffer, &json_string);
+  int outcome = ffi_jose_general_encrypt_json(alg, enc, payloadBuffer, recipientsBuffer, &json_string, true);
 
   if (outcome == 0)
   {
@@ -215,7 +215,7 @@ void compactSignJson(SigningAlgorithm alg, char* jwk, char* payload)
   string2ByteArray(payload, payloadBufferData);
   payloadBuffer.data = payloadBufferData;
 
-  int outcome = ffi_jose_compact_sign_json(alg, payloadBuffer, jwkBuffer, &json_string);
+  int outcome = ffi_jose_compact_sign_json(alg, payloadBuffer, jwkBuffer, &json_string, true);
 
   if (outcome == 0)
   {
@@ -271,7 +271,7 @@ void flattenedSignJson(SigningAlgorithm alg, char* jwk, char* payload)
   string2ByteArray(payload, payloadBufferData);
   payloadBuffer.data = payloadBufferData;
 
-  int outcome = ffi_jose_flattened_sign_json(alg, payloadBuffer, jwkBuffer, &json_string);
+  int outcome = ffi_jose_flattened_sign_json(alg, payloadBuffer, jwkBuffer, &json_string, true);
 
   if (outcome == 0)
   {
@@ -327,7 +327,7 @@ void generalSignJson(char* jwks, char* payload)
   string2ByteArray(payload, payloadBufferData);
   payloadBuffer.data = payloadBufferData;
 
-  int outcome = ffi_jose_general_sign_json(payloadBuffer, jwksBuffer, &json_string);
+  int outcome = ffi_jose_general_sign_json(payloadBuffer, jwksBuffer, &json_string, true);
 
   if (outcome == 0)
   {
