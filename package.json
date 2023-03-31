@@ -1,6 +1,6 @@
 {
   "name": "@nuggetslife/ffi-jose",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Foreign Function Interface (FFI) for Rust JOSE package",
   "homepage": "https://github.com/NuggetsLtd/ffi-jose",
   "main": "lib/index.js",
@@ -51,7 +51,7 @@
     "build:android": "yarn build:env ANDROID",
     "build:ts": "tsc --pretty",
     "package": "node-pre-gyp package",
-    "clean": "rimraf lib/ && rimraf native/index.node && rimraf native/target && neon clean",
+    "clean": "rimraf lib/ && rimraf native/index.node && rimraf native/target && rimraf out/ && neon clean",
     "format": "prettier --write \"**/*.ts\" \"**/*.md\"  \"!**/lib/**\"",
     "lint": "eslint . --ignore-path .gitignore --color --format=table",
     "lint:fix": "yarn lint --fix",
