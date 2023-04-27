@@ -16,7 +16,7 @@ parameters:
     default: "Node FFI Jose"
   mac_openssl_location:
     type: string
-    default: /usr/local/Cellar/openssl@1.1/1.1.1q
+    default: /usr/local/Cellar/openssl@1.1/1.1.1t
 
 #+-----------------------------------------------------------------------------+
 #|                                 ORBS                                        |
@@ -65,6 +65,12 @@ executors:
   node-16-linux-musl:
     docker:
       - image: << pipeline.parameters.aws_ecr_host >>/rust-node-16-musl-main:latest
+  node-18-linux-libc:
+    docker:
+      - image: << pipeline.parameters.aws_ecr_host >>/rust-node-18-libc-main:latest
+  node-18-linux-musl:
+    docker:
+      - image: << pipeline.parameters.aws_ecr_host >>/rust-node-18-musl-main:latest
   mac:
     macos:
       xcode: "14.0.0"
@@ -220,7 +226,15 @@ workflows:
           name: "<< pipeline.parameters.project_name >>: << matrix.executor >>"
           matrix:
             parameters:
-              executor: [node-14-linux-libc, node-14-linux-musl, node-16-linux-libc, node-16-linux-musl]
+              executor:
+                [
+                  node-14-linux-libc,
+                  node-14-linux-musl,
+                  node-16-linux-libc,
+                  node-16-linux-musl,
+                  node-18-linux-libc,
+                  node-18-linux-musl,
+                ]
       - test-mac:
           context: nuggets
           filters:
@@ -230,7 +244,7 @@ workflows:
           name: "<< pipeline.parameters.project_name >>: node-<< matrix.node-version >>-macos"
           matrix:
             parameters:
-              node-version: ["14", "16"]
+              node-version: ["14", "16", "18"]
 
   # build & publish binaries
   publish:
@@ -253,7 +267,15 @@ workflows:
           name: "<< pipeline.parameters.project_name >> Publish: << matrix.executor >>"
           matrix:
             parameters:
-              executor: [node-14-linux-libc, node-14-linux-musl, node-16-linux-libc, node-16-linux-musl]
+              executor:
+                [
+                  node-14-linux-libc,
+                  node-14-linux-musl,
+                  node-16-linux-libc,
+                  node-16-linux-musl,
+                  node-18-linux-libc,
+                  node-18-linux-musl,
+                ]
       - publish-mac:
           context: nuggets
           requires:
@@ -265,4 +287,4 @@ workflows:
           name: "<< pipeline.parameters.project_name >> Publish: node-<< matrix.node-version >>-macos-undefined"
           matrix:
             parameters:
-              node-version: ["14", "16"]
+              node-version: ["14", "16", "18"]
