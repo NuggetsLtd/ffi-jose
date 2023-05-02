@@ -123,7 +123,7 @@ jobs:
           command: brew update && brew install openssl@1.1 && brew upgrade
       - run:
           name: Patch node-gyp error
-          command: find /usr/lib -type d -name "node-gyp" -exec sh -c 'cd "$(dirname "{}")" && npm i node-gyp@latest' \;
+          command: find ~/.nvm -type d -name "node-gyp" -exec sh -c 'cd "$(dirname "{}")" && npm i node-gyp@latest' \;
       - run:
           name: Install NPM Packages
           command: |
@@ -161,7 +161,7 @@ jobs:
           command: brew update && brew install openssl@1.1 && brew upgrade
       - run:
           name: Patch node-gyp error
-          command: find /usr/lib -type d -name "node-gyp" -exec sh -c 'cd "$(dirname "{}")" && npm i node-gyp@latest' \;
+          command: find ~/.nvm -type d -name "node-gyp" -exec sh -c 'cd "$(dirname "{}")" && npm i node-gyp@latest' \;
       - run:
           name: Install NPM Packages
           command: |
@@ -211,7 +211,7 @@ jobs:
           command: brew update && brew install openssl@1.1 && brew upgrade
       - run:
           name: Patch node-gyp error
-          command: find /usr/lib -type d -name "node-gyp" -exec sh -c 'cd "$(dirname "{}")" && npm i node-gyp@latest' \;
+          command: find ~/.nvm -type d -name "node-gyp" -exec sh -c 'cd "$(dirname "{}")" && npm i node-gyp@latest' \;
       - run:
           name: Install NPM Packages
           command: |
