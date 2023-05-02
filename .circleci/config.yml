@@ -104,7 +104,7 @@ jobs:
           command: yarn build:neon:linux
       - run:
           name: Test
-          command: yarn test --coverage
+          command: yarn test
   # test & lint jobs for macos
   test-mac:
     description: << parameters.node-version >>
