@@ -7,7 +7,7 @@ version: 2.1
 parameters:
   cache_version:
     type: string
-    default: "v1"
+    default: "v2"
   aws_ecr_host:
     type: string
     default: "454245708275.dkr.ecr.eu-west-1.amazonaws.com"
@@ -97,9 +97,6 @@ jobs:
       - checkout
       - install_packages
       - run:
-          name: Install OpenSSL 1.1
-          command: brew update && brew install openssl@1.1 && brew upgrade
-      - run:
           name: Lint
           command: yarn lint
       - run:
@@ -183,9 +180,6 @@ jobs:
     steps:
       - checkout
       - install_packages
-      - run:
-          name: Install OpenSSL 1.1
-          command: brew update && brew install openssl@1.1 && brew upgrade
       - run:
           name: Build Rust Binary
           command: yarn build:neon:linux
