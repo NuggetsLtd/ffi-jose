@@ -73,7 +73,7 @@ executors:
       - image: << pipeline.parameters.aws_ecr_host >>/rust-node-18-musl-main:latest
   mac:
     macos:
-      xcode: "14.3.0"
+      xcode: "14.2.0"
     # use a --login shell so our "set Ruby version" command gets picked up for later steps
     shell: /bin/bash --login -o pipefail
     environment:
