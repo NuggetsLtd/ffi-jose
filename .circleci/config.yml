@@ -122,6 +122,9 @@ jobs:
           name: Install OpenSSL 1.1
           command: brew update && brew install openssl@1.1 && brew upgrade
       - run:
+          name: Patch node-gyp error
+          command: find /usr/lib -type d -name "node-gyp" -exec sh -c 'cd "$(dirname "{}")" && npm i node-gyp@latest' \;
+      - run:
           name: Install NPM Packages
           command: |
             echo "//registry.npmjs.org/:_authToken=$PRIVATE_NPM_TOKEN" > ~/.npmrc
@@ -156,6 +159,9 @@ jobs:
       - run:
           name: Install OpenSSL 1.1
           command: brew update && brew install openssl@1.1 && brew upgrade
+      - run:
+          name: Patch node-gyp error
+          command: find /usr/lib -type d -name "node-gyp" -exec sh -c 'cd "$(dirname "{}")" && npm i node-gyp@latest' \;
       - run:
           name: Install NPM Packages
           command: |
@@ -203,6 +209,9 @@ jobs:
       - run:
           name: Install OpenSSL 1.1
           command: brew update && brew install openssl@1.1 && brew upgrade
+      - run:
+          name: Patch node-gyp error
+          command: find /usr/lib -type d -name "node-gyp" -exec sh -c 'cd "$(dirname "{}")" && npm i node-gyp@latest' \;
       - run:
           name: Install NPM Packages
           command: |
