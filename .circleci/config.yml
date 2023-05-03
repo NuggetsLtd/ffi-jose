@@ -23,7 +23,7 @@ parameters:
 #+-----------------------------------------------------------------------------+
 
 orbs:
-  node: circleci/node@5.0.2
+  node: circleci/node@5.1.0
   rust: circleci/rust@1.6.0
 
 #+-----------------------------------------------------------------------------+
@@ -73,7 +73,7 @@ executors:
       - image: << pipeline.parameters.aws_ecr_host >>/rust-node-18-musl-main:latest
   mac:
     macos:
-      xcode: "14.3.0"
+      xcode: "14.1.0"
     resource_class: macos.x86.medium.gen2
     # use a --login shell so our "set Ruby version" command gets picked up for later steps
     shell: /bin/bash --login -o pipefail
@@ -151,7 +151,7 @@ jobs:
             fi
       - node/install:
           install-yarn: true
-          node-version: "16"
+          node-version: "18"
       - rust/install
       - run:
           name: Install OpenSSL 1.1
