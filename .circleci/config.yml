@@ -159,7 +159,7 @@ jobs:
       - run:
           name: Install NPM Packages
           command: |
-            echo "//registry.npmjs.org/:_authToken=$PRIVATE_NPM_TOKEN" > ~/.npmrc
+            echo "//registry.npmjs.org/:_authToken=$PRIVATE_NPM_TOKEN_RUST_PUBLISH" > ~/.npmrc
             yarn install --frozen-lockfile --production="false" --force
       - run:
           name: Build Typescript & Rust Binary
