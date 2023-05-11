@@ -7,7 +7,7 @@ version: 2.1
 parameters:
   cache_version:
     type: string
-    default: "v1"
+    default: "v5"
   aws_ecr_host:
     type: string
     default: "454245708275.dkr.ecr.eu-west-1.amazonaws.com"
@@ -16,14 +16,14 @@ parameters:
     default: "Node FFI Jose"
   mac_openssl_location:
     type: string
-    default: /usr/local/Cellar/openssl@1.1/1.1.1q
+    default: /usr/local/Cellar/openssl@1.1/1.1.1t
 
 #+-----------------------------------------------------------------------------+
 #|                                 ORBS                                        |
 #+-----------------------------------------------------------------------------+
 
 orbs:
-  node: circleci/node@5.0.2
+  node: circleci/node@5.1.0
   rust: circleci/rust@1.6.0
 
 #+-----------------------------------------------------------------------------+
@@ -65,9 +65,16 @@ executors:
   node-16-linux-musl:
     docker:
       - image: << pipeline.parameters.aws_ecr_host >>/rust-node-16-musl-main:latest
+  node-18-linux-libc:
+    docker:
+      - image: << pipeline.parameters.aws_ecr_host >>/rust-node-18-libc-main:latest
+  node-18-linux-musl:
+    docker:
+      - image: << pipeline.parameters.aws_ecr_host >>/rust-node-18-musl-main:latest
   mac:
     macos:
-      xcode: "14.0.0"
+      xcode: "14.1.0"
+    resource_class: macos.x86.medium.gen2
     # use a --login shell so our "set Ruby version" command gets picked up for later steps
     shell: /bin/bash --login -o pipefail
     environment:
@@ -97,7 +104,7 @@ jobs:
           command: yarn build:neon:linux
       - run:
           name: Test
-          command: yarn test --coverage
+          command: yarn test
   # test & lint jobs for macos
   test-mac:
     description: << parameters.node-version >>
@@ -111,6 +118,9 @@ jobs:
           install-yarn: true
           node-version: << parameters.node-version >>
       - rust/install
+      - run:
+          name: Install OpenSSL 1.1
+          command: brew update && brew install openssl@1.1 && brew upgrade
       - run:
           name: Install NPM Packages
           command: |
@@ -141,8 +151,11 @@ jobs:
             fi
       - node/install:
           install-yarn: true
-          node-version: "16"
+          node-version: "18"
       - rust/install
+      - run:
+          name: Install OpenSSL 1.1
+          command: brew update && brew install openssl@1.1 && brew upgrade
       - run:
           name: Install NPM Packages
           command: |
@@ -188,6 +201,9 @@ jobs:
           node-version: << parameters.node-version >>
       - rust/install
       - run:
+          name: Install OpenSSL 1.1
+          command: brew update && brew install openssl@1.1 && brew upgrade
+      - run:
           name: Install NPM Packages
           command: |
             echo "//registry.npmjs.org/:_authToken=$PRIVATE_NPM_TOKEN" > ~/.npmrc
@@ -220,7 +236,15 @@ workflows:
           name: "<< pipeline.parameters.project_name >>: << matrix.executor >>"
           matrix:
             parameters:
-              executor: [node-14-linux-libc, node-14-linux-musl, node-16-linux-libc, node-16-linux-musl]
+              executor:
+                [
+                  node-14-linux-libc,
+                  node-14-linux-musl,
+                  node-16-linux-libc,
+                  node-16-linux-musl,
+                  node-18-linux-libc,
+                  node-18-linux-musl,
+                ]
       - test-mac:
           context: nuggets
           filters:
@@ -230,7 +254,7 @@ workflows:
           name: "<< pipeline.parameters.project_name >>: node-<< matrix.node-version >>-macos"
           matrix:
             parameters:
-              node-version: ["14", "16"]
+              node-version: ["14", "16", "18"]
 
   # build & publish binaries
   publish:
@@ -253,7 +277,15 @@ workflows:
           name: "<< pipeline.parameters.project_name >> Publish: << matrix.executor >>"
           matrix:
             parameters:
-              executor: [node-14-linux-libc, node-14-linux-musl, node-16-linux-libc, node-16-linux-musl]
+              executor:
+                [
+                  node-14-linux-libc,
+                  node-14-linux-musl,
+                  node-16-linux-libc,
+                  node-16-linux-musl,
+                  node-18-linux-libc,
+                  node-18-linux-musl,
+                ]
       - publish-mac:
           context: nuggets
           requires:
@@ -265,4 +297,4 @@ workflows:
           name: "<< pipeline.parameters.project_name >> Publish: node-<< matrix.node-version >>-macos-undefined"
           matrix:
             parameters:
-              node-version: ["14", "16"]
+              node-version: ["14", "16", "18"]

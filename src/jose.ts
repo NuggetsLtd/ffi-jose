@@ -16,7 +16,7 @@ export const generateJWK = async (request: JoseGenerateJwkRequest): Promise<JWK>
 
   try {
     jwkString = await jose.generate_key_pair_jwk({ namedCurve });
-  } catch (error) {
+  } catch (error: any) {
     if (error.message === "internal error in Neon module: Unknown curve") {
       throw new TypeError("Unknown curve");
     }
@@ -65,7 +65,7 @@ export const generateKeyPair = async (
 
   try {
     keyPairString = await jose.generate_key_pair_jwk({ namedCurve: crv_mapped });
-  } catch (error) {
+  } catch (error: any) {
     if (error.message === "internal error in Neon module: Unknown curve") {
       throw new TypeError("Unknown curve");
     }
@@ -105,7 +105,7 @@ export const encrypt = async (
 
   try {
     encryptedString = await jose.encrypt(enc_mapped, cek.buffer, iv.buffer, plaintext.buffer, aad.buffer, didcomm);
-  } catch (error) {
+  } catch (error: any) {
     if (error.message === "internal error in Neon module: Unknown curve") {
       throw new TypeError("Unknown curve");
     }
@@ -146,7 +146,7 @@ export const decrypt = async (
 
   try {
     decrypted = jose.decrypt(enc_mapped, cek.buffer, ciphertext.buffer, iv.buffer, tag.buffer, aad.buffer);
-  } catch (error) {
+  } catch (error: any) {
     if (error.message === "internal error in Neon module: Unknown curve") {
       throw new TypeError("Unknown curve");
     }

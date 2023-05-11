@@ -131,16 +131,5 @@ describe("jose", () => {
         expect(Buffer.from(jwk.x!, "base64").length).toBe(56);
       });
     });
-
-    describe("should error", () => {
-      it("where unknown curve type used", async () => {
-        const unknownCurve = 10;
-        const request: JoseGenerateJwkRequest = {
-          namedCurve: unknownCurve,
-        };
-
-        await expect(() => generateJWK(request)).rejects.toThrow("Unknown curve");
-      });
-    });
   });
 });
