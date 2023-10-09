@@ -140,15 +140,15 @@ jobs:
     executor: mac
     steps:
       - checkout
-      # - run:
-      #     name: Publish Check
-      #     command: |
-      #       GIT_COMMIT_MESSAGE=$(git log --format=%s -n 1 $CIRCLE_SHA1)
+      - run:
+          name: Publish Check
+          command: |
+            GIT_COMMIT_MESSAGE=$(git log --format=%s -n 1 $CIRCLE_SHA1)
 
-      #       if [ "$GIT_COMMIT_MESSAGE" != "chore(release): publish" ]; then
-      #           curl -X POST "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel?circle-token=$CIRCLE_API_TOKEN"
-      #           circleci-agent step halt
-      #       fi
+            if [ "$GIT_COMMIT_MESSAGE" != "chore(release): publish" ]; then
+                curl -X POST "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel?circle-token=$CIRCLE_API_TOKEN"
+                circleci-agent step halt
+            fi
       - node/install:
           install-yarn: true
           node-version: "18"
