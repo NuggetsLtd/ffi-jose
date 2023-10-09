@@ -153,9 +153,9 @@ jobs:
           install-yarn: true
           node-version: "18"
       - rust/install
-      # - run:
-      #     name: Install OpenSSL 1.1
-      #     command: brew update && brew install openssl@1.1 && brew upgrade
+      - run:
+          name: Install OpenSSL 1.1
+          command: brew update && brew install openssl@1.1 && brew upgrade
       - run:
           name: Install NPM Packages
           command: |
@@ -164,8 +164,8 @@ jobs:
       - run:
           name: Build Typescript & Rust Binary
           command: yarn build
-          # environment:
-          #   OPENSSL_DIR: << pipeline.parameters.mac_openssl_location >>
+          environment:
+            OPENSSL_DIR: << pipeline.parameters.mac_openssl_location >>
       - run:
           name: Publish NPM Package
           command: yarn publish:ts
