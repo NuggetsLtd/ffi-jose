@@ -1,3 +1,14 @@
+## [2.0.8](https://github.com/NuggetsLtd/ffi-jose/compare/v2.0.7...v2.0.8) (2024-03-01)
+
+
+### Reverts
+
+* Revert ":fire:  Comment out code for OpenSSL 1.1" ([4220ec2](https://github.com/NuggetsLtd/ffi-jose/commit/4220ec2c952b05524905afb9f980dc6efc2219d2))
+* Revert ":fire:  Remove publish check" ([4217bb7](https://github.com/NuggetsLtd/ffi-jose/commit/4217bb733bac6249fa0abe8c392351aba8a6b0e8))
+* Revert "chore(release): publish" ([fba1d77](https://github.com/NuggetsLtd/ffi-jose/commit/fba1d77461dffb81ecf16e1e9dcf50349f062451))
+
+
+
 ## [2.0.6](https://github.com/NuggetsLtd/ffi-jose/compare/v2.0.5...v2.0.6) (2023-05-11)
 
 
