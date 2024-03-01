@@ -71,6 +71,12 @@ executors:
   node-18-linux-musl:
     docker:
       - image: << pipeline.parameters.aws_ecr_host >>/rust-node-18-musl-main:latest
+  node-20-linux-libc:
+    docker:
+      - image: << pipeline.parameters.aws_ecr_host >>/rust-node-20-libc-main:latest
+  node-20-linux-musl:
+    docker:
+      - image: << pipeline.parameters.aws_ecr_host >>/rust-node-20-musl-main:latest
   mac:
     macos:
       xcode: "14.1.0"
@@ -151,7 +157,7 @@ jobs:
             fi
       - node/install:
           install-yarn: true
-          node-version: "18"
+          node-version: "20"
       - rust/install
       - run:
           name: Install OpenSSL 1.1
@@ -244,6 +250,8 @@ workflows:
                   node-16-linux-musl,
                   node-18-linux-libc,
                   node-18-linux-musl,
+                  node-20-linux-libc,
+                  node-20-linux-musl,
                 ]
       - test-mac:
           context: nuggets
@@ -254,7 +262,7 @@ workflows:
           name: "<< pipeline.parameters.project_name >>: node-<< matrix.node-version >>-macos"
           matrix:
             parameters:
-              node-version: ["14", "16", "18"]
+              node-version: ["14", "16", "18", "20"]
 
   # build & publish binaries
   publish:
@@ -285,6 +293,8 @@ workflows:
                   node-16-linux-musl,
                   node-18-linux-libc,
                   node-18-linux-musl,
+                  node-20-linux-libc,
+                  node-20-linux-musl,
                 ]
       - publish-mac:
           context: nuggets
@@ -297,4 +307,4 @@ workflows:
           name: "<< pipeline.parameters.project_name >> Publish: node-<< matrix.node-version >>-macos-undefined"
           matrix:
             parameters:
-              node-version: ["14", "16", "18"]
+              node-version: ["14", "16", "18", "20"]
