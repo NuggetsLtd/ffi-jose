@@ -234,7 +234,7 @@ workflows:
   test:
     jobs:
       - test-linux:
-          context: nuggets
+          context: nuggets-mobile
           filters:
             branches:
               ignore:
@@ -254,7 +254,7 @@ workflows:
                   node-20-linux-musl,
                 ]
       - test-mac:
-          context: nuggets
+          context: nuggets-mobile
           filters:
             branches:
               ignore:
@@ -268,14 +268,14 @@ workflows:
   publish:
     jobs:
       - publish-package:
-          context: nuggets
+          context: nuggets-mobile
           filters:
             branches:
               only:
                 - master
           name: "<< pipeline.parameters.project_name >> Publish: NPM Package"
       - publish-linux:
-          context: nuggets
+          context: nuggets-mobile
           requires:
             - "<< pipeline.parameters.project_name >> Publish: NPM Package"
           filters:
@@ -297,7 +297,7 @@ workflows:
                   node-20-linux-musl,
                 ]
       - publish-mac:
-          context: nuggets
+          context: nuggets-mobile
           requires:
             - "<< pipeline.parameters.project_name >> Publish: NPM Package"
           filters:
