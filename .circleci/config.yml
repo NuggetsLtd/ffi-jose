@@ -14,9 +14,13 @@ parameters:
   project_name:
     type: string
     default: "Node FFI Jose"
-  mac_openssl_location:
+  mac_intel_openssl_location:
+    type: string
+    default: /usr/local/Cellar/openssl@1.1/1.1.1w
+  mac_m1_openssl_location:
     type: string
     default: /opt/homebrew/Cellar/openssl@1.1/1.1.1w
+
 
 #+-----------------------------------------------------------------------------+
 #|                                 ORBS                                        |
@@ -25,6 +29,7 @@ parameters:
 orbs:
   node: circleci/node@5.1.0
   rust: circleci/rust@1.6.0
+
 
 #+-----------------------------------------------------------------------------+
 #|                               COMMANDS                                      |
@@ -140,7 +145,7 @@ jobs:
           name: Build Typescript & Rust Binary
           command: yarn build
           environment:
-            OPENSSL_DIR: << pipeline.parameters.mac_openssl_location >>
+            OPENSSL_DIR: << pipeline.parameters.mac_intel_openssl_location >>
       - run:
           name: Test
           command: yarn test
@@ -168,7 +173,7 @@ jobs:
           name: Build Typescript & Rust Binary
           command: yarn build
           environment:
-            OPENSSL_DIR: << pipeline.parameters.mac_openssl_location >>
+            OPENSSL_DIR: << pipeline.parameters.mac_m1_openssl_location >>
       - run:
           name: Test
           command: yarn test
@@ -203,7 +208,7 @@ jobs:
           name: Build Typescript & Rust Binary
           command: yarn build
           environment:
-            OPENSSL_DIR: << pipeline.parameters.mac_openssl_location >>
+            OPENSSL_DIR: << pipeline.parameters.mac_m1_openssl_location >>
       - run:
           name: Publish NPM Package
           command: yarn publish:ts
@@ -250,7 +255,7 @@ jobs:
           name: Build Typescript & Rust Binary
           command: yarn build
           environment:
-            OPENSSL_DIR: << pipeline.parameters.mac_openssl_location >>
+            OPENSSL_DIR: << pipeline.parameters.mac_intel_openssl_location >>
       - run:
           name: Publish Rust Binary
           command: yarn publish:binary
@@ -278,7 +283,7 @@ jobs:
           name: Build Typescript & Rust Binary
           command: yarn build
           environment:
-            OPENSSL_DIR: << pipeline.parameters.mac_openssl_location >>
+            OPENSSL_DIR: << pipeline.parameters.mac_m1_openssl_location >>
       - run:
           name: Publish Rust Binary
           command: yarn publish:binary
