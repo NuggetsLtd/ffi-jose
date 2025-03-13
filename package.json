@@ -4,6 +4,7 @@
   "description": "Foreign Function Interface (FFI) for Rust JOSE package",
   "homepage": "https://github.com/NuggetsLtd/ffi-jose",
   "type": "module",
+  "main": "lib/index.js",
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",
