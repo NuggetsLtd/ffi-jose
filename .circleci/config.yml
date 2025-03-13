@@ -61,12 +61,6 @@ commands:
 #+-----------------------------------------------------------------------------+
 
 executors:
-  node-16-linux-libc:
-    docker:
-      - image: << pipeline.parameters.aws_ecr_host >>/rust-node-16-libc-main:latest
-  node-16-linux-musl:
-    docker:
-      - image: << pipeline.parameters.aws_ecr_host >>/rust-node-16-musl-main:latest
   node-18-linux-libc:
     docker:
       - image: << pipeline.parameters.aws_ecr_host >>/rust-node-18-libc-main:latest
@@ -79,6 +73,12 @@ executors:
   node-20-linux-musl:
     docker:
       - image: << pipeline.parameters.aws_ecr_host >>/rust-node-20-musl-main:latest
+  node-22-linux-libc:
+    docker:
+      - image: << pipeline.parameters.aws_ecr_host >>/rust-node-22-libc-main:latest
+  node-22-linux-musl:
+    docker:
+      - image: << pipeline.parameters.aws_ecr_host >>/rust-node-22-musl-main:latest
   mac-m1:
     macos:
       xcode: "15.2"
@@ -260,12 +260,12 @@ workflows:
             parameters:
               executor:
                 [
-                  node-16-linux-libc,
-                  node-16-linux-musl,
                   node-18-linux-libc,
                   node-18-linux-musl,
                   node-20-linux-libc,
                   node-20-linux-musl,
+                  node-22-linux-libc,
+                  node-22-linux-musl,
                 ]
       - test-mac-m1:
           context: nuggets
@@ -276,7 +276,7 @@ workflows:
           name: "<< pipeline.parameters.project_name >>: node-<< matrix.node-version >>-macos"
           matrix:
             parameters:
-              node-version: ["16", "18", "20"]
+              node-version: ["18", "20", "22"]
 
   # build & publish binaries
   publish:
@@ -301,12 +301,12 @@ workflows:
             parameters:
               executor:
                 [
-                  node-16-linux-libc,
-                  node-16-linux-musl,
                   node-18-linux-libc,
                   node-18-linux-musl,
                   node-20-linux-libc,
                   node-20-linux-musl,
+                  node-22-linux-libc,
+                  node-22-linux-musl,
                 ]
       - publish-mac-m1:
           context: nuggets
@@ -319,4 +319,4 @@ workflows:
           name: "<< pipeline.parameters.project_name >> Publish: node-<< matrix.node-version >>-macos-m1"
           matrix:
             parameters:
-              node-version: ["16", "18", "20"]
+              node-version: ["18", "20", "22"]
