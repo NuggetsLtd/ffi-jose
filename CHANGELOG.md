@@ -1,3 +1,12 @@
+## [2.0.23](https://github.com/NuggetsLtd/ffi-jose/compare/v2.0.22...v2.0.23) (2025-03-13)
+
+
+### Bug Fixes
+
+* rename script to ([70b3954](https://github.com/NuggetsLtd/ffi-jose/commit/70b395432b267ef183248169b98c5fdad3ea8a47))
+
+
+
 ## [2.0.22](https://github.com/NuggetsLtd/ffi-jose/compare/v2.0.21...v2.0.22) (2025-03-13)
 
 
