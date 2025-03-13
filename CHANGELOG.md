@@ -1,3 +1,12 @@
+## [2.0.24](https://github.com/NuggetsLtd/ffi-jose/compare/v2.0.23...v2.0.24) (2025-03-13)
+
+
+### Bug Fixes
+
+* update bash scripts to use  extension for scripts ([1da06fc](https://github.com/NuggetsLtd/ffi-jose/commit/1da06fca76a256b4d80ac5b70ee77bb40768dce5))
+
+
+
 ## [2.0.23](https://github.com/NuggetsLtd/ffi-jose/compare/v2.0.22...v2.0.23) (2025-03-13)
 
 
