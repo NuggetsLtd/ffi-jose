@@ -5,7 +5,7 @@ import { SigningAlgorithm } from "./SigningAlgorithm.js";
 
 export interface JoseModule {
   readonly generate_key_pair_jwk: ({ namedCurve }: { namedCurve: NamedCurve }) => string;
-  readonly generate_key_pair: () => Promise<any>;
+  readonly generate_key_pair: () => string;
   readonly encrypt: (
     contentEncryption: ContentEncryption,
     cek: ArrayBufferLike,
@@ -13,7 +13,7 @@ export interface JoseModule {
     plaintext: ArrayBufferLike,
     aad: ArrayBufferLike,
     didcomm: boolean
-  ) => Promise<{ ciphertext: string; tag?: string }>;
+  ) => { ciphertext: string; tag?: string };
   readonly decrypt: (
     contentEncryption: ContentEncryption,
     cek: ArrayBufferLike,

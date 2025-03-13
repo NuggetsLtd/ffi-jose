@@ -17,7 +17,7 @@ export const generateJWK = async (request: JoseGenerateJwkRequest): Promise<JWK>
 
   try {
     jwkString = jose.generate_key_pair_jwk({ namedCurve });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.message === "internal error in Neon module: Unknown curve") {
       throw new TypeError("Unknown curve");
     }
@@ -66,7 +66,7 @@ export const generateKeyPair = async (
 
   try {
     keyPairString = jose.generate_key_pair_jwk({ namedCurve: crv_mapped });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.message === "internal error in Neon module: Unknown curve") {
       throw new TypeError("Unknown curve");
     }
@@ -106,7 +106,7 @@ export const encrypt = async (
 
   try {
     encryptedObj = jose.encrypt(enc_mapped, cek.buffer, iv.buffer, plaintext.buffer, aad.buffer, didcomm);
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.message === "internal error in Neon module: Unknown curve") {
       throw new TypeError("Unknown curve");
     }
@@ -152,7 +152,7 @@ export const decrypt = async (
 
   try {
     decrypted = jose.decrypt(enc_mapped, cek.buffer, ciphertext.buffer, iv.buffer, tag.buffer, aad.buffer);
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.message === "internal error in Neon module: Unknown curve") {
       throw new TypeError("Unknown curve");
     }
@@ -166,13 +166,14 @@ export const decrypt = async (
 const _isJsonString = (str: string) => {
   try {
     JSON.parse(str);
-  } catch (e) {
+    // eslint-disable-next-line
+  } catch (e: unknown) {
     return false;
   }
   return true;
 };
 
-const _jsonConvertToString = (data: any) => {
+const _jsonConvertToString = (data: unknown) => {
   // ensure data is serialised as JSON string
   const dataSerialised = typeof data === "string" && _isJsonString(data) ? data : JSON.stringify(data);
 
@@ -182,17 +183,17 @@ const _jsonConvertToString = (data: any) => {
 export const generalEncryptJson = async (
   alg: KeyEncryption,
   enc: ContentEncryption,
-  payload: any,
+  payload: unknown,
   recipients: JWK[],
   didcomm: boolean = false
-): Promise<any> => {
+): Promise<unknown> => {
   recipients.forEach((recipient) => {
     if (!recipient?.kid) {
       throw new Error("Recipient JWKs must contain key identifier (kid)");
     }
   });
 
-  let jwe_string = jose.general_encrypt_json(
+  const jwe_string = jose.general_encrypt_json(
     alg,
     enc,
     _jsonConvertToString(payload),
@@ -203,56 +204,56 @@ export const generalEncryptJson = async (
   return JSON.parse(jwe_string);
 };
 
-export const decryptJson = async (jwe: any, jwk: JWK): Promise<any> => {
-  let json_string = jose.decrypt_json(_jsonConvertToString(jwe), _jsonConvertToString(jwk));
+export const decryptJson = async (jwe: JWE, jwk: JWK): Promise<unknown> => {
+  const json_string = jose.decrypt_json(_jsonConvertToString(jwe), _jsonConvertToString(jwk));
 
   return JSON.parse(json_string);
 };
 
 export const compactSignJson = async (
   alg: SigningAlgorithm,
-  payload: any,
+  payload: unknown,
   jwk: JWK,
   didcomm: boolean = false
-): Promise<any> => {
+): Promise<unknown> => {
   return jose.compact_sign_json(alg, _jsonConvertToString(payload), _jsonConvertToString(jwk), didcomm);
 };
 
-export const compactJsonVerify = async (jws: string, jwk: JWK): Promise<any> => {
-  let json_string = jose.compact_json_verify(jws, _jsonConvertToString(jwk));
+export const compactJsonVerify = async (jws: string, jwk: JWK): Promise<unknown> => {
+  const json_string = jose.compact_json_verify(jws, _jsonConvertToString(jwk));
 
   return JSON.parse(json_string);
 };
 
 export const flattenedSignJson = async (
   alg: SigningAlgorithm,
-  payload: any,
+  payload: unknown,
   jwk: JWK,
   didcomm: boolean = false
-): Promise<any> => {
+): Promise<unknown> => {
   if (!jwk.kid) {
     throw new Error('JWK `kid` property required for "flattened" signing');
   }
 
-  let json_string = jose.flattened_sign_json(alg, _jsonConvertToString(payload), _jsonConvertToString(jwk), didcomm);
+  const json_string = jose.flattened_sign_json(alg, _jsonConvertToString(payload), _jsonConvertToString(jwk), didcomm);
 
   return JSON.parse(json_string);
 };
 
-export const jsonVerify = async (jws: any, jwk: JWK): Promise<any> => {
-  let json_string = jose.json_verify(_jsonConvertToString(jws), _jsonConvertToString(jwk));
+export const jsonVerify = async (jws: unknown, jwk: JWK): Promise<unknown> => {
+  const json_string = jose.json_verify(_jsonConvertToString(jws), _jsonConvertToString(jwk));
 
   return JSON.parse(json_string);
 };
 
-export const generalSignJson = async (payload: any, jwks: [JWK], didcomm: boolean = false): Promise<any> => {
+export const generalSignJson = async (payload: unknown, jwks: [JWK], didcomm: boolean = false): Promise<unknown> => {
   jwks.forEach((jwk) => {
     if (!jwk.kid) {
       throw new Error('JWK `kid` property required for "general" signing');
     }
   });
 
-  let json_string = jose.general_sign_json(_jsonConvertToString(payload), _jsonConvertToString(jwks), didcomm);
+  const json_string = jose.general_sign_json(_jsonConvertToString(payload), _jsonConvertToString(jwks), didcomm);
 
   return JSON.parse(json_string);
 };
