@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { encrypt, decrypt } from "../src";
 
 const base64ToArrayBuffer = (value: string) => Uint8Array.from(Buffer.from(value, "base64"));

@@ -1,18 +1,20 @@
 {
+  "extends": "./tsconfig/base.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es5",
-    "sourceMap": true,
-    "allowJs": false,
-    "moduleResolution": "node",
-    "strict": true,
-    "declaration": true,
-    "downlevelIteration": true,
-    "baseUrl": ".",
-    "esModuleInterop": true,
+    "outDir": "lib",
+    "rootDir": "src",
+    "lib": ["esnext"],
+    "noEmit": true,
     "resolveJsonModule": true,
-    "outDir": "./lib",
-    "types": ["jest", "node"]
+    "moduleResolution": "Node16",
+    "module": "Node16",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": ["./src"]
+  "include": ["src/**/*.ts", "@types/g.d.ts"],
+  "exclude": ["node_modules", "lib", "src/**/*.spec.ts", "src/**/*.spec.js"],
+  "tsc-alias": {
+    "resolveFullPaths": true
+  }
 }

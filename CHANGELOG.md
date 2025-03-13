@@ -1,3 +1,19 @@
+## [2.0.21](https://github.com/NuggetsLtd/ffi-jose/compare/v2.0.20...v2.0.21) (2025-03-13)
+
+
+### Bug Fixes
+
+* build issues ([e496db5](https://github.com/NuggetsLtd/ffi-jose/commit/e496db577d37086befa2853edc089cb899cefb92))
+* eslint errors following refactor ([bd17d76](https://github.com/NuggetsLtd/ffi-jose/commit/bd17d769bd4a4ddbff8b8cd51660f4816ec5189f))
+* update CI to build for specific rust version & update to add node 22 ([d26cf27](https://github.com/NuggetsLtd/ffi-jose/commit/d26cf27498ddbba02677022e4ca7b26d94b997de))
+* use alternate way to install OpenSSL 1.1 ([769dc5e](https://github.com/NuggetsLtd/ffi-jose/commit/769dc5e38b22bbacd7b1e6918b12950f48486161))
+
+
+
+## [2.0.20](https://github.com/NuggetsLtd/ffi-jose/compare/v2.0.19...v2.0.20) (2025-03-13)
+
+
+
 ## [2.0.19](https://github.com/NuggetsLtd/ffi-jose/compare/v2.0.18...v2.0.19) (2024-04-22)
 
 

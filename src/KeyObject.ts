@@ -1,9 +1,9 @@
-import type { PublicKeyExportOptions, PrivateKeyExportOptions, JoseGenerateKeyPairResponse } from "./types";
+import type { PublicKeyExportOptions, PrivateKeyExportOptions, JoseGenerateKeyPairResponse } from "./types/index.js";
 
 const kKeyType = Symbol("kKeyType");
 
 export class KeyObject {
-  [kKeyType]: any;
+  [kKeyType]: unknown;
   _keyPair: JoseGenerateKeyPairResponse;
 
   constructor(type: string, keyPair: JoseGenerateKeyPairResponse) {
@@ -30,8 +30,8 @@ const kAsymmetricKeyType = Symbol("kAsymmetricKeyType");
 const kAsymmetricKeyDetails = Symbol("kAsymmetricKeyDetails");
 
 class AsymmetricKeyObject extends KeyObject {
-  [kAsymmetricKeyType]: any;
-  [kAsymmetricKeyDetails]: any;
+  [kAsymmetricKeyType]: unknown;
+  [kAsymmetricKeyDetails]: unknown;
 
   constructor(
     visibility: string,

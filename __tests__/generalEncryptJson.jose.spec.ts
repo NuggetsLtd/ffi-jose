@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { KeyEncryption, ContentEncryption, JWK } from "../src";
 import { generalEncryptJson } from "../src";
 
@@ -44,18 +45,15 @@ describe("jose", () => {
     const aad = base64ToArrayBuffer("");
 
     describe("should encrypt plaintext correctly", () => {
-
       describe("where enc type is `GCM`", () => {
-
-        describe('and didcomm = true', () => {
-
+        describe("and didcomm = true", () => {
           it("and `enc` = 'A128GCM'", async () => {
             const alg = KeyEncryption.EcdhEsA128kw;
             const enc = ContentEncryption.A128gcm;
             const recipients: JWK[] = [jwks[0].public];
-  
+
             const jwe = await generalEncryptJson(alg, enc, payload, recipients, true);
-  
+
             expect(jwe).toBeInstanceOf(Object);
             expect(Object.keys(jwe).sort()).toEqual(["ciphertext", "iv", "protected", "recipients", "tag"]);
             expect(jwe.protected).toEqual(
@@ -63,14 +61,14 @@ describe("jose", () => {
             );
             expect(jwe.recipients[0].header.kid).toBe(jwks[0].public.kid);
           });
-  
+
           it("and `enc` = 'A192GCM'", async () => {
             const alg = KeyEncryption.EcdhEsA192kw;
             const enc = ContentEncryption.A192gcm;
             const recipients: JWK[] = [jwks[0].public];
-  
+
             const jwe = await generalEncryptJson(alg, enc, payload, recipients, true);
-  
+
             expect(jwe).toBeInstanceOf(Object);
             expect(Object.keys(jwe).sort()).toEqual(["ciphertext", "iv", "protected", "recipients", "tag"]);
             expect(jwe.protected).toEqual(
@@ -78,14 +76,14 @@ describe("jose", () => {
             );
             expect(jwe.recipients[0].header.kid).toBe(jwks[0].public.kid);
           });
-  
+
           it("and `enc` = 'A256GCM'", async () => {
             const alg = KeyEncryption.EcdhEsA256kw;
             const enc = ContentEncryption.A256gcm;
             const recipients: JWK[] = [jwks[0].public];
-  
+
             const jwe = await generalEncryptJson(alg, enc, payload, recipients, true);
-  
+
             expect(jwe).toBeInstanceOf(Object);
             expect(Object.keys(jwe).sort()).toEqual(["ciphertext", "iv", "protected", "recipients", "tag"]);
             expect(jwe.protected).toEqual(
@@ -93,71 +91,59 @@ describe("jose", () => {
             );
             expect(jwe.recipients[0].header.kid).toBe(jwks[0].public.kid);
           });
+        });
 
-        })
-
-        describe('and didcomm = false (default)', () => {
-
+        describe("and didcomm = false (default)", () => {
           it("and `enc` = 'A128GCM'", async () => {
             const alg = KeyEncryption.EcdhEsA128kw;
             const enc = ContentEncryption.A128gcm;
             const recipients: JWK[] = [jwks[0].public];
-  
+
             const jwe = await generalEncryptJson(alg, enc, payload, recipients);
-  
+
             expect(jwe).toBeInstanceOf(Object);
             expect(Object.keys(jwe).sort()).toEqual(["ciphertext", "iv", "protected", "recipients", "tag"]);
-            expect(jwe.protected).toEqual(
-              "eyJhbGciOiJFQ0RILUVTK0ExMjhLVyIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJKV1QifQ"
-            );
+            expect(jwe.protected).toEqual("eyJhbGciOiJFQ0RILUVTK0ExMjhLVyIsImVuYyI6IkExMjhHQ00iLCJ0eXAiOiJKV1QifQ");
             expect(jwe.recipients[0].header.kid).toBe(jwks[0].public.kid);
           });
-  
+
           it("and `enc` = 'A192GCM'", async () => {
             const alg = KeyEncryption.EcdhEsA192kw;
             const enc = ContentEncryption.A192gcm;
             const recipients: JWK[] = [jwks[0].public];
-  
+
             const jwe = await generalEncryptJson(alg, enc, payload, recipients);
-  
+
             expect(jwe).toBeInstanceOf(Object);
             expect(Object.keys(jwe).sort()).toEqual(["ciphertext", "iv", "protected", "recipients", "tag"]);
-            expect(jwe.protected).toEqual(
-              "eyJhbGciOiJFQ0RILUVTK0ExOTJLVyIsImVuYyI6IkExOTJHQ00iLCJ0eXAiOiJKV1QifQ"
-            );
+            expect(jwe.protected).toEqual("eyJhbGciOiJFQ0RILUVTK0ExOTJLVyIsImVuYyI6IkExOTJHQ00iLCJ0eXAiOiJKV1QifQ");
             expect(jwe.recipients[0].header.kid).toBe(jwks[0].public.kid);
           });
-  
+
           it("and `enc` = 'A256GCM'", async () => {
             const alg = KeyEncryption.EcdhEsA256kw;
             const enc = ContentEncryption.A256gcm;
             const recipients: JWK[] = [jwks[0].public];
-  
+
             const jwe = await generalEncryptJson(alg, enc, payload, recipients);
-  
+
             expect(jwe).toBeInstanceOf(Object);
             expect(Object.keys(jwe).sort()).toEqual(["ciphertext", "iv", "protected", "recipients", "tag"]);
-            expect(jwe.protected).toEqual(
-              "eyJhbGciOiJFQ0RILUVTK0EyNTZLVyIsImVuYyI6IkEyNTZHQ00iLCJ0eXAiOiJKV1QifQ"
-            );
+            expect(jwe.protected).toEqual("eyJhbGciOiJFQ0RILUVTK0EyNTZLVyIsImVuYyI6IkEyNTZHQ00iLCJ0eXAiOiJKV1QifQ");
             expect(jwe.recipients[0].header.kid).toBe(jwks[0].public.kid);
           });
-
-        })
-
+        });
       });
 
       describe("where enc type is `CBC`", () => {
-
-        describe('and didcomm = true', () => {
-
+        describe("and didcomm = true", () => {
           it("and enc=`A128CBC-HS256`", async () => {
             const alg = KeyEncryption.EcdhEsA128kw;
             const enc = ContentEncryption.A128cbcHs256;
             const recipients: JWK[] = [jwks[0].public];
-  
+
             const jwe = await generalEncryptJson(alg, enc, payload, recipients, true);
-  
+
             expect(jwe).toBeInstanceOf(Object);
             expect(Object.keys(jwe).sort()).toEqual(["ciphertext", "iv", "protected", "recipients", "tag"]);
             expect(jwe.protected).toEqual(
@@ -165,14 +151,14 @@ describe("jose", () => {
             );
             expect(jwe.recipients[0].header.kid).toBe(jwks[0].public.kid);
           });
-  
+
           it("and enc=`A192CBC-HS384`", async () => {
             const alg = KeyEncryption.EcdhEsA192kw;
             const enc = ContentEncryption.A192cbcHs384;
             const recipients: JWK[] = [jwks[0].public];
-  
+
             const jwe = await generalEncryptJson(alg, enc, payload, recipients, true);
-  
+
             expect(jwe).toBeInstanceOf(Object);
             expect(Object.keys(jwe).sort()).toEqual(["ciphertext", "iv", "protected", "recipients", "tag"]);
             expect(jwe.protected).toEqual(
@@ -180,14 +166,14 @@ describe("jose", () => {
             );
             expect(jwe.recipients[0].header.kid).toBe(jwks[0].public.kid);
           });
-  
+
           it("and enc=`A256CBC-HS512`", async () => {
             const alg = KeyEncryption.EcdhEsA256kw;
             const enc = ContentEncryption.A256cbcHs512;
             const recipients: JWK[] = [jwks[0].public];
-  
+
             const jwe = await generalEncryptJson(alg, enc, payload, recipients, true);
-  
+
             expect(jwe).toBeInstanceOf(Object);
             expect(Object.keys(jwe).sort()).toEqual(["ciphertext", "iv", "protected", "recipients", "tag"]);
             expect(jwe.protected).toEqual(
@@ -195,18 +181,16 @@ describe("jose", () => {
             );
             expect(jwe.recipients[0].header.kid).toBe(jwks[0].public.kid);
           });
+        });
 
-        })
-
-        describe('and didcomm = false (default)', () => {
-
+        describe("and didcomm = false (default)", () => {
           it("and enc=`A128CBC-HS256`", async () => {
             const alg = KeyEncryption.EcdhEsA128kw;
             const enc = ContentEncryption.A128cbcHs256;
             const recipients: JWK[] = [jwks[0].public];
-  
+
             const jwe = await generalEncryptJson(alg, enc, payload, recipients);
-  
+
             expect(jwe).toBeInstanceOf(Object);
             expect(Object.keys(jwe).sort()).toEqual(["ciphertext", "iv", "protected", "recipients", "tag"]);
             expect(jwe.protected).toEqual(
@@ -214,14 +198,14 @@ describe("jose", () => {
             );
             expect(jwe.recipients[0].header.kid).toBe(jwks[0].public.kid);
           });
-  
+
           it("and enc=`A192CBC-HS384`", async () => {
             const alg = KeyEncryption.EcdhEsA192kw;
             const enc = ContentEncryption.A192cbcHs384;
             const recipients: JWK[] = [jwks[0].public];
-  
+
             const jwe = await generalEncryptJson(alg, enc, payload, recipients);
-  
+
             expect(jwe).toBeInstanceOf(Object);
             expect(Object.keys(jwe).sort()).toEqual(["ciphertext", "iv", "protected", "recipients", "tag"]);
             expect(jwe.protected).toEqual(
@@ -229,14 +213,14 @@ describe("jose", () => {
             );
             expect(jwe.recipients[0].header.kid).toBe(jwks[0].public.kid);
           });
-  
+
           it("and enc=`A256CBC-HS512`", async () => {
             const alg = KeyEncryption.EcdhEsA256kw;
             const enc = ContentEncryption.A256cbcHs512;
             const recipients: JWK[] = [jwks[0].public];
-  
+
             const jwe = await generalEncryptJson(alg, enc, payload, recipients);
-  
+
             expect(jwe).toBeInstanceOf(Object);
             expect(Object.keys(jwe).sort()).toEqual(["ciphertext", "iv", "protected", "recipients", "tag"]);
             expect(jwe.protected).toEqual(
@@ -244,13 +228,8 @@ describe("jose", () => {
             );
             expect(jwe.recipients[0].header.kid).toBe(jwks[0].public.kid);
           });
-
-        })
-
+        });
       });
-
     });
-
   });
-
 });
