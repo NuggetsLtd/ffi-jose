@@ -1,3 +1,12 @@
+## [2.0.25](https://github.com/NuggetsLtd/ffi-jose/compare/v2.0.24...v2.0.25) (2025-03-13)
+
+
+### Bug Fixes
+
+* add  for node-gyp ([d41391f](https://github.com/NuggetsLtd/ffi-jose/commit/d41391f99b6b7479cc4dbcbdaea7e06ae6436f78))
+
+
+
 ## [2.0.24](https://github.com/NuggetsLtd/ffi-jose/compare/v2.0.23...v2.0.24) (2025-03-13)
 
 
