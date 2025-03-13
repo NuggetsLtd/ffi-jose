@@ -125,7 +125,11 @@ jobs:
       - rust/install
       - run:
           name: Install OpenSSL 1.1
-          command: brew update && brew install openssl@1.1 && brew upgrade
+          command: |
+            brew update
+            brew tap rbenv/tap
+            brew install rbenv/tap/openssl@1.1
+            brew upgrade
       - run:
           name: Install NPM Packages
           command: |
@@ -160,7 +164,11 @@ jobs:
       - rust/install
       - run:
           name: Install OpenSSL 1.1
-          command: brew update && brew install openssl@1.1 && brew upgrade
+          command: |
+            brew update
+            brew tap rbenv/tap
+            brew install rbenv/tap/openssl@1.1
+            brew upgrade
       - run:
           name: Install NPM Packages
           command: |
@@ -205,7 +213,11 @@ jobs:
       - rust/install
       - run:
           name: Install OpenSSL 1.1
-          command: brew update && brew install openssl@1.1 && brew upgrade
+          command: |
+            brew update
+            brew tap rbenv/tap
+            brew install rbenv/tap/openssl@1.1
+            brew upgrade
       - run:
           name: Install NPM Packages
           command: |
