@@ -1,4 +1,4 @@
-import type { PublicKeyExportOptions, PrivateKeyExportOptions, JoseGenerateKeyPairResponse } from "./types";
+import type { PublicKeyExportOptions, PrivateKeyExportOptions, JoseGenerateKeyPairResponse } from "./types/index.js";
 
 const kKeyType = Symbol("kKeyType");
 

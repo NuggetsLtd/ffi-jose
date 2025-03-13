@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { NamedCurve, generateKeyPair, JoseGenerateJwkRequest } from "../src";
 
 describe("jose", () => {

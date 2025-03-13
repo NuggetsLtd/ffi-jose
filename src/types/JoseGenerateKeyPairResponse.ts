@@ -1,4 +1,4 @@
-import type { JWK } from "./JWK";
+import type { JWK } from "./JWK.js";
 
 export interface JoseGenerateKeyPairResponse {
   readonly der_private_key: string;

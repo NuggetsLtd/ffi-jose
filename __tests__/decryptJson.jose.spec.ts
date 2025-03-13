@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { KeyEncryption, ContentEncryption, JWK } from "../src";
 import { generalEncryptJson, decryptJson } from "../src";
 

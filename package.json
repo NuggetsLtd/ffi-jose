@@ -3,7 +3,14 @@
   "version": "2.0.19",
   "description": "Foreign Function Interface (FFI) for Rust JOSE package",
   "homepage": "https://github.com/NuggetsLtd/ffi-jose",
-  "main": "lib/index.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "default": "./lib/index.js"
+    }
+  },
   "engines": {
     "node": ">=14",
     "yarn": "1.x"
@@ -16,7 +23,6 @@
     "lib",
     "native/index.node"
   ],
-  "typings": "lib/index.d.ts",
   "author": {
     "name": "Nuggets Ltd",
     "email": "support@nuggets.life",
@@ -41,15 +47,16 @@
     "test:c": "./scripts/c_test.sh",
     "test:java": "./scripts/java_test.sh",
     "test:neon": "./scripts/neon_test.sh",
-    "test:ts": "jest --config jest.config.typescript.js",
+    "test:ts": "vitest run",
     "test": "yarn test:neon && yarn test:ts",
     "build": "yarn build:neon && yarn build:ts",
     "build:env": "./scripts/build.sh",
     "build:neon": "yarn build:env NODE",
     "build:neon:linux": "./scripts/linux_docker_build.sh",
     "build:ios": "yarn build:env IOS",
+    "build:ios:openssl": "./scripts/openssl.sh",
     "build:android": "yarn build:env ANDROID",
-    "build:ts": "tsc --pretty",
+    "build:ts": "tsup --config tsup.config.ts",
     "package": "node-pre-gyp package",
     "clean": "rimraf lib/ && rimraf native/index.node && rimraf native/target && rimraf out/ && neon clean",
     "format": "prettier --write \"**/*.ts\" \"**/*.md\"  \"!**/lib/**\"",
@@ -92,8 +99,12 @@
     "rimraf": "3.0.2",
     "ts-jest": "29.1.0",
     "ts-node": "10.9.1",
+    "tsup": "^8.4.0",
     "typedoc": "0.24.6",
-    "typescript": "5.0.4"
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.0",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.0.8"
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "1.0.11",

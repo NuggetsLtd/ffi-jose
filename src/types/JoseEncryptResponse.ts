@@ -1,4 +1,4 @@
 export interface JoseEncryptResponse {
   readonly ciphertext: Uint8Array;
-  readonly tag?: Uint8Array;
+  tag?: Uint8Array;
 }
