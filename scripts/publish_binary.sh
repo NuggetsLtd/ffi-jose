@@ -13,7 +13,7 @@ set -e
 export PATH="$PATH:node_modules/.bin"
 
 # Add in the install script to package.json
-node scripts/add_stable_install_script.js
+node scripts/add_stable_install_script.cjs
 
 # Move out the generated index.node file
 copyfiles -f native/index.node .
