@@ -1,3 +1,12 @@
+## [2.0.26](https://github.com/NuggetsLtd/ffi-jose/compare/v2.0.25...v2.0.26) (2025-03-14)
+
+
+### Features
+
+* export types for module ([a6c310b](https://github.com/NuggetsLtd/ffi-jose/commit/a6c310b6ef7aa875afd9e2a9fa4a9680341c72a8))
+
+
+
 ## [2.0.25](https://github.com/NuggetsLtd/ffi-jose/compare/v2.0.24...v2.0.25) (2025-03-13)
 
 
