@@ -18,7 +18,7 @@ export const generateJWK = async (request: JoseGenerateJwkRequest): Promise<JWK>
   try {
     jwkString = jose.generate_key_pair_jwk({ namedCurve });
   } catch (error: unknown) {
-    if (error.message === "internal error in Neon module: Unknown curve") {
+    if (error instanceof Error && error.message === "internal error in Neon module: Unknown curve") {
       throw new TypeError("Unknown curve");
     }
 
@@ -67,7 +67,7 @@ export const generateKeyPair = async (
   try {
     keyPairString = jose.generate_key_pair_jwk({ namedCurve: crv_mapped });
   } catch (error: unknown) {
-    if (error.message === "internal error in Neon module: Unknown curve") {
+    if (error instanceof Error && error.message === "internal error in Neon module: Unknown curve") {
       throw new TypeError("Unknown curve");
     }
 
@@ -107,7 +107,7 @@ export const encrypt = async (
   try {
     encryptedObj = jose.encrypt(enc_mapped, cek.buffer, iv.buffer, plaintext.buffer, aad.buffer, didcomm);
   } catch (error: unknown) {
-    if (error.message === "internal error in Neon module: Unknown curve") {
+    if (error instanceof Error && error.message === "internal error in Neon module: Unknown curve") {
       throw new TypeError("Unknown curve");
     }
 
@@ -153,7 +153,7 @@ export const decrypt = async (
   try {
     decrypted = jose.decrypt(enc_mapped, cek.buffer, ciphertext.buffer, iv.buffer, tag.buffer, aad.buffer);
   } catch (error: unknown) {
-    if (error.message === "internal error in Neon module: Unknown curve") {
+    if (error instanceof Error && error.message === "internal error in Neon module: Unknown curve") {
       throw new TypeError("Unknown curve");
     }
 
@@ -204,7 +204,7 @@ export const generalEncryptJson = async (
   return JSON.parse(jwe_string);
 };
 
-export const decryptJson = async (jwe: JWE, jwk: JWK): Promise<unknown> => {
+export const decryptJson = async (jwe: any, jwk: JWK): Promise<unknown> => {
   const json_string = jose.decrypt_json(_jsonConvertToString(jwe), _jsonConvertToString(jwk));
 
   return JSON.parse(json_string);

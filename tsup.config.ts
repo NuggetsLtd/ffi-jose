@@ -4,7 +4,7 @@ export default defineConfig({
   entry: ["src/index.ts"],
   outDir: "lib",
   format: ["esm"],
-  dts: false, // @TODO: Enable this when we have types
+  dts: true,
   sourcemap: true,
   clean: true,
   splitting: false,
