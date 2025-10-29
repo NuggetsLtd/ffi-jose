@@ -592,6 +592,11 @@ pub fn rust_decrypt_json(
   jwe_string: &str,
   jwk: &Jwk,
 ) -> Result<(Vec<u8>, JweHeader), JoseError> {
+
+  // Always sanitize JWK base64url fields before use
+  let mut jwk_fixed = jwk.clone();
+  fix_jwk_base64url(&mut jwk_fixed);
+
   let mut decrypter_dir: Option<DirectJweDecrypter> = None;
   let mut decrypter_ecdhes: Option<EcdhEsJweDecrypter> = None;
   let mut decrypter_rsaes: Option<RsaesJweDecrypter> = None;
@@ -610,34 +615,30 @@ pub fn rust_decrypt_json(
   // set required decrypter
   match alg {
     // Direct encryption
-    "dir" => decrypter_dir = Some(DirectJweAlgorithm::Dir.decrypter_from_jwk(jwk).unwrap()),
+    "dir" => decrypter_dir = Some(DirectJweAlgorithm::Dir.decrypter_from_jwk(&jwk_fixed).unwrap()),
     // Diffie-Hellman
-    "ECDH-ES" => decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEs.decrypter_from_jwk(jwk).unwrap()),
-    "ECDH-ES+A128KW" => decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEsA128kw.decrypter_from_jwk(jwk).unwrap()),
-    "ECDH-ES+A192KW" => decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEsA192kw.decrypter_from_jwk(jwk).unwrap()),
-    "ECDH-ES+A256KW"  => {
-      let mut jwk_fixed = jwk.clone();
-      fix_jwk_base64url(&mut jwk_fixed);
-      decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEsA256kw.decrypter_from_jwk(&jwk_fixed).unwrap())
-    },
+    "ECDH-ES" => decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEs.decrypter_from_jwk(&jwk_fixed).unwrap()),
+    "ECDH-ES+A128KW" => decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEsA128kw.decrypter_from_jwk(&jwk_fixed).unwrap()),
+    "ECDH-ES+A192KW" => decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEsA192kw.decrypter_from_jwk(&jwk_fixed).unwrap()),
+    "ECDH-ES+A256KW"  => decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEsA256kw.decrypter_from_jwk(&jwk_fixed).unwrap()),
     // RSAES
     "RSA1_5" => panic!("The `Rsa1_5` algorithm is no longer recommendeddur to a security vulnerability"),
-    "RSA-OAEP" => decrypter_rsaes = Some(RsaesJweAlgorithm::RsaOaep.decrypter_from_jwk(jwk).unwrap()),
-    "RSA-OAEP-256" => decrypter_rsaes = Some(RsaesJweAlgorithm::RsaOaep256.decrypter_from_jwk(jwk).unwrap()),
-    "RSA-OAEP-384" => decrypter_rsaes = Some(RsaesJweAlgorithm::RsaOaep384.decrypter_from_jwk(jwk).unwrap()),
-    "RSA-OAEP-512" => decrypter_rsaes = Some(RsaesJweAlgorithm::RsaOaep512.decrypter_from_jwk(jwk).unwrap()),
+    "RSA-OAEP" => decrypter_rsaes = Some(RsaesJweAlgorithm::RsaOaep.decrypter_from_jwk(&jwk_fixed).unwrap()),
+    "RSA-OAEP-256" => decrypter_rsaes = Some(RsaesJweAlgorithm::RsaOaep256.decrypter_from_jwk(&jwk_fixed).unwrap()),
+    "RSA-OAEP-384" => decrypter_rsaes = Some(RsaesJweAlgorithm::RsaOaep384.decrypter_from_jwk(&jwk_fixed).unwrap()),
+    "RSA-OAEP-512" => decrypter_rsaes = Some(RsaesJweAlgorithm::RsaOaep512.decrypter_from_jwk(&jwk_fixed).unwrap()),
     // PBES2
-    "PBES2-HS256+A128KW" => decrypter_pbes2 = Some(Pbes2HmacAeskwJweAlgorithm::Pbes2Hs256A128kw.decrypter_from_jwk(jwk).unwrap()),
-    "PBES2-HS384+A192KW" => decrypter_pbes2 = Some(Pbes2HmacAeskwJweAlgorithm::Pbes2Hs384A192kw.decrypter_from_jwk(jwk).unwrap()),
-    "PBES2-HS512+A256KW" => decrypter_pbes2 = Some(Pbes2HmacAeskwJweAlgorithm::Pbes2Hs512A256kw.decrypter_from_jwk(jwk).unwrap()),
+    "PBES2-HS256+A128KW" => decrypter_pbes2 = Some(Pbes2HmacAeskwJweAlgorithm::Pbes2Hs256A128kw.decrypter_from_jwk(&jwk_fixed).unwrap()),
+    "PBES2-HS384+A192KW" => decrypter_pbes2 = Some(Pbes2HmacAeskwJweAlgorithm::Pbes2Hs384A192kw.decrypter_from_jwk(&jwk_fixed).unwrap()),
+    "PBES2-HS512+A256KW" => decrypter_pbes2 = Some(Pbes2HmacAeskwJweAlgorithm::Pbes2Hs512A256kw.decrypter_from_jwk(&jwk_fixed).unwrap()),
     // AES Key Wrap
-    "A128KW" => decrypter_aeskw = Some(AeskwJweAlgorithm::A128kw.decrypter_from_jwk(jwk).unwrap()),
-    "A192KW" => decrypter_aeskw = Some(AeskwJweAlgorithm::A192kw.decrypter_from_jwk(jwk).unwrap()),
-    "A256KW" => decrypter_aeskw = Some(AeskwJweAlgorithm::A256kw.decrypter_from_jwk(jwk).unwrap()),
+    "A128KW" => decrypter_aeskw = Some(AeskwJweAlgorithm::A128kw.decrypter_from_jwk(&jwk_fixed).unwrap()),
+    "A192KW" => decrypter_aeskw = Some(AeskwJweAlgorithm::A192kw.decrypter_from_jwk(&jwk_fixed).unwrap()),
+    "A256KW" => decrypter_aeskw = Some(AeskwJweAlgorithm::A256kw.decrypter_from_jwk(&jwk_fixed).unwrap()),
     // AES GCM Key wrap
-    "A128GCMKW" => decrypter_aesgcmkw = Some(AesgcmkwJweAlgorithm::A128gcmkw.decrypter_from_jwk(jwk).unwrap()),
-    "A192GCMKW" => decrypter_aesgcmkw = Some(AesgcmkwJweAlgorithm::A192gcmkw.decrypter_from_jwk(jwk).unwrap()),
-    "A256GCMKW" => decrypter_aesgcmkw = Some(AesgcmkwJweAlgorithm::A256gcmkw.decrypter_from_jwk(jwk).unwrap()),
+    "A128GCMKW" => decrypter_aesgcmkw = Some(AesgcmkwJweAlgorithm::A128gcmkw.decrypter_from_jwk(&jwk_fixed).unwrap()),
+    "A192GCMKW" => decrypter_aesgcmkw = Some(AesgcmkwJweAlgorithm::A192gcmkw.decrypter_from_jwk(&jwk_fixed).unwrap()),
+    "A256GCMKW" => decrypter_aesgcmkw = Some(AesgcmkwJweAlgorithm::A256gcmkw.decrypter_from_jwk(&jwk_fixed).unwrap()),
     // unknown
     _ => panic!("Unknown key encryption algorithm"),
   }
@@ -823,8 +824,8 @@ pub fn rust_compact_json_verify(
     "RS512" => verifier_rsassa = Some(jws::alg::rsassa::RsassaJwsAlgorithm::Rs512.verifier_from_jwk(&jwk).unwrap()),
     // RSASSA PSS
     "PS256" => verifier_rsassa_pss = Some(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps256.verifier_from_jwk(&jwk).unwrap()),
-    "PS384" => verifier_rsassa_pss = Some(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps256.verifier_from_jwk(&jwk).unwrap()),
-    "PS512" => verifier_rsassa_pss = Some(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps256.verifier_from_jwk(&jwk).unwrap()),
+    "PS384" => verifier_rsassa_pss = Some(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps384.verifier_from_jwk(&jwk).unwrap()),
+    "PS512" => verifier_rsassa_pss = Some(jws::alg::rsassa_pss::RsassaPssJwsAlgorithm::Ps512.verifier_from_jwk(&jwk).unwrap()),
     // unknown
     _ => panic!("Unknown signature algorithm"),
   }
