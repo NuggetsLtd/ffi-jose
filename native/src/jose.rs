@@ -615,7 +615,11 @@ pub fn rust_decrypt_json(
     "ECDH-ES" => decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEs.decrypter_from_jwk(jwk).unwrap()),
     "ECDH-ES+A128KW" => decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEsA128kw.decrypter_from_jwk(jwk).unwrap()),
     "ECDH-ES+A192KW" => decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEsA192kw.decrypter_from_jwk(jwk).unwrap()),
-    "ECDH-ES+A256KW"  => decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEsA256kw.decrypter_from_jwk(jwk).unwrap()),
+    "ECDH-ES+A256KW"  => {
+      let mut jwk_fixed = jwk.clone();
+      fix_jwk_base64url(&mut jwk_fixed);
+      decrypter_ecdhes = Some(EcdhEsJweAlgorithm::EcdhEsA256kw.decrypter_from_jwk(&jwk_fixed).unwrap())
+    },
     // RSAES
     "RSA1_5" => panic!("The `Rsa1_5` algorithm is no longer recommendeddur to a security vulnerability"),
     "RSA-OAEP" => decrypter_rsaes = Some(RsaesJweAlgorithm::RsaOaep.decrypter_from_jwk(jwk).unwrap()),
@@ -1179,4 +1183,17 @@ pub fn rust_general_sign_json(
 
   // sign & return jws
   jws::serialize_general_json(payload, &signers_combined)
+}
+
+// Utility to fix base64url encoding for JWK fields
+fn fix_jwk_base64url(jwk: &mut Jwk) {
+    let fields = ["x", "y", "d"];
+    for field in fields.iter() {
+        if let Some(val) = jwk.parameter(field) {
+            if let Some(s) = val.as_str() {
+                let fixed = s.replace('+', "-").replace('/', "_").trim_end_matches('=').to_string();
+                let _ = jwk.set_parameter(field, Some(serde_json::Value::String(fixed)));
+            }
+        }
+    }
 }
