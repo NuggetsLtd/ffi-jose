@@ -13,7 +13,10 @@ name = "jose"
 crate-type = ["staticlib", "cdylib"]
 
 [features]
-default = ["node"]
+# No default features; select one explicitly (e.g., `--features node` for Node addon,
+# `--features java` for JNI, `--features c` for C FFI). This avoids Neon/V8 link errors
+# when building in environments without Node headers.
+default = []
 java = ["jni","openssl"]
 node = ["neon"]
 c = ["ffi-support"]

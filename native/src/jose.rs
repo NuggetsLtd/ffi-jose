@@ -404,6 +404,7 @@ pub enum TokenType {
 
 #[allow(dead_code)]
 #[repr(C)]
+#[derive(Debug)]
 pub enum KeyEncryptionAlgorithm {
   // Direct encryption
   Dir,
@@ -500,7 +501,9 @@ pub fn rust_general_encrypt_json(
   let mut recipients_aesgcmkw = Vec::new();
 
   for i in 0..recipients.len() {
-    let jwk = &recipients[i];
+    // Clone & fix base64url issues for each recipient prior to encrypter creation
+    let mut jwk = recipients[i].clone();
+    fix_jwk_base64url(&mut jwk);
     let mut recipient_header = JweHeader::new();
 
     let kid = match jwk.key_id() {
@@ -509,33 +512,45 @@ pub fn rust_general_encrypt_json(
     };
 
     recipient_header.set_key_id(kid);
-
+    // Gather additional descriptive logging details
+    let kty = jwk.parameter("kty").and_then(|v| v.as_str()).unwrap_or("unknown");
+    let jwk_alg = jwk.algorithm().unwrap_or("unset");
+    eprintln!(
+      "[ffi-jose] encrypt: recipient index={} kid={} kty={} jwk.alg={} chosen.alg={} content.enc={} (enum={:?})",
+      i,
+      kid,
+      kty,
+      jwk_alg,
+      key_encrypt_algorithm,
+      content_encrypt_algorithm,
+      alg
+    );
     match alg {
       // Direct encryption
-      KeyEncryptionAlgorithm::Dir => recipients_dir.push((recipient_header, DirectJweAlgorithm::Dir.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::Dir => recipients_dir.push((recipient_header, DirectJweAlgorithm::Dir.encrypter_from_jwk(&jwk).unwrap())),
       // Diffie-Hellman
-      KeyEncryptionAlgorithm::EcdhEs => recipients_ecdhes.push((recipient_header, EcdhEsJweAlgorithm::EcdhEs.encrypter_from_jwk(jwk).unwrap())),
-      KeyEncryptionAlgorithm::EcdhEsA128kw => recipients_ecdhes.push((recipient_header, EcdhEsJweAlgorithm::EcdhEsA128kw.encrypter_from_jwk(jwk).unwrap())),
-      KeyEncryptionAlgorithm::EcdhEsA192kw => recipients_ecdhes.push((recipient_header, EcdhEsJweAlgorithm::EcdhEsA192kw.encrypter_from_jwk(jwk).unwrap())),
-      KeyEncryptionAlgorithm::EcdhEsA256kw => recipients_ecdhes.push((recipient_header, EcdhEsJweAlgorithm::EcdhEsA256kw.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::EcdhEs => recipients_ecdhes.push((recipient_header, EcdhEsJweAlgorithm::EcdhEs.encrypter_from_jwk(&jwk).unwrap())),
+      KeyEncryptionAlgorithm::EcdhEsA128kw => recipients_ecdhes.push((recipient_header, EcdhEsJweAlgorithm::EcdhEsA128kw.encrypter_from_jwk(&jwk).unwrap())),
+      KeyEncryptionAlgorithm::EcdhEsA192kw => recipients_ecdhes.push((recipient_header, EcdhEsJweAlgorithm::EcdhEsA192kw.encrypter_from_jwk(&jwk).unwrap())),
+      KeyEncryptionAlgorithm::EcdhEsA256kw => recipients_ecdhes.push((recipient_header, EcdhEsJweAlgorithm::EcdhEsA256kw.encrypter_from_jwk(&jwk).unwrap())),
       // RSAES
       KeyEncryptionAlgorithm::Rsa1_5 => panic!("The `Rsa1_5` algorithm is no longer recommendeddur to a security vulnerability"),
-      KeyEncryptionAlgorithm::RsaOaep => recipients_rsaes.push((recipient_header, RsaesJweAlgorithm::RsaOaep.encrypter_from_jwk(jwk).unwrap())),
-      KeyEncryptionAlgorithm::RsaOaep256 => recipients_rsaes.push((recipient_header, RsaesJweAlgorithm::RsaOaep256.encrypter_from_jwk(jwk).unwrap())),
-      KeyEncryptionAlgorithm::RsaOaep384 => recipients_rsaes.push((recipient_header, RsaesJweAlgorithm::RsaOaep384.encrypter_from_jwk(jwk).unwrap())),
-      KeyEncryptionAlgorithm::RsaOaep512 => recipients_rsaes.push((recipient_header, RsaesJweAlgorithm::RsaOaep512.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::RsaOaep => recipients_rsaes.push((recipient_header, RsaesJweAlgorithm::RsaOaep.encrypter_from_jwk(&jwk).unwrap())),
+      KeyEncryptionAlgorithm::RsaOaep256 => recipients_rsaes.push((recipient_header, RsaesJweAlgorithm::RsaOaep256.encrypter_from_jwk(&jwk).unwrap())),
+      KeyEncryptionAlgorithm::RsaOaep384 => recipients_rsaes.push((recipient_header, RsaesJweAlgorithm::RsaOaep384.encrypter_from_jwk(&jwk).unwrap())),
+      KeyEncryptionAlgorithm::RsaOaep512 => recipients_rsaes.push((recipient_header, RsaesJweAlgorithm::RsaOaep512.encrypter_from_jwk(&jwk).unwrap())),
       // PBES2
-      KeyEncryptionAlgorithm::Pbes2Hs256A128kw => recipients_pbes2.push((recipient_header, Pbes2HmacAeskwJweAlgorithm::Pbes2Hs256A128kw.encrypter_from_jwk(jwk).unwrap())),
-      KeyEncryptionAlgorithm::Pbes2Hs384A192kw => recipients_pbes2.push((recipient_header, Pbes2HmacAeskwJweAlgorithm::Pbes2Hs384A192kw.encrypter_from_jwk(jwk).unwrap())),
-      KeyEncryptionAlgorithm::Pbes2Hs512A256kw => recipients_pbes2.push((recipient_header, Pbes2HmacAeskwJweAlgorithm::Pbes2Hs512A256kw.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::Pbes2Hs256A128kw => recipients_pbes2.push((recipient_header, Pbes2HmacAeskwJweAlgorithm::Pbes2Hs256A128kw.encrypter_from_jwk(&jwk).unwrap())),
+      KeyEncryptionAlgorithm::Pbes2Hs384A192kw => recipients_pbes2.push((recipient_header, Pbes2HmacAeskwJweAlgorithm::Pbes2Hs384A192kw.encrypter_from_jwk(&jwk).unwrap())),
+      KeyEncryptionAlgorithm::Pbes2Hs512A256kw => recipients_pbes2.push((recipient_header, Pbes2HmacAeskwJweAlgorithm::Pbes2Hs512A256kw.encrypter_from_jwk(&jwk).unwrap())),
       // AES Key Wrap
-      KeyEncryptionAlgorithm::A128kw => recipients_aeskw.push((recipient_header, AeskwJweAlgorithm::A128kw.encrypter_from_jwk(jwk).unwrap())),
-      KeyEncryptionAlgorithm::A192kw => recipients_aeskw.push((recipient_header, AeskwJweAlgorithm::A192kw.encrypter_from_jwk(jwk).unwrap())),
-      KeyEncryptionAlgorithm::A256kw => recipients_aeskw.push((recipient_header, AeskwJweAlgorithm::A256kw.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::A128kw => recipients_aeskw.push((recipient_header, AeskwJweAlgorithm::A128kw.encrypter_from_jwk(&jwk).unwrap())),
+      KeyEncryptionAlgorithm::A192kw => recipients_aeskw.push((recipient_header, AeskwJweAlgorithm::A192kw.encrypter_from_jwk(&jwk).unwrap())),
+      KeyEncryptionAlgorithm::A256kw => recipients_aeskw.push((recipient_header, AeskwJweAlgorithm::A256kw.encrypter_from_jwk(&jwk).unwrap())),
       // AES GCM Key wrap
-      KeyEncryptionAlgorithm::A128gcmkw => recipients_aesgcmkw.push((recipient_header, AesgcmkwJweAlgorithm::A128gcmkw.encrypter_from_jwk(jwk).unwrap())),
-      KeyEncryptionAlgorithm::A192gcmkw => recipients_aesgcmkw.push((recipient_header, AesgcmkwJweAlgorithm::A192gcmkw.encrypter_from_jwk(jwk).unwrap())),
-      KeyEncryptionAlgorithm::A256gcmkw => recipients_aesgcmkw.push((recipient_header, AesgcmkwJweAlgorithm::A256gcmkw.encrypter_from_jwk(jwk).unwrap())),
+      KeyEncryptionAlgorithm::A128gcmkw => recipients_aesgcmkw.push((recipient_header, AesgcmkwJweAlgorithm::A128gcmkw.encrypter_from_jwk(&jwk).unwrap())),
+      KeyEncryptionAlgorithm::A192gcmkw => recipients_aesgcmkw.push((recipient_header, AesgcmkwJweAlgorithm::A192gcmkw.encrypter_from_jwk(&jwk).unwrap())),
+      KeyEncryptionAlgorithm::A256gcmkw => recipients_aesgcmkw.push((recipient_header, AesgcmkwJweAlgorithm::A256gcmkw.encrypter_from_jwk(&jwk).unwrap())),
     }
   }
 
@@ -584,6 +599,7 @@ pub fn rust_general_encrypt_json(
   }
 
   // encrypt payload & return encrypted string
+  eprintln!("[ffi-jose] encrypt: invoking serialize_general_json for {} recipients", recipients_combined.len());
   serialize_general_json(payload, Some(&header), recipients_combined.as_slice(), aad)
 }
 
@@ -1188,13 +1204,61 @@ pub fn rust_general_sign_json(
 
 // Utility to fix base64url encoding for JWK fields
 fn fix_jwk_base64url(jwk: &mut Jwk) {
-    let fields = ["x", "y", "d"];
-    for field in fields.iter() {
-        if let Some(val) = jwk.parameter(field) {
-            if let Some(s) = val.as_str() {
-                let fixed = s.replace('+', "-").replace('/', "_").trim_end_matches('=').to_string();
-                let _ = jwk.set_parameter(field, Some(serde_json::Value::String(fixed)));
-            }
+  // JWK base64url fields across kty types (EC, OKP, RSA, oct)
+  // See RFC 7517 & 7518. We normalise any accidental standard base64 usage (+,/ and trailing =) to base64url.
+  let fields = [
+    // EC / OKP coordinates & private scalar
+    "x", "y", "d",
+    // RSA parameters
+    "n", "e", "p", "q", "dp", "dq", "qi",
+    // Symmetric key material
+    "k",
+  ];
+
+  for field in fields.iter() {
+    if let Some(val) = jwk.parameter(field) {
+      if let Some(original) = val.as_str() {
+        // Only modify if we detect characters that are not base64url safe or have padding
+        if original.contains('+') || original.contains('/') || original.contains('=') {
+          let mut fixed = original
+            .replace('+', "-")
+            .replace('/', "_")
+            .to_string();
+          // remove any padding '=' characters
+          while fixed.ends_with('=') { fixed.pop(); }
+          let _ = jwk.set_parameter(field, Some(serde_json::Value::String(fixed)));
         }
+      }
     }
+  }
+}
+
+// Safe wrapper around rust_general_encrypt_json that converts panic/JoseError into a JSON string
+// {"ok":true,"result":<string>} or {"ok":false,"error":"message"}
+#[allow(dead_code)]
+pub fn rust_general_encrypt_json_safe(
+  alg: KeyEncryptionAlgorithm,
+  enc: ContentEncryptionAlgorithm,
+  typ: TokenType,
+  payload: &[u8],
+  recipients: &[Jwk],
+  aad: Option<&[u8]>
+) -> String {
+  // Catch unwinds from panics to avoid aborting host (e.g. React Native)
+  let result = std::panic::catch_unwind(|| {
+    rust_general_encrypt_json(alg, enc, typ, payload, recipients, aad)
+  });
+
+  match result {
+    Ok(inner) => match inner {
+      Ok(encrypted) => serde_json::json!({"ok": true, "result": encrypted}).to_string(),
+      Err(err) => serde_json::json!({"ok": false, "error": format!("JoseError: {:?}", err)}).to_string(),
+    },
+    Err(panic_payload) => {
+      let msg = if let Some(s) = panic_payload.downcast_ref::<&str>() { s.to_string() }
+                else if let Some(s) = panic_payload.downcast_ref::<String>() { s.clone() }
+                else { "Unknown panic".to_string() };
+      serde_json::json!({"ok": false, "error": format!("panic: {}", msg)}).to_string()
+    }
+  }
 }
