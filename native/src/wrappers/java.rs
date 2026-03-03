@@ -1,3 +1,6 @@
+#[macro_use]
+mod macros;
+
 use jni::JNIEnv;
 use jni::objects::{JClass};
 use jni::sys::{jstring, jint, jbyteArray, jboolean, JNI_FALSE};
@@ -20,7 +23,7 @@ use crate::jose::{
   rust_general_sign_json,
 };
 use josekit::jwk::Jwk;
-use std::panic;
+use std::panic::{self, AssertUnwindSafe};
 use serde::{Serialize};
 use base64;
 
@@ -40,24 +43,24 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_generate_1key_1pair_1jwk(
       5 => NamedCurve::Ed448,
       6 => NamedCurve::X25519,
       7 => NamedCurve::X448,
-      _ => panic!("Unknown curve")
+      _ => { handle_err!("Unknown curve", env); }
     };
 
     // generate JWK string for specified curve
-    let jwk = panic::catch_unwind(|| {
+    let jwk = panic::catch_unwind(AssertUnwindSafe(|| {
       rust_generate_key_pair_jwk(named_curve)
-    });
+    }));
 
     match jwk {
       Ok(jwk_string) => {
         let output = env
           .new_string(jwk_string)
           .expect("Unable to create string from JWK");
-  
+
         // extract the raw pointer to return.
         output.into_inner()
       },
-      Err(_) => panic!("Unable to generate keypair")
+      Err(_) => { handle_err!("Unable to generate keypair", env); }
     }
 }
 
@@ -77,13 +80,13 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_generate_1key_1pair(
     5 => NamedCurve::Ed448,
     6 => NamedCurve::X25519,
     7 => NamedCurve::X448,
-    _ => panic!("Unknown curve")
+    _ => { handle_err!("Unknown curve", env); }
   };
 
   // generate JWK string for specified curve
-  let key_pair = panic::catch_unwind(|| {
+  let key_pair = panic::catch_unwind(AssertUnwindSafe(|| {
     rust_generate_key_pair(named_curve)
-  });
+  }));
 
   match key_pair {
     Ok(key_pair_string) => {
@@ -94,7 +97,7 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_generate_1key_1pair(
       // extract the raw pointer to return.
       output.into_inner()
     },
-    Err(_) => panic!("Unable to generate keypair")
+    Err(_) => { handle_err!("Unable to generate keypair", env); }
   }
 }
 
@@ -122,34 +125,34 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_encrypt(
     3 => ContentEncryptionAlgorithm::A128cbcHs256,
     4 => ContentEncryptionAlgorithm::A192cbcHs384,
     5 => ContentEncryptionAlgorithm::A256cbcHs512,
-    _ => panic!("Unknown `enc` value")
+    _ => { handle_err!("Unknown `enc` value", env); }
   };
 
-  let key_bytes;
-  let iv_bytes;
-  let plaintext_bytes;
-  let aad_bytes;
-
-  match env.convert_byte_array(key) {
-      Err(_) => panic!("Failed converting `key` to byte array"),
-      Ok(k) => key_bytes = k,
+  let key_bytes = match env.convert_byte_array(key) {
+      Err(_) => { handle_err!("Failed converting `key` to byte array", env); }
+      Ok(k) => k,
   };
-  match env.convert_byte_array(iv) {
-      Err(_) => panic!("Failed converting `iv` to byte array"),
-      Ok(i) => iv_bytes = i,
+  let iv_bytes = match env.convert_byte_array(iv) {
+      Err(_) => { handle_err!("Failed converting `iv` to byte array", env); }
+      Ok(i) => i,
   };
-  match env.convert_byte_array(message) {
-      Err(_) => panic!("Failed converting `message` to byte array"),
-      Ok(m) => plaintext_bytes = m,
+  let plaintext_bytes = match env.convert_byte_array(message) {
+      Err(_) => { handle_err!("Failed converting `message` to byte array", env); }
+      Ok(m) => m,
   };
-  match env.convert_byte_array(aad) {
-      Err(_) => panic!("Failed converting `message` to byte array"),
-      Ok(a) => aad_bytes = a,
+  let aad_bytes = match env.convert_byte_array(aad) {
+      Err(_) => { handle_err!("Failed converting `aad` to byte array", env); }
+      Ok(a) => a,
   };
 
-  let (ciphertext, tag) = match rust_encrypt(enc, &key_bytes, &iv_bytes, &plaintext_bytes, &aad_bytes) {
-    Ok(encrypted) => encrypted,
-    _ => panic!("Failed to encrypt data")
+  let result = panic::catch_unwind(AssertUnwindSafe(|| {
+    rust_encrypt(enc, &key_bytes, &iv_bytes, &plaintext_bytes, &aad_bytes)
+  }));
+
+  let (ciphertext, tag) = match result {
+    Ok(Ok(encrypted)) => encrypted,
+    Ok(Err(e)) => { handle_err!(format!("Failed to encrypt data: {}", e), env); }
+    Err(_) => { handle_err!("Failed to encrypt data: internal error", env); }
   };
 
   // populate `Encrypted` instance
@@ -178,7 +181,7 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_encrypt(
       // extract the raw pointer to return.
       output.into_inner()
     },
-    Err(_) => panic!("Unable to generate encryped data")
+    Err(_) => { handle_err!("Unable to serialize encrypted data", env); }
   }
 }
 
@@ -201,43 +204,45 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_decrypt(
     3 => ContentEncryptionAlgorithm::A128cbcHs256,
     4 => ContentEncryptionAlgorithm::A192cbcHs384,
     5 => ContentEncryptionAlgorithm::A256cbcHs512,
-    _ => panic!("Unknown `enc` value")
+    _ => { handle_err!("Unknown `enc` value", env); }
   };
 
-  let key_bytes;
-  let iv_bytes;
-  let ciphertext_bytes;
-  let tag_bytes;
-  let aad_bytes;
-
-  match env.convert_byte_array(key) {
-      Err(_) => panic!("Failed converting `key` to byte array"),
-      Ok(k) => key_bytes = k,
+  let key_bytes = match env.convert_byte_array(key) {
+      Err(_) => { handle_err!("Failed converting `key` to byte array", env); }
+      Ok(k) => k,
   };
-  match env.convert_byte_array(ciphertext) {
-      Err(_) => panic!("Failed converting `ciphertext` to byte array"),
-      Ok(c) => ciphertext_bytes = c,
+  let ciphertext_bytes = match env.convert_byte_array(ciphertext) {
+      Err(_) => { handle_err!("Failed converting `ciphertext` to byte array", env); }
+      Ok(c) => c,
   };
-  match env.convert_byte_array(iv) {
-      Err(_) => panic!("Failed converting `iv` to byte array"),
-      Ok(i) => iv_bytes = i,
+  let iv_bytes = match env.convert_byte_array(iv) {
+      Err(_) => { handle_err!("Failed converting `iv` to byte array", env); }
+      Ok(i) => i,
   };
-  match env.convert_byte_array(tag) {
-      Err(_) => panic!("Failed converting `tag` to byte array"),
-      Ok(t) => tag_bytes = t,
+  let tag_bytes = match env.convert_byte_array(tag) {
+      Err(_) => { handle_err!("Failed converting `tag` to byte array", env); }
+      Ok(t) => t,
   };
-  match env.convert_byte_array(aad) {
-      Err(_) => panic!("Failed converting `message` to byte array"),
-      Ok(a) => aad_bytes = a,
+  let aad_bytes = match env.convert_byte_array(aad) {
+      Err(_) => { handle_err!("Failed converting `aad` to byte array", env); }
+      Ok(a) => a,
   };
 
   // decrypt ciphertext
-  let decrypted = match rust_decrypt(enc, &key_bytes, &ciphertext_bytes, &iv_bytes, &tag_bytes, &aad_bytes) {
-    Ok(decrypted) => decrypted,
-    _ => panic!("Failed to decrypt data")
+  let result = panic::catch_unwind(AssertUnwindSafe(|| {
+    rust_decrypt(enc, &key_bytes, &ciphertext_bytes, &iv_bytes, &tag_bytes, &aad_bytes)
+  }));
+
+  let decrypted = match result {
+    Ok(Ok(decrypted)) => decrypted,
+    Ok(Err(e)) => { handle_err!(format!("Failed to decrypt data: {}", e), env); }
+    Err(_) => { handle_err!("Failed to decrypt data: internal error", env); }
   };
 
-  let decrypted_string = String::from_utf8(decrypted).unwrap();
+  let decrypted_string = match String::from_utf8(decrypted) {
+    Ok(s) => s,
+    Err(_) => { handle_err!("Failed to decode decrypted data as UTF-8", env); }
+  };
 
   let output = env
         .new_string(decrypted_string)
@@ -279,7 +284,7 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_general_1encrypt_1json(
     16 => KeyEncryptionAlgorithm::A128gcmkw,
     17 => KeyEncryptionAlgorithm::A192gcmkw,
     18 => KeyEncryptionAlgorithm::A256gcmkw,
-    _ => panic!("Unknown `alg` value")
+    _ => { handle_err!("Unknown `alg` value", env); }
   };
 
   // map content encryption algorithm integers to enum options
@@ -290,38 +295,47 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_general_1encrypt_1json(
     3 => ContentEncryptionAlgorithm::A128cbcHs256,
     4 => ContentEncryptionAlgorithm::A192cbcHs384,
     5 => ContentEncryptionAlgorithm::A256cbcHs512,
-    _ => panic!("Unknown `enc` value")
+    _ => { handle_err!("Unknown `enc` value", env); }
   };
 
-  let plaintext_bytes;
-  match env.convert_byte_array(plaintext) {
-      Err(_) => panic!("Failed converting `plaintext` to byte array"),
-      Ok(p) => plaintext_bytes = p,
+  let plaintext_bytes = match env.convert_byte_array(plaintext) {
+      Err(_) => { handle_err!("Failed converting `plaintext` to byte array", env); }
+      Ok(p) => p,
   };
 
-  let recipients_bytes;
-  match env.convert_byte_array(recipients) {
-      Err(_) => panic!("Failed converting `recipients` to byte array"),
-      Ok(r) => recipients_bytes = r,
+  let recipients_bytes = match env.convert_byte_array(recipients) {
+      Err(_) => { handle_err!("Failed converting `recipients` to byte array", env); }
+      Ok(r) => r,
   };
 
   // convert recipients byte array to array of Jwks
-  let recipients_string = String::from_utf8(recipients_bytes.to_vec()).unwrap();
-  let recipient_jwks: Vec<Jwk> = serde_json::from_str(&recipients_string).unwrap();
+  let recipients_string = match String::from_utf8(recipients_bytes.to_vec()) {
+    Ok(s) => s,
+    Err(_) => { handle_err!("Failed to decode recipients as UTF-8", env); }
+  };
+  let recipient_jwks: Vec<Jwk> = match serde_json::from_str(&recipients_string) {
+    Ok(jwks) => jwks,
+    Err(e) => { handle_err!(format!("Failed to parse recipients JSON: {}", e), env); }
+  };
 
   let typ = if didcomm != JNI_FALSE { TokenType::DidcommEncrypted } else { TokenType::JWT };
 
   // encrypt JSON to JWE
-  let encrypted = match rust_general_encrypt_json(
-    alg,
-    enc,
-    typ,
-    &plaintext_bytes.to_vec(),
-    &recipient_jwks,
-    aad
-  ) {
-    Ok(encrypted) => encrypted,
-    _ => panic!("Failed to decrypt data")
+  let result = panic::catch_unwind(AssertUnwindSafe(|| {
+    rust_general_encrypt_json(
+      alg,
+      enc,
+      typ,
+      &plaintext_bytes.to_vec(),
+      &recipient_jwks,
+      aad
+    )
+  }));
+
+  let encrypted = match result {
+    Ok(Ok(encrypted)) => encrypted,
+    Ok(Err(e)) => { handle_err!(format!("Failed to encrypt data: {}", e), env); }
+    Err(_) => { handle_err!("Failed to encrypt data: internal error", env); }
   };
 
   let output = env
@@ -338,34 +352,49 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_decrypt_1json(
   jwe: jbyteArray,
   jwk: jbyteArray,
 ) -> jstring {
-  let jwe_bytes;
-  match env.convert_byte_array(jwe) {
-      Err(_) => panic!("Failed converting `jwe` to byte array"),
-      Ok(j) => jwe_bytes = j,
+  let jwe_bytes = match env.convert_byte_array(jwe) {
+      Err(_) => { handle_err!("Failed converting `jwe` to byte array", env); }
+      Ok(j) => j,
   };
 
-  let jwk_bytes;
-  match env.convert_byte_array(jwk) {
-      Err(_) => panic!("Failed converting `jwk` to byte array"),
-      Ok(k) => jwk_bytes = k,
+  let jwk_bytes = match env.convert_byte_array(jwk) {
+      Err(_) => { handle_err!("Failed converting `jwk` to byte array", env); }
+      Ok(k) => k,
   };
 
-  let jwe_string = String::from_utf8(jwe_bytes.to_vec()).unwrap();
+  let jwe_string = match String::from_utf8(jwe_bytes.to_vec()) {
+    Ok(s) => s,
+    Err(_) => { handle_err!("Failed to decode JWE as UTF-8", env); }
+  };
 
   // convert jwk byte array to Jwk
-  let jwk_string = String::from_utf8(jwk_bytes.to_vec()).unwrap();
-  let jwk: Jwk = serde_json::from_str(&jwk_string).unwrap();
-
-  // decrypt JWE to JSON
-  let (decrypted, _header) = match rust_decrypt_json(
-    &jwe_string,
-    &jwk,
-  ) {
-    Ok(decrypted) => decrypted,
-    _ => panic!("Failed to decrypt data")
+  let jwk_string = match String::from_utf8(jwk_bytes.to_vec()) {
+    Ok(s) => s,
+    Err(_) => { handle_err!("Failed to decode JWK as UTF-8", env); }
+  };
+  let jwk: Jwk = match serde_json::from_str(&jwk_string) {
+    Ok(k) => k,
+    Err(e) => { handle_err!(format!("Failed to parse JWK JSON: {}", e), env); }
   };
 
-  let decrypted_string = String::from_utf8(decrypted).unwrap();
+  // decrypt JWE to JSON
+  let result = panic::catch_unwind(AssertUnwindSafe(|| {
+    rust_decrypt_json(
+      &jwe_string,
+      &jwk,
+    )
+  }));
+
+  let (decrypted, _header) = match result {
+    Ok(Ok(decrypted)) => decrypted,
+    Ok(Err(e)) => { handle_err!(format!("Failed to decrypt data: {}", e), env); }
+    Err(_) => { handle_err!("Failed to decrypt data: internal error", env); }
+  };
+
+  let decrypted_string = match String::from_utf8(decrypted) {
+    Ok(s) => s,
+    Err(_) => { handle_err!("Failed to decode decrypted data as UTF-8", env); }
+  };
 
   let output = env
         .new_string(decrypted_string)
@@ -404,36 +433,45 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_compact_1sign_1json(
     11 => SigningAlgorithm::Ps256,
     12 => SigningAlgorithm::Ps384,
     13 => SigningAlgorithm::Ps512,
-    _ => panic!("Unknown `alg` value")
+    _ => { handle_err!("Unknown `alg` value", env); }
   };
 
-  let payload_bytes;
-  match env.convert_byte_array(payload) {
-      Err(_) => panic!("Failed converting `payload` to byte array"),
-      Ok(p) => payload_bytes = p,
+  let payload_bytes = match env.convert_byte_array(payload) {
+      Err(_) => { handle_err!("Failed converting `payload` to byte array", env); }
+      Ok(p) => p,
   };
 
-  let jwk_bytes;
-  match env.convert_byte_array(jwk) {
-      Err(_) => panic!("Failed converting `jwk` to byte array"),
-      Ok(r) => jwk_bytes = r,
+  let jwk_bytes = match env.convert_byte_array(jwk) {
+      Err(_) => { handle_err!("Failed converting `jwk` to byte array", env); }
+      Ok(r) => r,
   };
 
-  // convert jwk byte array to array of Jwks
-  let jwk_string = String::from_utf8(jwk_bytes.to_vec()).unwrap();
-  let signer_jwk: Jwk = serde_json::from_str(&jwk_string).unwrap();
+  // convert jwk byte array to Jwk
+  let jwk_string = match String::from_utf8(jwk_bytes.to_vec()) {
+    Ok(s) => s,
+    Err(_) => { handle_err!("Failed to decode JWK as UTF-8", env); }
+  };
+  let signer_jwk: Jwk = match serde_json::from_str(&jwk_string) {
+    Ok(k) => k,
+    Err(e) => { handle_err!(format!("Failed to parse JWK JSON: {}", e), env); }
+  };
 
   let typ = if didcomm != JNI_FALSE { TokenType::DidcommSigned } else { TokenType::JWT };
 
   // sign JSON to JWS
-  let signed = match rust_compact_sign_json(
-    alg,
-    typ,
-    &payload_bytes.to_vec(),
-    &signer_jwk
-  ) {
-    Ok(signed) => signed,
-    _ => panic!("Failed to sign data")
+  let result = panic::catch_unwind(AssertUnwindSafe(|| {
+    rust_compact_sign_json(
+      alg,
+      typ,
+      &payload_bytes.to_vec(),
+      &signer_jwk
+    )
+  }));
+
+  let signed = match result {
+    Ok(Ok(signed)) => signed,
+    Ok(Err(e)) => { handle_err!(format!("Failed to sign data: {}", e), env); }
+    Err(_) => { handle_err!("Failed to sign data: internal error", env); }
   };
 
   let output = env
@@ -450,34 +488,49 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_compact_1json_1verify(
   jws: jbyteArray,
   jwk: jbyteArray,
 ) -> jstring {
-  let jws_bytes;
-  match env.convert_byte_array(jws) {
-      Err(_) => panic!("Failed converting `jws` to byte array"),
-      Ok(j) => jws_bytes = j,
+  let jws_bytes = match env.convert_byte_array(jws) {
+      Err(_) => { handle_err!("Failed converting `jws` to byte array", env); }
+      Ok(j) => j,
   };
 
-  let jwk_bytes;
-  match env.convert_byte_array(jwk) {
-      Err(_) => panic!("Failed converting `jwk` to byte array"),
-      Ok(k) => jwk_bytes = k,
+  let jwk_bytes = match env.convert_byte_array(jwk) {
+      Err(_) => { handle_err!("Failed converting `jwk` to byte array", env); }
+      Ok(k) => k,
   };
 
-  let jws_string = String::from_utf8(jws_bytes.to_vec()).unwrap();
+  let jws_string = match String::from_utf8(jws_bytes.to_vec()) {
+    Ok(s) => s,
+    Err(_) => { handle_err!("Failed to decode JWS as UTF-8", env); }
+  };
 
   // convert jwk byte array to Jwk
-  let jwk_string = String::from_utf8(jwk_bytes.to_vec()).unwrap();
-  let jwk: Jwk = serde_json::from_str(&jwk_string).unwrap();
-
-  // decrypt JWs to JSON
-  let (payload, _header) = match rust_compact_json_verify(
-    &jws_string,
-    &jwk,
-  ) {
-    Ok(payload) => payload,
-    _ => panic!("Failed to verify data")
+  let jwk_string = match String::from_utf8(jwk_bytes.to_vec()) {
+    Ok(s) => s,
+    Err(_) => { handle_err!("Failed to decode JWK as UTF-8", env); }
+  };
+  let jwk: Jwk = match serde_json::from_str(&jwk_string) {
+    Ok(k) => k,
+    Err(e) => { handle_err!(format!("Failed to parse JWK JSON: {}", e), env); }
   };
 
-  let payload_string = String::from_utf8(payload).unwrap();
+  // verify JWS
+  let result = panic::catch_unwind(AssertUnwindSafe(|| {
+    rust_compact_json_verify(
+      &jws_string,
+      &jwk,
+    )
+  }));
+
+  let (payload, _header) = match result {
+    Ok(Ok(payload)) => payload,
+    Ok(Err(e)) => { handle_err!(format!("Failed to verify data: {}", e), env); }
+    Err(_) => { handle_err!("Failed to verify data: internal error", env); }
+  };
+
+  let payload_string = match String::from_utf8(payload) {
+    Ok(s) => s,
+    Err(_) => { handle_err!("Failed to decode verified payload as UTF-8", env); }
+  };
 
   let output = env
         .new_string(payload_string)
@@ -516,36 +569,45 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_flattened_1sign_1json(
     11 => SigningAlgorithm::Ps256,
     12 => SigningAlgorithm::Ps384,
     13 => SigningAlgorithm::Ps512,
-    _ => panic!("Unknown `alg` value")
+    _ => { handle_err!("Unknown `alg` value", env); }
   };
 
-  let payload_bytes;
-  match env.convert_byte_array(payload) {
-      Err(_) => panic!("Failed converting `payload` to byte array"),
-      Ok(p) => payload_bytes = p,
+  let payload_bytes = match env.convert_byte_array(payload) {
+      Err(_) => { handle_err!("Failed converting `payload` to byte array", env); }
+      Ok(p) => p,
   };
 
-  let jwk_bytes;
-  match env.convert_byte_array(jwk) {
-      Err(_) => panic!("Failed converting `jwk` to byte array"),
-      Ok(r) => jwk_bytes = r,
+  let jwk_bytes = match env.convert_byte_array(jwk) {
+      Err(_) => { handle_err!("Failed converting `jwk` to byte array", env); }
+      Ok(r) => r,
   };
 
-  // convert jwk byte array to array of Jwks
-  let jwk_string = String::from_utf8(jwk_bytes.to_vec()).unwrap();
-  let signer_jwk: Jwk = serde_json::from_str(&jwk_string).unwrap();
+  // convert jwk byte array to Jwk
+  let jwk_string = match String::from_utf8(jwk_bytes.to_vec()) {
+    Ok(s) => s,
+    Err(_) => { handle_err!("Failed to decode JWK as UTF-8", env); }
+  };
+  let signer_jwk: Jwk = match serde_json::from_str(&jwk_string) {
+    Ok(k) => k,
+    Err(e) => { handle_err!(format!("Failed to parse JWK JSON: {}", e), env); }
+  };
 
   let typ = if didcomm != JNI_FALSE { TokenType::DidcommSigned } else { TokenType::JWT };
 
-  // sign JSON to JWS
-  let signed = match rust_flattened_sign_json(
-    alg,
-    typ,
-    &payload_bytes.to_vec(),
-    &signer_jwk
-  ) {
-    Ok(signed) => signed,
-    _ => panic!("Failed to sign data")
+  // sign JSON to JWS (flattened)
+  let result = panic::catch_unwind(AssertUnwindSafe(|| {
+    rust_flattened_sign_json(
+      alg,
+      typ,
+      &payload_bytes.to_vec(),
+      &signer_jwk
+    )
+  }));
+
+  let signed = match result {
+    Ok(Ok(signed)) => signed,
+    Ok(Err(e)) => { handle_err!(format!("Failed to sign data: {}", e), env); }
+    Err(_) => { handle_err!("Failed to sign data: internal error", env); }
   };
 
   let output = env
@@ -562,34 +624,49 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_json_1verify(
   jws: jbyteArray,
   jwk: jbyteArray,
 ) -> jstring {
-  let jws_bytes;
-  match env.convert_byte_array(jws) {
-      Err(_) => panic!("Failed converting `jws` to byte array"),
-      Ok(j) => jws_bytes = j,
+  let jws_bytes = match env.convert_byte_array(jws) {
+      Err(_) => { handle_err!("Failed converting `jws` to byte array", env); }
+      Ok(j) => j,
   };
 
-  let jwk_bytes;
-  match env.convert_byte_array(jwk) {
-      Err(_) => panic!("Failed converting `jwk` to byte array"),
-      Ok(k) => jwk_bytes = k,
+  let jwk_bytes = match env.convert_byte_array(jwk) {
+      Err(_) => { handle_err!("Failed converting `jwk` to byte array", env); }
+      Ok(k) => k,
   };
 
-  let jws_string = String::from_utf8(jws_bytes.to_vec()).unwrap();
+  let jws_string = match String::from_utf8(jws_bytes.to_vec()) {
+    Ok(s) => s,
+    Err(_) => { handle_err!("Failed to decode JWS as UTF-8", env); }
+  };
 
   // convert jwk byte array to Jwk
-  let jwk_string = String::from_utf8(jwk_bytes.to_vec()).unwrap();
-  let jwk: Jwk = serde_json::from_str(&jwk_string).unwrap();
-
-  // decrypt JWs to JSON
-  let (payload, _header) = match rust_json_verify(
-    &jws_string,
-    &jwk,
-  ) {
-    Ok(payload) => payload,
-    _ => panic!("Failed to verify data")
+  let jwk_string = match String::from_utf8(jwk_bytes.to_vec()) {
+    Ok(s) => s,
+    Err(_) => { handle_err!("Failed to decode JWK as UTF-8", env); }
+  };
+  let jwk: Jwk = match serde_json::from_str(&jwk_string) {
+    Ok(k) => k,
+    Err(e) => { handle_err!(format!("Failed to parse JWK JSON: {}", e), env); }
   };
 
-  let payload_string = String::from_utf8(payload).unwrap();
+  // verify JWS
+  let result = panic::catch_unwind(AssertUnwindSafe(|| {
+    rust_json_verify(
+      &jws_string,
+      &jwk,
+    )
+  }));
+
+  let (payload, _header) = match result {
+    Ok(Ok(payload)) => payload,
+    Ok(Err(e)) => { handle_err!(format!("Failed to verify data: {}", e), env); }
+    Err(_) => { handle_err!("Failed to verify data: internal error", env); }
+  };
+
+  let payload_string = match String::from_utf8(payload) {
+    Ok(s) => s,
+    Err(_) => { handle_err!("Failed to decode verified payload as UTF-8", env); }
+  };
 
   let output = env
         .new_string(payload_string)
@@ -606,32 +683,41 @@ pub extern "system" fn Java_life_nuggets_rs_Jose_general_1sign_1json(
   jwks: jbyteArray,
   didcomm: jboolean,
 ) -> jstring {
-  let payload_bytes;
-  match env.convert_byte_array(payload) {
-      Err(_) => panic!("Failed converting `payload` to byte array"),
-      Ok(p) => payload_bytes = p,
+  let payload_bytes = match env.convert_byte_array(payload) {
+      Err(_) => { handle_err!("Failed converting `payload` to byte array", env); }
+      Ok(p) => p,
   };
 
-  let jwks_bytes;
-  match env.convert_byte_array(jwks) {
-      Err(_) => panic!("Failed converting `jwk` to byte array"),
-      Ok(r) => jwks_bytes = r,
+  let jwks_bytes = match env.convert_byte_array(jwks) {
+      Err(_) => { handle_err!("Failed converting `jwks` to byte array", env); }
+      Ok(r) => r,
   };
 
   // convert jwk byte array to array of Jwks
-  let jwks_string = String::from_utf8(jwks_bytes.to_vec()).unwrap();
-  let signer_jwks: Vec<Jwk> = serde_json::from_str(&jwks_string).unwrap();
+  let jwks_string = match String::from_utf8(jwks_bytes.to_vec()) {
+    Ok(s) => s,
+    Err(_) => { handle_err!("Failed to decode JWKs as UTF-8", env); }
+  };
+  let signer_jwks: Vec<Jwk> = match serde_json::from_str(&jwks_string) {
+    Ok(jwks) => jwks,
+    Err(e) => { handle_err!(format!("Failed to parse JWKs JSON: {}", e), env); }
+  };
 
   let typ = if didcomm != JNI_FALSE { TokenType::DidcommSigned } else { TokenType::JWT };
 
-  // sign JSON to JWS
-  let signed = match rust_general_sign_json(
-    typ,
-    &payload_bytes.to_vec(),
-    &signer_jwks
-  ) {
-    Ok(signed) => signed,
-    _ => panic!("Failed to sign data")
+  // sign JSON to JWS (general)
+  let result = panic::catch_unwind(AssertUnwindSafe(|| {
+    rust_general_sign_json(
+      typ,
+      &payload_bytes.to_vec(),
+      &signer_jwks
+    )
+  }));
+
+  let signed = match result {
+    Ok(Ok(signed)) => signed,
+    Ok(Err(e)) => { handle_err!(format!("Failed to sign data: {}", e), env); }
+    Err(_) => { handle_err!("Failed to sign data: internal error", env); }
   };
 
   let output = env
