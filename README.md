@@ -1,5 +1,17 @@
 [![Nuggets](./docs/assets/nuggets-logo.svg)](https://github.com/NuggetsLtd)
 
+# Archived repository
+
+This repository has been archived.
+
+The JOSE FFI sources have been migrated into the Nuggets monorepo:
+
+- https://github.com/NuggetsLtd/nuggets
+
+Current development now lives in the monorepo `ffi-jose`, `ffi-jose-native`,
+`ffi-jose-c`, and React Native JOSE packages. This repository is retained for
+historical reference only.
+
 # Node JOSE FFI (Foreign Function Interface)
 
 ![npm-version](https://badgen.net/npm/v/@nuggetslife/ffi-jose)
